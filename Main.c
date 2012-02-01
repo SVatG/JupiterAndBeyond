@@ -14,36 +14,15 @@ int main()
 	RCC_GetClocksFreq(&RCC_Clocks);
 	SysTick_Config(RCC_Clocks.HCLK_Frequency/100);
 
+	int i=0;
 	for(;;)
 	{
-		for(;;)
-		{
-			SetLEDs(0x01);
-			Delay(10);
-			SetLEDs(0x02);
-			Delay(10);
-			SetLEDs(0x04);
-			Delay(10);
-			SetLEDs(0x08);
-			Delay(10);
-			if(UserButtonState()) break;
-		}
-
-		for(;;)
-		{
-			SetLEDs(0x08);
-			Delay(10);
-			SetLEDs(0x04);
-			Delay(10);
-			SetLEDs(0x02);
-			Delay(10);
-			SetLEDs(0x01);
-			Delay(10);
-			if(!UserButtonState()) break;
-		}
+		if(UserButtonState()) i--;
+		else i++;
+		ToggleLEDs(1<<(i&3));
+		ToggleLEDs(1<<((i>>3)&3));
+		Delay(10);
 	}
-
-//  if (STM_EVAL_PBGetState(BUTTON_USER) == Bit_SET)
 
 #if 0
     TIM4_Config();
