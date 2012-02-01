@@ -24,10 +24,11 @@ BUILD_DIR = Build
 #			Utilities/STM32F4-Discovery/stm32f4_discovery_lis302dl.c \
 #			Utilities/STM32F4-Discovery/stm32f4_discovery_audio_codec.c
 
-C_FILES =	Main.c \
+C_FILES =	Button.c \
+			LED.c \
+			Main.c \
 			Interrupts.c \
 			System.c \
-			stm32f4_discovery.c \
 			Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_dma.c \
 			Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_des.c \
 			Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_dac.c \
@@ -76,7 +77,9 @@ all: $(NAME).bin
 
 upload: $(NAME).bin
 	openocd -f interface/stlink-v2.cfg -f target/stm32f4x_stlink.cfg \
-	-c init -c "reset halt" -c "stm32f2x mass_erase 0" -c "flash write_bank 0 $(NAME).bin 0" -c reset -c shutdown
+	-c init -c "reset halt" -c "stm32f2x mass_erase 0" \
+	-c "flash write_bank 0 $(NAME).bin 0" \
+	-c "reset run" -c shutdown
 
 clean:
 	rm -rf $(BUILD_DIR) $(NAME).elf $(NAME).bin

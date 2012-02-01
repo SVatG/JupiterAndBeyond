@@ -1,17 +1,14 @@
 #include <stdint.h>
 
-#include "stm32f4_discovery.h"
+#include "LED.h"
+#include "Button.h"
 
 void Delay(uint32_t time);
 
 int main()
 {
-	STM_EVAL_PBInit(BUTTON_USER, BUTTON_MODE_EXTI); 
-  
-	STM_EVAL_LEDInit(LED4);
-	STM_EVAL_LEDInit(LED3);
-	STM_EVAL_LEDInit(LED5);
-	STM_EVAL_LEDInit(LED6);
+	InitializeLEDs();
+	InitializeUserButton();
 
 	RCC_ClocksTypeDef RCC_Clocks;
 	RCC_GetClocksFreq(&RCC_Clocks);
@@ -19,26 +16,31 @@ int main()
 
 	for(;;)
 	{
-		STM_EVAL_LEDOn(LED4);
-		STM_EVAL_LEDOff(LED3);
-		STM_EVAL_LEDOff(LED5);
-		STM_EVAL_LEDOff(LED6); 
-		Delay(10);
-		STM_EVAL_LEDOff(LED4);
-		STM_EVAL_LEDOn(LED3);
-		STM_EVAL_LEDOff(LED5);
-		STM_EVAL_LEDOff(LED6); 
-		Delay(10);
-		STM_EVAL_LEDOff(LED4);
-		STM_EVAL_LEDOff(LED3);
-		STM_EVAL_LEDOn(LED5);
-		STM_EVAL_LEDOff(LED6); 
-		Delay(10);
-		STM_EVAL_LEDOff(LED4);
-		STM_EVAL_LEDOff(LED3);
-		STM_EVAL_LEDOff(LED5);
-		STM_EVAL_LEDOn(LED6); 
-		Delay(10);
+		for(;;)
+		{
+			SetLEDs(0x01);
+			Delay(10);
+			SetLEDs(0x02);
+			Delay(10);
+			SetLEDs(0x04);
+			Delay(10);
+			SetLEDs(0x08);
+			Delay(10);
+			if(UserButtonState()) break;
+		}
+
+		for(;;)
+		{
+			SetLEDs(0x08);
+			Delay(10);
+			SetLEDs(0x04);
+			Delay(10);
+			SetLEDs(0x02);
+			Delay(10);
+			SetLEDs(0x01);
+			Delay(10);
+			if(!UserButtonState()) break;
+		}
 	}
 
 //  if (STM_EVAL_PBGetState(BUTTON_USER) == Bit_SET)

@@ -1,6 +1,7 @@
 #include "Interrupts.h"
-#include "stm32f4_discovery.h"
+
 #include <stdint.h>
+#include <stm32f4xx_exti.h>
 
 void NMI_Handler()
 {
@@ -112,9 +113,7 @@ void SysTick_Handler(void)
 
 void EXTI0_IRQHandler()
 {
-//	UserButtonPressed = 0x01;
-
-	EXTI_ClearITPendingBit(USER_BUTTON_EXTI_LINE);
+	EXTI_ClearITPendingBit(EXTI_Line0);
 }
 
 /*void OTG_FS_WKUP_IRQHandler()
@@ -124,3 +123,4 @@ void EXTI0_IRQHandler()
 void OTG_FS_IRQHandler()
 {
 }*/
+
