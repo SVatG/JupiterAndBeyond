@@ -1,0 +1,3 @@
+glob:*.elf
+glob:*.bin
+glob:Build
