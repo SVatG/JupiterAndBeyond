@@ -102,14 +102,11 @@ void ResetAccelerometerFilter()
 
 void ReadRawAccelerometerData(int8_t *values)
 {
-/*	uint8_t buffer[5];
+	uint8_t buffer[5];
 	ReadBytes(buffer,LIS302DL_OUT_X_ADDR,5);
 	values[0]=(int8_t)buffer[0];
 	values[1]=(int8_t)buffer[2];
-	values[2]=(int8_t)buffer[4];*/
-	values[0]=ReadByte(LIS302DL_OUT_X_ADDR);
-	values[1]=ReadByte(LIS302DL_OUT_Y_ADDR);
-	values[2]=ReadByte(LIS302DL_OUT_Z_ADDR);
+	values[2]=(int8_t)buffer[4];
 }
 
 
@@ -176,16 +173,16 @@ static inline uint8_t RaiseCS()
 }
 
 #define Timeout 0x1000
-#include "LED.h"
+
 static uint8_t TransferByte(uint8_t byte)
 {
 	uint32_t timer=Timeout;
-	while(!SPI_I2S_GetFlagStatus(SPI1,SPI_I2S_FLAG_TXE)) { if(timer--==0) {SetLEDs(0x0f);for(;;);} }
+	while(!SPI_I2S_GetFlagStatus(SPI1,SPI_I2S_FLAG_TXE)) if(timer--==0) return 0;
 
 	SPI_I2S_SendData(SPI1,byte);
   
 	timer=Timeout;
-	while(!SPI_I2S_GetFlagStatus(SPI1,SPI_I2S_FLAG_RXNE)) { if(timer--==0) {SetLEDs(0x0f);for(;;);} }
+	while(!SPI_I2S_GetFlagStatus(SPI1,SPI_I2S_FLAG_RXNE)) if(timer--==0) return 0;
 
 	return SPI_I2S_ReceiveData(SPI1);
 }
