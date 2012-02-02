@@ -5,7 +5,8 @@ LD = arm-eabi-gcc
 OBJCOPY = arm-eabi-objcopy
 
 DEFINES =	-DUSE_STDPERIPH_DRIVER \
-			-DSTM32F4XX
+			-DSTM32F4XX \
+			-DARM_MATH_CM4
 
 C_OPTS =	-std=c99 \
 			-mthumb \
@@ -31,6 +32,8 @@ C_FILES =	Accelerometer.c \
 			Main.c \
 			Interrupts.c \
 			System.c \
+			Libraries/CMSIS/DSP_Lib/Source/CommonTables/arm_common_tables.c \
+			Libraries/CMSIS/DSP_Lib/Source/FastMathFunctions/arm_sqrt_q15.c \
 			Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_dma.c \
 			Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_des.c \
 			Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_dac.c \

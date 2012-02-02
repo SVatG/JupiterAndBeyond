@@ -4,6 +4,8 @@
 #include "Button.h"
 #include "Accelerometer.h"
 
+#include "arm_math.h"
+
 void Delay(uint32_t time);
 
 int main()
@@ -43,16 +45,38 @@ int main()
 	int8_t zero[3];
 	ReadRawAccelerometerData(zero);
 
+	int32_t x=0,y=0;
+
 	for(;;)
 	{
 		int8_t components[3];
 		ReadRawAccelerometerData(components);
 
-		if(components[0]>zero[0]) { TurnOnLEDs(8); TurnOffLEDs(2); }
+		int16_t dx=components[0]-zero[0];
+		int16_t dy=components[1]-zero[1];
+		q15_t r;
+		arm_sqrt_q15(dx*dx+dy*dy,&r);
+		dx=(dx*200)/(r>>3);
+		dy=(dy*200)/(r>>3);
+
+		x+=r>>9;
+
+//		x+=components[0]-zero[0];
+//		y+=components[1]-zero[1];
+
+		int leds=0;
+		leds|=(((x+dx)>>5)&1)<<1;
+		leds|=(((x-dx)>>5)&1)<<3;
+		leds|=(((x+dy)>>5)&1)<<0;
+		leds|=(((x-dy)>>5)&1)<<2;
+
+		SetLEDs(leds);
+
+/*		if(components[0]>zero[0]) { TurnOnLEDs(8); TurnOffLEDs(2); }
 		else { TurnOnLEDs(2); TurnOffLEDs(8); }
 
 		if(components[1]>zero[1]) { TurnOnLEDs(4); TurnOffLEDs(1); }
-		else { TurnOnLEDs(1); TurnOffLEDs(4); }
+		else { TurnOnLEDs(1); TurnOffLEDs(4); }*/
 
 		Delay(10);
 	}
