@@ -1,6 +1,8 @@
 #ifndef __BITS_H__
 #define __BITS_H__
 
+#include <stdint.h>
+
 static inline uint32_t InterleaveZeros(uint32_t val)
 {
 	val=(val|(val<<8))&0x00ff00ff;

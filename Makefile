@@ -32,6 +32,7 @@ C_FILES =	Accelerometer.c \
 			Main.c \
 			Interrupts.c \
 			System.c \
+			VGA.c \
 			Libraries/CMSIS/DSP_Lib/Source/CommonTables/arm_common_tables.c \
 			Libraries/CMSIS/DSP_Lib/Source/FastMathFunctions/arm_sqrt_q15.c \
 			Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_dma.c \
