@@ -3,6 +3,7 @@
 #include "LED.h"
 #include "Button.h"
 #include "Accelerometer.h"
+#include "Bits.h"
 
 #include "arm_math.h"
 
@@ -47,10 +48,19 @@ int main()
 
 	int32_t x=0,y=0;
 
+	GPIOE->MODER=SetDoubleBits(GPIOE->MODER,(1<<13)|(1<<14)|(1<<15),GPIO_Mode_OUT);
+	GPIOE->OSPEEDR=SetDoubleBits(GPIOE->OSPEEDR,(1<<13)|(1<<14)|(1<<15),GPIO_Speed_50MHz);
+	GPIOE->OTYPER=SetBits(GPIOE->OTYPER,(1<<13)|(1<<14)|(1<<15),GPIO_OType_PP);
+	GPIOE->PUPDR=SetDoubleBits(GPIOE->PUPDR,(1<<13)|(1<<14)|(1<<15),GPIO_PuPd_UP);
+
+	int i=0;
+
 	for(;;)
 	{
 		int8_t components[3];
 		ReadRawAccelerometerData(components);
+
+GPIOE->ODR=(GPIOE->ODR&~0xe000)|((i++&7)<<13);
 
 		int16_t dx=components[0]-zero[0];
 		int16_t dy=components[1]-zero[1];
