@@ -19,12 +19,12 @@ static inline void ToggleLEDs(int leds)
 }
 static inline void TurnOnLEDs(int leds)
 {
-	GPIOD->BSRRH=leds<12;
+	GPIOD->BSRRL=leds<<12;
 }
 
 static inline void TurnOffLEDs(int leds)
 {
-	GPIOD->BSRRL=leds<<12;
+	GPIOD->BSRRH=leds<<12;
 }
 
 #endif

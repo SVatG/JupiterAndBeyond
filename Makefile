@@ -7,7 +7,8 @@ OBJCOPY = arm-eabi-objcopy
 DEFINES =	-DUSE_STDPERIPH_DRIVER \
 			-DSTM32F4XX
 
-C_OPTS =	-mthumb \
+C_OPTS =	-std=c99 \
+			-mthumb \
 			-mcpu=cortex-m4 \
 			-I. \
 			-ILibraries/CMSIS/Include \
@@ -24,7 +25,8 @@ BUILD_DIR = Build
 #			Utilities/STM32F4-Discovery/stm32f4_discovery_lis302dl.c \
 #			Utilities/STM32F4-Discovery/stm32f4_discovery_audio_codec.c
 
-C_FILES =	Button.c \
+C_FILES =	Accelerometer.c \
+			Button.c \
 			LED.c \
 			Main.c \
 			Interrupts.c \
@@ -80,6 +82,10 @@ upload: $(NAME).bin
 	-c init -c "reset halt" -c "stm32f2x mass_erase 0" \
 	-c "flash write_bank 0 $(NAME).bin 0" \
 	-c "reset run" -c shutdown
+
+debug:
+	arm-eabi-gdb $(NAME).elf \
+	--eval-command="target remote | openocd -f interface/stlink-v2.cfg -f target/stm32f4x_stlink.cfg -c 'gdb_port pipe'"
 
 clean:
 	rm -rf $(BUILD_DIR) $(NAME).elf $(NAME).bin
