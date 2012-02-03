@@ -68,6 +68,21 @@ void InitializeAccelerometer()
 	GPIOE->PUPDR=SetDoubleBits(GPIOE->PUPDR,(1<<0)|(1<<1),GPIO_PuPd_NOPULL);
 }
 
+void DisableAccelerometerPins()
+{
+	// Set CS pin to input, with pullup.
+	GPIOE->MODER=SetDoubleBits(GPIOE->MODER,(1<<3),GPIO_Mode_IN);
+	GPIOE->PUPDR=SetDoubleBits(GPIOE->PUPDR,(1<<3),GPIO_PuPd_UP);
+}
+
+void EnableAccelerometerPins()
+{
+	// Set CS pin to output and drive it high.
+	GPIOE->MODER=SetDoubleBits(GPIOE->MODER,(1<<3),GPIO_Mode_OUT);
+	GPIOE->PUPDR=SetDoubleBits(GPIOE->PUPDR,(1<<3),GPIO_PuPd_DOWN);
+	GPIOE->BSRRH=1<<3;
+}
+
 bool PingAccelerometer()
 {
 	uint8_t byte=ReadByte(LIS302DL_WHO_AM_I_ADDR);
