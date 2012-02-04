@@ -2,7 +2,7 @@
 #include "GPIO.h"
 #include "RCC.h"
 
-#include <stm32f4xx_spi.h>
+#include <stm32f4xx.h>
 
 static uint8_t ReadByte(uint8_t address);
 static void ReadBytes(uint8_t *buffer,uint8_t address,int numbytes);
@@ -29,20 +29,11 @@ void InitializeAccelerometer()
 	SetGPIOPullDownResistor(GPIOA,(1<<5)|(1<<6)|(1<<7));
 
 	// Configure and enable SPI.
-	SPI_I2S_DeInit(SPI1);
-	SPI_Init(SPI1,&(SPI_InitTypeDef){
-		.SPI_Direction=SPI_Direction_2Lines_FullDuplex,
-		.SPI_DataSize=SPI_DataSize_8b,
-		.SPI_CPOL=SPI_CPOL_Low,
-		.SPI_CPHA=SPI_CPHA_1Edge,
-		.SPI_NSS=SPI_NSS_Soft,
-		.SPI_BaudRatePrescaler=SPI_BaudRatePrescaler_4,
-		.SPI_FirstBit=SPI_FirstBit_MSB,
-		.SPI_CRCPolynomial=7,
-		.SPI_Mode=SPI_Mode_Master,
-	});
+	SetAPB2PeripheralReset(RCC_APB2RSTR_SPI1RST);
+	ClearAPB2PeripheralReset(RCC_APB2RSTR_SPI1RST);
 
-	SPI_Cmd(SPI1,ENABLE);
+	SPI1->I2SCFGR&=~SPI_I2SCFGR_I2SMOD; // Disable I2S mode.
+	SPI1->CR1=SPI_CR1_SSM|(1*SPI_CR1_BR_0)|SPI_CR1_SSI|SPI_CR1_MSTR|SPI_CR1_SPE;
 
 	// Configure CS pin and drive it high.
 	SetGPIOOutputMode(GPIOE,(1<<3));
@@ -180,12 +171,12 @@ static inline uint8_t RaiseCS()
 static uint8_t TransferByte(uint8_t byte)
 {
 	uint32_t timer=Timeout;
-	while(!SPI_I2S_GetFlagStatus(SPI1,SPI_I2S_FLAG_TXE)) if(timer--==0) return 0;
+	while(!(SPI1->SR&SPI_SR_TXE)) if(timer--==0) return 0;
 
-	SPI_I2S_SendData(SPI1,byte);
-  
+	SPI1->DR=byte;
+
 	timer=Timeout;
-	while(!SPI_I2S_GetFlagStatus(SPI1,SPI_I2S_FLAG_RXNE)) if(timer--==0) return 0;
+	while(!(SPI1->SR&SPI_SR_RXNE)) if(timer--==0) return 0;
 
-	return SPI_I2S_ReceiveData(SPI1);
+	return SPI1->DR;
 }
