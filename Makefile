@@ -4,9 +4,9 @@ CC = arm-eabi-gcc
 LD = arm-eabi-gcc
 OBJCOPY = arm-eabi-objcopy
 
-DEFINES =	-DUSE_STDPERIPH_DRIVER \
-			-DSTM32F4XX \
-			-DARM_MATH_CM4
+DEFINES =	-DARM_MATH_CM4 \
+			'-Dassert_param(e)' \
+			-DRGB8Pixels
 
 C_OPTS =	-std=c99 \
 			-mthumb \

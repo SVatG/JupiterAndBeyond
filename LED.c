@@ -1,6 +1,9 @@
 #include "LED.h"
 #include "Bits.h"
 
+#include <stm32f4xx_rcc.h>
+#include <stm32f4xx_gpio.h>
+
 void InitializeLEDs()
 {
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD,ENABLE);

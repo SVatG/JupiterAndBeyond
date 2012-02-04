@@ -6,7 +6,8 @@
 #include "VGA.h"
 #include "Bits.h"
 
-#include "arm_math.h"
+#include <stm32f4xx_rcc.h>
+#include <arm_math.h>
 
 void DrawBlob(uint8_t *framebuffer,int x0,int y0,int c);
 

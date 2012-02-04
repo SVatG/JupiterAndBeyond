@@ -2,7 +2,7 @@
 #define __BUTTON_H__
 
 #include <stdbool.h>
-#include <stm32f4xx_gpio.h>
+#include <stm32f4xx.h>
 
 void InitializeUserButton();
 void EnableUserButtonInterrupt();

@@ -1,7 +1,9 @@
 #include "Accelerometer.h"
 #include "Bits.h"
 
+#include <stm32f4xx_rcc.h>
 #include <stm32f4xx_gpio.h>
+#include <stm32f4xx_spi.h>
 
 static uint8_t ReadByte(uint8_t address);
 static void ReadBytes(uint8_t *buffer,uint8_t address,int numbytes);

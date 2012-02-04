@@ -89,7 +89,7 @@
   */           
 
 #if !defined  (HSE_VALUE) 
-  #define HSE_VALUE    ((uint32_t)25000000) /*!< Value of the External oscillator in Hz */
+  #define HSE_VALUE    ((uint32_t)8000000) /*!< Value of the External oscillator in Hz */
 #endif /* HSE_VALUE */
 
 /**
@@ -243,7 +243,7 @@ typedef enum IRQn
   */
 
 #include "core_cm4.h"             /* Cortex-M4 processor and core peripherals */
-#include "system_stm32f4xx.h"
+/*#include "system_stm32f4xx.h"*/
 #include <stdint.h>
 
 /** @addtogroup Exported_types

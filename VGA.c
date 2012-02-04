@@ -2,6 +2,8 @@
 #include "Bits.h"
 
 #include <stm32f4xx.h>
+#include <stm32f4xx_rcc.h>
+#include <stm32f4xx_gpio.h>
 
 static uint32_t Line;
 static volatile uint32_t Frame;
