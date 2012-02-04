@@ -4,8 +4,8 @@
 #include "Button.h"
 #include "Accelerometer.h"
 #include "VGA.h"
+#include "RCC.h"
 
-#include <stm32f4xx_rcc.h>
 #include <arm_math.h>
 
 void DrawBlob(uint8_t *framebuffer,int x0,int y0,int c);
@@ -30,9 +30,7 @@ static uint8_t replacements[256];
 
 int main()
 {
-	RCC_ClocksTypeDef RCC_Clocks;
-	RCC_GetClocksFreq(&RCC_Clocks);
-	SysTick_Config(RCC_Clocks.HCLK_Frequency/100);
+	SysTick_Config(HCLKFrequency()/100);
 
 	for(int i=0;i<sizeof(palette);i++)
 	{
