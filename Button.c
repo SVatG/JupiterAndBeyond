@@ -1,15 +1,14 @@
 #include "Button.h"
 #include "GPIO.h"
+#include "RCC.h"
 
-#include <stm32f4xx_rcc.h>
-#include <stm32f4xx_exti.h>
-#include <stm32f4xx_syscfg.h>
-#include <misc.h>
+//#include <stm32f4xx_exti.h>
+//#include <stm32f4xx_syscfg.h>
+//#include <misc.h>
 
 void InitializeUserButton()
 {
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA,ENABLE);
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG,ENABLE);
+	EnableAHB1PeripheralClock(RCC_AHB1ENR_GPIOAEN);
 
 	SetGPIOInputMode(GPIOA,(1<<0));
 	SetGPIONoPullResistor(GPIOA,(1<<0));
@@ -17,7 +16,9 @@ void InitializeUserButton()
 
 void EnableUserButtonInterrupt()
 {
-	EXTI_InitTypeDef EXTI_InitStructure;
+	EnableAPB2PeripheralClock(RCC_APB2ENR_SYSCFGEN);
+
+/*	EXTI_InitTypeDef EXTI_InitStructure;
 	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOA,EXTI_PinSource0);
 
 	EXTI_Init(&(EXTI_InitTypeDef){
@@ -32,6 +33,6 @@ void EnableUserButtonInterrupt()
 		.NVIC_IRQChannelPreemptionPriority=0x0f, // Lowest priority
 		.NVIC_IRQChannelSubPriority=0x0f,
 		.NVIC_IRQChannelCmd=ENABLE,
-	});
+	});*/
 }
 

@@ -1,11 +1,10 @@
 #include "LED.h"
 #include "GPIO.h"
-
-#include <stm32f4xx_rcc.h>
+#include "RCC.h"
 
 void InitializeLEDs()
 {
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD,ENABLE);
+	EnableAHB1PeripheralClock(RCC_AHB1ENR_GPIODEN);
 
 	SetGPIOOutputMode(GPIOD,(1<<12)|(1<<13)|(1<<14)|(1<<15));
 	SetGPIOPushPullOutput(GPIOD,(1<<12)|(1<<13)|(1<<14)|(1<<15));

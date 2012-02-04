@@ -1,7 +1,7 @@
 #include "Accelerometer.h"
 #include "GPIO.h"
+#include "RCC.h"
 
-#include <stm32f4xx_rcc.h>
 #include <stm32f4xx_spi.h>
 
 static uint8_t ReadByte(uint8_t address);
@@ -16,9 +16,8 @@ static uint8_t TransferByte(uint8_t byte);
 void InitializeAccelerometer()
 {
 	// Enable peripherals.
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1,ENABLE);
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA,ENABLE);
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE,ENABLE);
+	EnableAHB1PeripheralClock(RCC_AHB1ENR_GPIOAEN|RCC_AHB1ENR_GPIOEEN);
+	EnableAPB2PeripheralClock(RCC_APB2ENR_SPI1EN);
 
 	// Configure SPI pins as alternate function.
 	SelectAlternateFunctionForGPIOPin(GPIOA,5,5);

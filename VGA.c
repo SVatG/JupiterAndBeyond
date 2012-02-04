@@ -1,8 +1,8 @@
 #include "VGA.h"
 #include "GPIO.h"
+#include "RCC.h"
 
 #include <stm32f4xx.h>
-#include <stm32f4xx_rcc.h>
 
 static uint32_t Line;
 static volatile uint32_t Frame;
@@ -18,11 +18,8 @@ void InitializeVGA(uint8_t *framebuffer)
 	CurrentLineAddress=FrameBufferAddress;
 
 	// Turn on peripherals.
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB|RCC_AHB1Periph_GPIOE|RCC_AHB1ENR_DMA2EN,ENABLE);
-	RCC_AHB1PeriphClockCmd(RCC_AHB1ENR_DMA2EN,ENABLE); // TODO: Remove
-	RCC_APB2PeriphClockCmd(RCC_APB2RSTR_TIM8RST,ENABLE);
-	RCC_APB2PeriphClockCmd(RCC_APB2RSTR_TIM9RST,ENABLE);
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG,ENABLE);
+	EnableAHB1PeripheralClock(RCC_AHB1ENR_GPIOBEN|RCC_AHB1ENR_GPIOEEN|RCC_AHB1ENR_DMA2EN);
+	EnableAPB2PeripheralClock(RCC_APB2ENR_TIM8EN|RCC_APB2ENR_TIM9EN|RCC_APB2ENR_SYSCFGEN);
 
 	// Configure DAC pins, and set to black.
 	SetGPIOOutputMode(GPIOE,0xff00);
