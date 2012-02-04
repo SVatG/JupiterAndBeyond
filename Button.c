@@ -1,8 +1,7 @@
 #include "Button.h"
-#include "Bits.h"
+#include "GPIO.h"
 
 #include <stm32f4xx_rcc.h>
-#include <stm32f4xx_gpio.h>
 #include <stm32f4xx_exti.h>
 #include <stm32f4xx_syscfg.h>
 #include <misc.h>
@@ -12,8 +11,8 @@ void InitializeUserButton()
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA,ENABLE);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG,ENABLE);
 
-	GPIOA->MODER=SetDoubleBits(GPIOA->MODER,(1<<0),GPIO_Mode_IN);
-	GPIOA->PUPDR=SetDoubleBits(GPIOA->PUPDR,(1<<0),GPIO_PuPd_NOPULL);
+	SetGPIOInputMode(GPIOA,(1<<0));
+	SetGPIONoPullResistor(GPIOA,(1<<0));
 }
 
 void EnableUserButtonInterrupt()

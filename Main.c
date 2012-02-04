@@ -4,7 +4,6 @@
 #include "Button.h"
 #include "Accelerometer.h"
 #include "VGA.h"
-#include "Bits.h"
 
 #include <stm32f4xx_rcc.h>
 #include <arm_math.h>

@@ -1,8 +1,7 @@
 #include "Accelerometer.h"
-#include "Bits.h"
+#include "GPIO.h"
 
 #include <stm32f4xx_rcc.h>
-#include <stm32f4xx_gpio.h>
 #include <stm32f4xx_spi.h>
 
 static uint8_t ReadByte(uint8_t address);
@@ -14,16 +13,6 @@ static inline uint8_t LowerCS();
 static inline uint8_t RaiseCS();
 static uint8_t TransferByte(uint8_t byte);
 
-/*#define LIS302DL_SPI_INT1_EXTI_LINE        EXTI_Line0
-#define LIS302DL_SPI_INT1_EXTI_PORT_SOURCE EXTI_PortSourceGPIOE
-#define LIS302DL_SPI_INT1_EXTI_PIN_SOURCE  EXTI_PinSource0
-#define LIS302DL_SPI_INT1_EXTI_IRQn        EXTI0_IRQn 
-
-#define LIS302DL_SPI_INT2_EXTI_LINE        EXTI_Line1
-#define LIS302DL_SPI_INT2_EXTI_PORT_SOURCE EXTI_PortSourceGPIOE
-#define LIS302DL_SPI_INT2_EXTI_PIN_SOURCE  EXTI_PinSource1
-#define LIS302DL_SPI_INT2_EXTI_IRQn        EXTI1_IRQn */
-
 void InitializeAccelerometer()
 {
 	// Enable peripherals.
@@ -32,13 +21,13 @@ void InitializeAccelerometer()
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE,ENABLE);
 
 	// Configure SPI pins as alternate function.
-	GPIO_PinAFConfig(GPIOA,GPIO_PinSource5,GPIO_AF_SPI1);
-	GPIO_PinAFConfig(GPIOA,GPIO_PinSource6,GPIO_AF_SPI1);
-	GPIO_PinAFConfig(GPIOA,GPIO_PinSource7,GPIO_AF_SPI1);
-	GPIOA->MODER=SetDoubleBits(GPIOA->MODER,(1<<5)|(1<<6)|(1<<7),GPIO_Mode_AF);
-	GPIOA->OSPEEDR=SetDoubleBits(GPIOA->OSPEEDR,(1<<5)|(1<<6)|(1<<7),GPIO_Speed_50MHz);
-	GPIOA->OTYPER=SetBits(GPIOA->OTYPER,(1<<5)|(1<<6)|(1<<7),GPIO_OType_PP);
-	GPIOA->PUPDR=SetDoubleBits(GPIOA->PUPDR,(1<<5)|(1<<6)|(1<<7),GPIO_PuPd_DOWN);
+	SelectAlternateFunctionForGPIOPin(GPIOA,5,5);
+	SelectAlternateFunctionForGPIOPin(GPIOA,6,5);
+	SelectAlternateFunctionForGPIOPin(GPIOA,7,5);
+	SetGPIOAlternateFunctionMode(GPIOA,(1<<5)|(1<<6)|(1<<7));
+	SetGPIOPushPullOutput(GPIOA,(1<<5)|(1<<6)|(1<<7));
+	SetGPIOSpeed50MHz(GPIOA,(1<<5)|(1<<6)|(1<<7));
+	SetGPIOPullDownResistor(GPIOA,(1<<5)|(1<<6)|(1<<7));
 
 	// Configure and enable SPI.
 	SPI_I2S_DeInit(SPI1);
@@ -57,31 +46,29 @@ void InitializeAccelerometer()
 	SPI_Cmd(SPI1,ENABLE);
 
 	// Configure CS pin and drive it high.
-	GPIOE->MODER=SetDoubleBits(GPIOE->MODER,(1<<3),GPIO_Mode_OUT);
-	GPIOE->OSPEEDR=SetDoubleBits(GPIOE->OSPEEDR,(1<<3),GPIO_Speed_50MHz);
-	GPIOE->OTYPER=SetBits(GPIOE->OTYPER,(1<<3),GPIO_OType_PP);
-	GPIOE->PUPDR=SetDoubleBits(GPIOE->PUPDR,(1<<3),GPIO_PuPd_DOWN);
+	SetGPIOOutputMode(GPIOE,(1<<3));
+	SetGPIOPushPullOutput(GPIOE,(1<<3));
+	SetGPIOSpeed50MHz(GPIOE,(1<<3));
+	SetGPIOPullDownResistor(GPIOE,(1<<3));
 	GPIOE->BSRRH=1<<3;
 
 	// Configure interrupt pins.
-	GPIOE->MODER=SetDoubleBits(GPIOE->MODER,(1<<0)|(1<<1),GPIO_Mode_IN);
-	GPIOE->OSPEEDR=SetDoubleBits(GPIOE->OSPEEDR,(1<<0)|(1<<1),GPIO_Speed_50MHz);
-	GPIOE->OTYPER=SetBits(GPIOE->OTYPER,(1<<0)|(1<<1),GPIO_OType_PP);
-	GPIOE->PUPDR=SetDoubleBits(GPIOE->PUPDR,(1<<0)|(1<<1),GPIO_PuPd_NOPULL);
+	SetGPIOInputMode(GPIOE,(1<<0)|(1<<1));
+	SetGPIONoPullResistor(GPIOE,(1<<0)|(1<<1));
 }
 
 void DisableAccelerometerPins()
 {
 	// Set CS pin to input, with pullup.
-	GPIOE->MODER=SetDoubleBits(GPIOE->MODER,(1<<3),GPIO_Mode_IN);
-	GPIOE->PUPDR=SetDoubleBits(GPIOE->PUPDR,(1<<3),GPIO_PuPd_UP);
+	SetGPIOInputMode(GPIOE,(1<<3));
+	SetGPIOPullUpResistor(GPIOE,(1<<3));
 }
 
 void EnableAccelerometerPins()
 {
 	// Set CS pin to output and drive it high.
-	GPIOE->MODER=SetDoubleBits(GPIOE->MODER,(1<<3),GPIO_Mode_OUT);
-	GPIOE->PUPDR=SetDoubleBits(GPIOE->PUPDR,(1<<3),GPIO_PuPd_DOWN);
+	SetGPIOOutputMode(GPIOE,(1<<3));
+	SetGPIOPullDownResistor(GPIOE,(1<<3));
 	GPIOE->BSRRH=1<<3;
 }
 
