@@ -15,7 +15,7 @@ C_OPTS =	-std=c99 \
 			-ILibraries/CMSIS/Include \
 			-ILibraries/STM32F4xx_StdPeriph_Driver/inc \
 			-g \
-			-Os
+			-O3
 
 LIBS =	
 
@@ -30,10 +30,10 @@ C_FILES =	Accelerometer.c \
 			Button.c \
 			LED.c \
 			Main.c \
-			Interrupts.c \
 			System.c \
 			VGA.c \
 			Libraries/CMSIS/DSP_Lib/Source/CommonTables/arm_common_tables.c \
+			Libraries/CMSIS/DSP_Lib/Source/ControllerFunctions/arm_sin_cos_q31.c \
 			Libraries/CMSIS/DSP_Lib/Source/FastMathFunctions/arm_sqrt_q15.c \
 			Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_dma.c \
 			Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_des.c \
