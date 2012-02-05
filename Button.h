@@ -1,8 +1,9 @@
 #ifndef __BUTTON_H__
 #define __BUTTON_H__
 
+#include "stm32f4xx.h"
+
 #include <stdbool.h>
-#include <stm32f4xx.h>
 
 void InitializeUserButton();
 void EnableUserButtonInterrupt();

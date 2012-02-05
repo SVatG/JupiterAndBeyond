@@ -5,16 +5,17 @@
 #include "Accelerometer.h"
 #include "VGA.h"
 #include "RCC.h"
+#include "Sprites.h"
+#include "Random.h"
+
+#include "Graphics/Bitmap.h"
+#include "Graphics/Drawing.h"
 
 #include <arm_math.h>
 
-void DrawBlob(uint8_t *framebuffer,int x0,int y0,int c);
-
-void Delay(uint32_t time);
-
 static uint8_t *framebuffer=(uint8_t *)0x20000000;
 
-#define RGB(r,g,b) (((r)<<5)|((g)<<2)|(b))
+/*#define RGB(r,g,b) (((r)<<5)|((g)<<2)|(b))
 
 static uint8_t palette[18]=
 {
@@ -24,18 +25,13 @@ static uint8_t palette[18]=
 	RGB(0,7,3),RGB(0,5,3),RGB(0,2,3),
 	RGB(0,0,3),RGB(2,0,3),RGB(5,0,3),
 	RGB(7,0,3),RGB(7,0,2),RGB(7,0,1),
-};
+};*/
 
 static uint8_t replacements[256];
 
 int main()
 {
 	SysTick_Config(HCLKFrequency()/100);
-
-	for(int i=0;i<sizeof(palette);i++)
-	{
-		replacements[palette[i]]=palette[(i+1)%sizeof(palette)];
-	}
 
 	memset(framebuffer,0,320*240);
 
@@ -45,59 +41,45 @@ int main()
 	DisableAccelerometerPins();
 	InitializeVGA(framebuffer);
 
+	Bitmap screen;
+	InitializeBitmap(&screen,320,240,320,framebuffer);
+
 	int i=0;
+
+	const int numstars=128;
+	struct Star
+	{
+		int x,y,dx,f;
+	} stars[numstars];
+
+	for(int i=0;i<numstars;i++)
+	{
+		stars[i].x=(RandomInteger()%352-16)<<12;
+		stars[i].y=RandomInteger()%240;
+		int z=RandomInteger()%100;
+		stars[i].dx=2*4096*150/(z+50);
+		stars[i].f=6-(z*6)/100;
+	}
+
+	const RLEBitmap *frames[7]={ &Star1,&Star2,&Star3,&Star4,&Star5,&Star6,&Star7 };
 
 	for(;;)
 	{
 		WaitVBL();
 
+		ClearBitmap(&screen);
+
 		SetLEDs(1<<((i++/3)&3));
 
-		for(int j=0;j<320*240;j++)
-		framebuffer[j]=replacements[framebuffer[j]];
-
-		for(int j=0;j<4;j++)
+		for(int i=0;i<numstars;i++)
 		{
-			q31_t sina,cosa;
-			arm_sin_cos_q31(i*2234934+0x95122323,&sina,&cosa);
-			q31_t sinb,cosb;
-			arm_sin_cos_q31(i*788929+0x11322323,&sinb,&cosb);
-
-			q31_t sin1,cos1;
-			arm_sin_cos_q31(i*(sina/78)+(j<<30),&sin1,&cos1);
-			q31_t sin2,cos2;
-			arm_sin_cos_q31(i*(sinb/123)+(j<<30)+0x12424234,&sin2,&cos2);
-			q31_t sin3,cos3;
-			arm_sin_cos_q31(i*7234904+0x53224234,&sin3,&cos3);
-			q31_t sin4,cos4;
-			arm_sin_cos_q31(i*3123904+0xd2324234,&sin4,&cos4);
-
-			int x=160-16+((sin1>>20)*(sin4>>20)>>15)+((sin2>>20)*(sin3>>20)>>16);
-			int y=120-16+((cos1>>20)*(sin4>>20)>>15)+((cos2>>20)*(sin3>>20)>>16);
-
-			DrawBlob(framebuffer,x,y,palette[0]);
-		}
-	}
-}
-
-void DrawBlob(uint8_t *framebuffer,int x0,int y0,int c)
-{
-	static const int rowlengths[32]=
-	{
-		6,12,16,20,  22,24,26,26, 28,28,30,30, 30,32,32,32,
-		32,32,32,30, 30,30,28,28, 26,26,24,22, 20,16,12,6
-	};
-
-	for(int row=0;row<32;row++)
-	{
-if(y0+row<0) continue;
-if(y0+row>=240) continue;
-		int startx=16-rowlengths[row]/2;
-		for(int x=0;x<rowlengths[row];x++)
-		{
-if(x0+startx+x<0) continue;
-if(x0+startx+x>=320) continue;
-			framebuffer[x0+startx+x+(y0+row)*320]=c;
+			DrawRLEBitmap(&screen,frames[stars[i].f],stars[i].x>>12,stars[i].y);
+			stars[i].x-=stars[i].dx;
+			if(stars[i].x<=-16<<12)
+			{
+				stars[i].x=(320+16)<<12;
+				stars[i].y=RandomInteger()%240;
+			}
 		}
 	}
 }

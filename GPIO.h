@@ -1,8 +1,9 @@
 #ifndef __GPIO_H__
 #define __GPIO_H__
 
+#include "stm32f4xx.h"
+
 #include <stdint.h>
-#include <stm32f4xx.h>
 
 static inline uint32_t InterleaveZeros(uint32_t val)
 {

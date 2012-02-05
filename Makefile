@@ -5,15 +5,12 @@ LD = arm-eabi-gcc
 OBJCOPY = arm-eabi-objcopy
 
 DEFINES =	-DARM_MATH_CM4 \
-			'-Dassert_param(e)' \
 			-DRGB8Pixels
 
 C_OPTS =	-std=c99 \
 			-mthumb \
 			-mcpu=cortex-m4 \
-			-I. \
 			-ILibraries/CMSIS/Include \
-			-ILibraries/STM32F4xx_StdPeriph_Driver/inc \
 			-g \
 			-O3
 
@@ -30,8 +27,17 @@ C_FILES =	Accelerometer.c \
 			Button.c \
 			LED.c \
 			Main.c \
+			Random.c \
+			Sprites.c \
 			System.c \
 			VGA.c \
+			Graphics/Bitmap.c \
+			Graphics/DrawingBitmaps.c \
+			Graphics/DrawingLines.c \
+			Graphics/DrawingPixels.c \
+			Graphics/DrawingRectangles.c \
+			Graphics/DrawingRLEBitmaps.c \
+			Graphics/DrawingStraightLines.c \
 			Libraries/CMSIS/DSP_Lib/Source/CommonTables/arm_common_tables.c \
 			Libraries/CMSIS/DSP_Lib/Source/ControllerFunctions/arm_sin_cos_q31.c \
 			Libraries/CMSIS/DSP_Lib/Source/FastMathFunctions/arm_sqrt_q15.c

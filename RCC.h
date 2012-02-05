@@ -1,8 +1,9 @@
 #ifndef __RCC_H__
 #define __RCC_H__
 
+#include "stm32f4xx.h"
+
 #include <stdint.h>
-#include <stm32f4xx.h>
 
 static inline void EnableAHB1PeripheralClock(uint32_t peripherals) { RCC->AHB1ENR|=peripherals; }
 static inline void EnableAHB2PeripheralClock(uint32_t peripherals) { RCC->AHB2ENR|=peripherals; }
@@ -40,7 +41,7 @@ static inline void DisableAHB3PeripheralLowPowerClock(uint32_t peripherals) { RC
 static inline void DisableAPB1PeripheralLowPowerClock(uint32_t peripherals) { RCC->APB1LPENR&=~peripherals; }
 static inline void DisableAPB2PeripheralLowPowerClock(uint32_t peripherals) { RCC->APB2LPENR&=~peripherals; }
 
-static uint8_t APBAHBPrescalerTable[16]={0,0,0,0,1,2,3,4,1,2,3,4,6,7,8,9};
+static const uint8_t APBAHBPrescalerTable[16]={0,0,0,0,1,2,3,4,1,2,3,4,6,7,8,9};
 
 static inline uint32_t SYSCLKFrequency()
 {

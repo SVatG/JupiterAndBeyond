@@ -8,6 +8,7 @@ MEMORY
 }
 
 _estack = 0x10010000;
+__isr_vector_sram = 0x20020000-0x200;
 
 SECTIONS
 {
