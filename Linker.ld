@@ -3,10 +3,11 @@ ENTRY(g_pfnVectors)
 MEMORY
 {
 	flash (rx)		: ORIGIN = 0x08000000, LENGTH = 1024K
-	ram (rwx)		: ORIGIN = 0x20000000, LENGTH = 112K
+	ccmram (rwx)	: ORIGIN = 0x10000000, LENGTH = 64K
+	sram (rwx)		: ORIGIN = 0x20000000, LENGTH = 128K
 }
 
-_estack = 0x2001c000;
+_estack = 0x10010000;
 
 SECTIONS
 {
@@ -27,13 +28,13 @@ SECTIONS
         *(vtable)
         *(.data*)
         _edata = .;
-    } > ram
+    } > ccmram
     .bss :
     {
         _sbss = .;
         *(.bss*)
         *(COMMON)
         _ebss = .;
-    } > ram
+    } > ccmram
 }
 

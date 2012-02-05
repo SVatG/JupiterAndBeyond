@@ -12,7 +12,7 @@ void DrawBlob(uint8_t *framebuffer,int x0,int y0,int c);
 
 void Delay(uint32_t time);
 
-static uint8_t framebuffer[320*240];
+static uint8_t *framebuffer=(uint8_t *)0x20000000;
 
 #define RGB(r,g,b) (((r)<<5)|((g)<<2)|(b))
 
@@ -37,7 +37,7 @@ int main()
 		replacements[palette[i]]=palette[(i+1)%sizeof(palette)];
 	}
 
-	memset(framebuffer,0,sizeof(framebuffer));
+	memset(framebuffer,0,320*240);
 
 	InitializeLEDs();
 	InitializeUserButton();
@@ -53,7 +53,7 @@ int main()
 
 		SetLEDs(1<<((i++/3)&3));
 
-		for(int j=0;j<sizeof(framebuffer);j++)
+		for(int j=0;j<320*240;j++)
 		framebuffer[j]=replacements[framebuffer[j]];
 
 		for(int j=0;j<4;j++)
