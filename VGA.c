@@ -278,3 +278,9 @@ void WaitVBL()
 	uint32_t currframe=Frame;
 	while(Frame==currframe);
 }
+
+void SetFrameBuffer(uint8_t *framebuffer)
+{
+	FrameBufferAddress=CurrentLineAddress=(uint32_t)framebuffer;
+}
+

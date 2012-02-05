@@ -1,4 +1,4 @@
-NAME = Test
+NAME = VGA
 
 CC = arm-eabi-gcc
 LD = arm-eabi-gcc
@@ -15,7 +15,7 @@ C_OPTS =	-std=c99 \
 			-Werror \
 			-O3
 
-LIBS =	
+LIBS =	-lm
 
 SOURCE_DIR = .
 BUILD_DIR = Build

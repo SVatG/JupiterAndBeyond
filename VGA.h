@@ -11,6 +11,7 @@ void InitializeVGAScreenMode200(uint8_t *framebuffer,int pixelsperrow,int pixelc
 void InitializeVGAScreenMode175(uint8_t *framebuffer,int pixelsperrow,int pixelclock);
 
 void WaitVBL();
+void SetFrameBuffer(uint8_t *framebuffer); // Only safe to call in the vertical blank!
 
 static inline void IntializeVGAScreenMode320x240(uint8_t *framebuffer)
 {
