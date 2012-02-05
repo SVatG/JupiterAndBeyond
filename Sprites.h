@@ -3,12 +3,12 @@
 
 #include "Graphics/RLEBitmap.h"
 
-const RLEBitmap Star1;
-const RLEBitmap Star2;
-const RLEBitmap Star3;
-const RLEBitmap Star4;
-const RLEBitmap Star5;
-const RLEBitmap Star6;
-const RLEBitmap Star7;
+extern const RLEBitmap Star1;
+extern const RLEBitmap Star2;
+extern const RLEBitmap Star3;
+extern const RLEBitmap Star4;
+extern const RLEBitmap Star5;
+extern const RLEBitmap Star6;
+extern const RLEBitmap Star7;
 
 #endif

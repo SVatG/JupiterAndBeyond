@@ -77,7 +77,6 @@ int main()
 	for(;;)
 	{
 		WaitVBL();
-	SetLEDs(0x5);
 
 		ClearBitmap(&screen);
 

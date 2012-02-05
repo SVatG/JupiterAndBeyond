@@ -12,6 +12,7 @@ C_OPTS =	-std=c99 \
 			-mcpu=cortex-m4 \
 			-ILibraries/CMSIS/Include \
 			-g \
+			-Werror \
 			-O3
 
 LIBS =	
