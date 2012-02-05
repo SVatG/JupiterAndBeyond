@@ -2,8 +2,6 @@
 #include "GPIO.h"
 #include "RCC.h"
 
-#include "stm32f4xx.h"
-
 static void InitializeState(uint8_t *framebuffer,int pixelsperrow);
 static void HSYNCHandler240();
 static void HSYNCHandler200();
@@ -20,6 +18,22 @@ void InitializeVGAScreenMode240(uint8_t *framebuffer,int pixelsperrow,int pixelc
 	InitializeState(framebuffer,pixelsperrow);
 	InitializePixelDMA(pixelclock);
 	InitializeVGAHorizontalSync31kHz(HSYNCHandler240);
+}
+
+void InitializeVGAScreenMode200(uint8_t *framebuffer,int pixelsperrow,int pixelclock)
+{
+	InitializeVGAPort();
+	InitializeState(framebuffer,pixelsperrow);
+	InitializePixelDMA(pixelclock);
+	InitializeVGAHorizontalSync31kHz(HSYNCHandler200);
+}
+
+void InitializeVGAScreenMode175(uint8_t *framebuffer,int pixelsperrow,int pixelclock)
+{
+	InitializeVGAPort();
+	InitializeState(framebuffer,pixelsperrow);
+	InitializePixelDMA(pixelclock);
+	InitializeVGAHorizontalSync31kHz(HSYNCHandler175);
 }
 
 void InitializeVGAPort()
@@ -84,44 +98,124 @@ static void InitializeState(uint8_t *framebuffer,int pixelsperrow)
 
 static void HSYNCHandler240()
 {
-	uint32_t sr=TIM9->SR;
-	TIM9->SR=0;
+	switch(VGAHorizontalSyncInterruptType())
+	{
+		case VGAHorizontalSyncStartInterrupt:
+			LowerVGAHSYNCLine();
+		break;
 
-	if(sr&1) // Overflow interrupt - start of sync pulse
-	{
-		GPIOE->BSRRH=0xff00; // Set signal to black.
-		GPIOB->BSRRH=(1<<11); // Lower HSYNC.
+		case VGAHorizontalSyncEndInterrupt:
+			RaiseVGAHSYNCLine();
+		break;
+
+		case VGAVideoStartInterrupt:
+			if(Line<480)
+			{
+				StartPixelDMA();
+				if(Line&1) CurrentLineAddress+=PixelsPerRow;
+			}
+			else if(Line==480)
+			{
+				Frame++;
+				// TODO: VBlank interrupt.
+			}
+			else if(Line==490)
+			{
+				LowerVGAVSYNCLine();
+			}
+			else if(Line==492)
+			{
+				RaiseVGAVSYNCLine();
+			}
+			else if(Line==524)
+			{
+				Line=-1;
+				CurrentLineAddress=FrameBufferAddress;
+			}
+			Line++;
+		break;
 	}
-	else if(sr&2) // Output compare 1 interrupt - end of sync pulse
+}
+
+static void HSYNCHandler200()
+{
+	switch(VGAHorizontalSyncInterruptType())
 	{
-		GPIOB->BSRRL=(1<<11); // Raise HSYNC.
+		case VGAHorizontalSyncStartInterrupt:
+			LowerVGAHSYNCLine();
+		break;
+
+		case VGAHorizontalSyncEndInterrupt:
+			RaiseVGAHSYNCLine();
+		break;
+
+		case VGAVideoStartInterrupt:
+			if(Line<400)
+			{
+				StartPixelDMA();
+				if(Line&1) CurrentLineAddress+=PixelsPerRow;
+			}
+			else if(Line==400)
+			{
+				Frame++;
+				// TODO: VBlank interrupt.
+			}
+			else if(Line==412)
+			{
+				RaiseVGAVSYNCLine();
+			}
+			else if(Line==414)
+			{
+				LowerVGAVSYNCLine();
+			}
+			else if(Line==448)
+			{
+				Line=-1;
+				CurrentLineAddress=FrameBufferAddress;
+			}
+			Line++;
+		break;
 	}
-	else if(sr&4) // Output compare 2 interrupt - start of video data
+}
+
+static void HSYNCHandler175()
+{
+	switch(VGAHorizontalSyncInterruptType())
 	{
-		if(Line<480)
-		{
-			StartPixelDMA();
-			if(Line&1) CurrentLineAddress+=PixelsPerRow;
-		}
-		else if(Line==480)
-		{
-			Frame++;
-			// TODO: VBlank interrupt.
-		}
-		else if(Line==491)
-		{
-			GPIOB->BSRRH=(1<<12); // Lower VSYNC.
-		}
-		else if(Line==493)
-		{		
-			GPIOB->BSRRL=(1<<12); // Raise VSYNC.
-		}
-		else if(Line==524)
-		{
-			Line=-1;
-			CurrentLineAddress=FrameBufferAddress;
-		}
-		Line++;
+		case VGAHorizontalSyncStartInterrupt:
+			RaiseVGAHSYNCLine();
+		break;
+
+		case VGAHorizontalSyncEndInterrupt:
+			LowerVGAHSYNCLine();
+		break;
+
+		case VGAVideoStartInterrupt:
+			if(Line<350)
+			{
+				StartPixelDMA();
+				if(Line&1) CurrentLineAddress+=PixelsPerRow;
+			}
+			else if(Line==350)
+			{
+				Frame++;
+				// TODO: VBlank interrupt.
+			}
+			else if(Line==387)
+			{
+				LowerVGAVSYNCLine();
+			}
+			else if(Line==389)
+			{		
+				RaiseVGAVSYNCLine();
+			}
+			else if(Line==448)
+			{
+				Line=-1;
+				CurrentLineAddress=FrameBufferAddress;
+			}
+			Line++;
+		break;
 	}
 }
 

@@ -49,11 +49,11 @@ int main()
 	DisableAccelerometerPins();
 
 	SetLEDs(0x07);
-	IntializeVGAScreenMode320x240(framebuffer);
+	IntializeVGAScreenMode320x200(framebuffer);
 	SetLEDs(0x0f);
 
 	Bitmap screen;
-	InitializeBitmap(&screen,320,240,320,framebuffer);
+	InitializeBitmap(&screen,320,200,320,framebuffer);
 
 	int i=0;
 
