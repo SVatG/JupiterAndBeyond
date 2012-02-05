@@ -15,9 +15,9 @@
 #define PLLI2S_N 192
 #define PLLI2S_R 5
 
-static void SetSysClock(void);
+static void InitializeClocks();
 
-void SystemInit()
+void InitializeSystem()
 {
 	// Reset the RCC clock configuration to the default reset state
 	RCC->CR|=0x00000001; // Set HSION bit
@@ -29,13 +29,13 @@ void SystemInit()
 
 	// Configure the System clock source, PLL Multiplier and Divider factors, 
 	// AHB/APBx prescalers and Flash settings
-	SetSysClock();
+	InitializeClocks();
 
 	// Set vector table offset to flash memory start.
 	SCB->VTOR=FLASH_BASE;
 }
 
-static void SetSysClock()
+static void InitializeClocks()
 {
 	// PLL (clocked by HSE) used as System clock source.
 
@@ -88,12 +88,14 @@ extern InterruptHandler *__isr_vector_sram[];
 
 void InstallInterruptHandler(IRQn_Type interrupt,InterruptHandler handler)
 {
+	// TODO: Disable interrupts.
 	InterruptHandler **currenttable=WritableInterruptTable();
 	currenttable[interrupt+16]=handler;
 }
 
 void RemoveInterruptHandler(IRQn_Type interrupt,InterruptHandler handler)
 {
+	// TODO: Disable interrupts.
 	InterruptHandler **currenttable=WritableInterruptTable();
 	currenttable[interrupt+16]=Default_Handler;
 }
@@ -107,7 +109,7 @@ static InterruptHandler **WritableInterruptTable()
 		currenttable=__isr_vector_sram;
 		for(int i=0;i<98;i++) currenttable[i]=flashtable[i];
 
-		SCB->VTOR==(uint32_t)currenttable;
+		SCB->VTOR=(uint32_t)currenttable;
 	}
 
 	return currenttable;

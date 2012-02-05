@@ -1,6 +1,7 @@
 #include "VGA.h"
 #include "GPIO.h"
 #include "RCC.h"
+#include "System.h"
 
 #include "stm32f4xx.h"
 
@@ -8,6 +9,9 @@ static uint32_t Line;
 static volatile uint32_t Frame;
 static uint32_t FrameBufferAddress;
 static uint32_t CurrentLineAddress;
+
+static void HSYNCHandler();
+static void DMACompleteHandler();
 
 void InitializeVGA(uint8_t *framebuffer)
 {
@@ -46,7 +50,8 @@ void InitializeVGA(uint8_t *framebuffer)
 	// DMA2 stream 1 channel 7 is triggered by timer 8. Stop it and configure interrupts.
 	DMA2_Stream1->CR&=~DMA_SxCR_EN;
 	DMA2->LISR|=DMA_LISR_TCIF1; // Enable transfer complete interrupt on DMA2 stream 1.
-	NVIC->ISER[1]|=1<<(57-32);
+	InstallInterruptHandler(DMA2_Stream1_IRQn,DMACompleteHandler);
+	EnableInterrupt(DMA2_Stream1_IRQn);
 
 	// Configure timer 9 as the HSYNC timer.
 	TIM9->CR1=TIM_CR1_ARPE;
@@ -59,14 +64,15 @@ void InitializeVGA(uint8_t *framebuffer)
 	TIM9->CCR2=950; // 168 MHz * (3.77 + 1.89) microseconds = 950.88 - back porch end
 
 	// Enable HSYNC timer interrupt.
-	NVIC->ISER[0]|=1<<24;
+	InstallInterruptHandler(TIM1_BRK_TIM9_IRQn,HSYNCHandler);
+	EnableInterrupt(TIM1_BRK_TIM9_IRQn);
 	// TODO: Set high priority.
 
 	// Enable HSYNC timer.
 	TIM9->CR1|=TIM_CR1_CEN;
 }
 
-void TIM1_BRK_TIM9_IRQHandler()
+static void HSYNCHandler()
 {
 	uint32_t sr=TIM9->SR;
 	TIM9->SR=0;
@@ -125,13 +131,7 @@ void TIM1_BRK_TIM9_IRQHandler()
 	}
 }
 
-void WaitVBL()
-{
-	uint32_t currframe=Frame;
-	while(Frame==currframe);
-}
-
-void DMA2_Stream1_IRQHandler()
+static void DMACompleteHandler()
 {
 	GPIOE->BSRRH=0xff00; // Set signal to black.
 	DMA2->LIFCR|=DMA_LIFCR_CTCIF1; // Clear interrupt flag.
@@ -139,4 +139,12 @@ void DMA2_Stream1_IRQHandler()
 	DMA2_Stream1->CR&=~DMA_SxCR_EN; // Disable pixel DMA.
 
 	// TODO: HBlank interrupt happens here.
+}
+
+
+
+void WaitVBL()
+{
+	uint32_t currframe=Frame;
+	while(Frame==currframe);
 }

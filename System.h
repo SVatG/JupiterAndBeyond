@@ -5,9 +5,23 @@
 
 typedef void InterruptHandler();
 
-void SystemInit();
+void InitializeSystem();
 
 void InstallInterruptHandler(IRQn_Type interrupt,InterruptHandler handler);
 void RemoveInterruptHandler(IRQn_Type interrupt,InterruptHandler handler);
+
+static inline void EnableInterrupt(IRQn_Type interrupt)
+{
+	int regindex=interrupt>>5;
+	int shift=interrupt&0x1f;
+	NVIC->ISER[regindex]|=1<<shift;
+}
+
+static inline void DisableInterrupt(IRQn_Type interrupt)
+{
+	int regindex=interrupt>>5;
+	int shift=interrupt&0x1f;
+	NVIC->ISER[regindex]&=~(1<<shift);
+}
 
 #endif

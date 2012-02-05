@@ -1,5 +1,6 @@
 #include <stdint.h>
 
+#include "System.h"
 #include "LED.h"
 #include "Button.h"
 #include "Accelerometer.h"
@@ -31,6 +32,13 @@ static uint8_t replacements[256];
 
 int main()
 {
+	InitializeLEDs();
+	SetLEDs(0x01);
+
+	InitializeSystem();
+
+	SetLEDs(0x03);
+
 	SysTick_Config(HCLKFrequency()/100);
 
 	memset(framebuffer,0,320*240);
@@ -39,7 +47,10 @@ int main()
 	InitializeUserButton();
 	InitializeAccelerometer();
 	DisableAccelerometerPins();
+
+	SetLEDs(0x07);
 	InitializeVGA(framebuffer);
+	SetLEDs(0x0f);
 
 	Bitmap screen;
 	InitializeBitmap(&screen,320,240,320,framebuffer);
@@ -66,6 +77,7 @@ int main()
 	for(;;)
 	{
 		WaitVBL();
+	SetLEDs(0x5);
 
 		ClearBitmap(&screen);
 
