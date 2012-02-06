@@ -36,8 +36,8 @@ int main()
 
 	for(;;)
 	{
-		Starfield();
 		Rotozoom();
+		Starfield();
 	}
 }
 
@@ -108,8 +108,8 @@ static void Rotozoom()
 		dx&=0xffffff80;
 		dy&=0xffffff80;
 
-		x0=-dx*256-dy*240;
-		y0=-dy*256+dx*240;
+		x0=-dx*320-dy*240;
+		y0=-dy*320+dx*240;
 		Delta=PackCoordinates(dx,dy);
 	}
 
@@ -137,13 +137,12 @@ static void RotozoomHSYNCHandler()
 			{
 				register uint32_t r0 __asm__("r0")=Pos;
 				register uint32_t r1 __asm__("r1")=Delta;
-				register uint32_t r2 __asm__("r2")=0x1ffff;
+				register uint32_t r2 __asm__("r2")=0x1f83f;
 				register uint32_t r3 __asm__("r3")=0x20000000;
 				register uint32_t r4 __asm__("r4")=0x40021015;
 				#define P \
-				"	adcs		r0,r1		\n" \
-				"	mov		r5,r0		\n" \
-				"	and		r5,r2		\n" \
+				"	adcs	r0,r1		\n" \
+				"	and		r5,r0,r2	\n" \
 				"	ldrb	r6,[r3,r5]	\n" \
 				"	strb	r6,[r4]		\n"
 				
@@ -155,7 +154,17 @@ static void RotozoomHSYNCHandler()
 				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
 				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
 				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
-				
+
+				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
+				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
+				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
+				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
+
+				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
+				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
+				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
+				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
+
 				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
 				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
 				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
@@ -165,13 +174,8 @@ static void RotozoomHSYNCHandler()
 				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
 				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
 				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
-				
-				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
-				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
-				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
-				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
-				
-				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
+
+			
 				".end:	\n"
 				:
 				: "r" (r0), "r" (r1), "r" (r2), "r" (r3), "r" (r4)
@@ -228,7 +232,7 @@ static void Starfield()
 		stars[i].y=RandomInteger()%200;
 
 		int z=sqrti((numstars-1-i)*numstars)*1000/numstars;
-		stars[i].dx=6000*1200/(z+200);
+		stars[i].dx=60*1200/(z+200);
 
 		stars[i].f=(6-(z*7)/1000)+(RandomInteger()%6)*7;
 	}
