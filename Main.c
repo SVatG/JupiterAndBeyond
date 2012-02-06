@@ -8,13 +8,15 @@
 #include "RCC.h"
 #include "Sprites.h"
 #include "Random.h"
+#include "Utils.h"
 
 #include "Graphics/Bitmap.h"
 #include "Graphics/Drawing.h"
 
 #include <arm_math.h>
 
-static uint32_t sqrti(uint32_t n);
+static void Rotozoom();
+static void Starfield();
 
 int main()
 {
@@ -27,15 +29,188 @@ int main()
 
 	SysTick_Config(HCLKFrequency()/100);
 
-	uint8_t *framebuffer1=(uint8_t *)0x20000000;
-	uint8_t *framebuffer2=(uint8_t *)0x20010000;
-	memset(framebuffer1,0,320*200);
-	memset(framebuffer2,0,320*200);
-
 	InitializeLEDs();
 	InitializeUserButton();
 	InitializeAccelerometer();
 	DisableAccelerometerPins();
+
+	for(;;)
+	{
+		Starfield();
+		Rotozoom();
+	}
+}
+
+
+
+
+static void RotozoomHSYNCHandler();
+
+static uint32_t Line;
+static volatile uint32_t Frame;
+static volatile int32_t x0,y0,dx,dy;
+
+static uint32_t PackCoordinates(int32_t x,int32_t y)
+{
+	x&=0x3ff80;
+	y&=0x3ff80;
+	return (y>>(12-17+6))|(x<<20)|(x>>12);
+}
+
+static volatile uint32_t Pos,Delta;
+
+static void Rotozoom()
+{
+	Line=0;
+	Frame=0;
+
+	uint8_t *texture=(uint8_t *)0x20000000;
+
+	for(int y=0;y<64;y++)
+	for(int x=0;x<64;x++)
+	{
+		int r;
+		if(x>=32) r=(63-x)/4;
+		else r=x/4;
+
+		int g;
+		if(y>=32) g=(63-y)/4;
+		else g=y/4;
+
+		int b=((x&1)<<1)|(y&1);
+
+		uint8_t c=(r<<5)|(g<<2)|b;
+
+		for(int i=0;i<32;i++)
+		{
+			int offset=(y<<(17-6))|(i<<6)|x;
+			if(offset<0x20000-0x200) texture[offset]=c;
+		}
+	}
+
+	InitializeVGAPort();
+	InitializeVGAHorizontalSync31kHz(RotozoomHSYNCHandler);
+
+	SetLEDs(0x5);
+
+	while(!UserButtonState())
+	{
+		uint32_t lastframe=Frame;
+		while(Frame==lastframe); // Wait for VBL
+		int t=Frame;
+
+		int32_t angle=isin(t*9);
+		int32_t scale=icos(t*17)+Fix(2);
+
+		dx=imul(scale,icos(angle));
+		dy=imul(scale,isin(angle));
+
+		dx&=0xffffff80;
+		dy&=0xffffff80;
+
+		x0=-dx*256-dy*240;
+		y0=-dy*256+dx*240;
+		Delta=PackCoordinates(dx,dy);
+	}
+
+	while(UserButtonState());
+}
+
+static void RotozoomHSYNCHandler()
+{
+	switch(VGAHorizontalSyncInterruptType())
+	{
+		case VGAHorizontalSyncStartInterrupt:
+			LowerVGAHSYNCLine();
+
+			x0+=dy;
+			y0-=dx;
+			Pos=PackCoordinates(x0,y0);
+		break;
+
+		case VGAHorizontalSyncEndInterrupt:
+			RaiseVGAHSYNCLine();
+		break;
+
+		case VGAVideoStartInterrupt:
+			if(Line<480)
+			{
+				register uint32_t r0 __asm__("r0")=Pos;
+				register uint32_t r1 __asm__("r1")=Delta;
+				register uint32_t r2 __asm__("r2")=0x1ffff;
+				register uint32_t r3 __asm__("r3")=0x20000000;
+				register uint32_t r4 __asm__("r4")=0x40021015;
+				#define P \
+				"	adcs		r0,r1		\n" \
+				"	mov		r5,r0		\n" \
+				"	and		r5,r2		\n" \
+				"	ldrb	r6,[r3,r5]	\n" \
+				"	strb	r6,[r4]		\n"
+				
+				__asm__ volatile(
+				"	b		.start		\n"
+				"	.align 4	\n"
+				".start:	\n"
+				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
+				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
+				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
+				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
+				
+				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
+				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
+				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
+				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
+				
+				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
+				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
+				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
+				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
+				
+				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
+				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
+				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
+				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
+				
+				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
+				".end:	\n"
+				:
+				: "r" (r0), "r" (r1), "r" (r2), "r" (r3), "r" (r4)
+				:"r5","r6");
+
+				((uint8_t *)&GPIOE->ODR)[1]=0;
+			}
+			else if(Line==480)
+			{
+				Frame++;
+			}
+			else if(Line==490)
+			{
+				LowerVGAVSYNCLine();
+			}
+			else if(Line==492)
+			{
+				RaiseVGAVSYNCLine();
+			}
+			else if(Line==524)
+			{
+				Line=-1;
+			}
+			Line++;
+		break;
+	}
+}
+
+
+
+
+static uint32_t sqrti(uint32_t n);
+
+static void Starfield()
+{
+	uint8_t *framebuffer1=(uint8_t *)0x20000000;
+	uint8_t *framebuffer2=(uint8_t *)0x20010000;
+	memset(framebuffer1,0,320*200);
+	memset(framebuffer2,0,320*200);
 
 	SetLEDs(0x07);
 	IntializeVGAScreenMode320x200(framebuffer1);
@@ -73,7 +248,7 @@ int main()
 
 	int frame=0;
 
-	for(;;)
+	while(!UserButtonState())
 	{
 		WaitVBL();
 
@@ -101,6 +276,8 @@ int main()
 
 		frame++;
 	}
+
+	while(UserButtonState());
 }
 
 

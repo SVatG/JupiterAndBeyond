@@ -31,6 +31,7 @@ C_FILES =	Accelerometer.c \
 			Random.c \
 			Sprites.c \
 			System.c \
+			Utils.c \
 			VGA.c \
 			Graphics/Bitmap.c \
 			Graphics/DrawingBitmaps.c \
