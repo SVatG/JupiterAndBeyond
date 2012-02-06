@@ -18,6 +18,8 @@
 static void Rotozoom();
 static void Starfield();
 
+static uint32_t sqrti(uint32_t n);
+
 int main()
 {
 	InitializeLEDs();
@@ -36,8 +38,8 @@ int main()
 
 	for(;;)
 	{
-		Rotozoom();
 		Starfield();
+		Rotozoom();
 	}
 }
 
@@ -52,39 +54,53 @@ static volatile int32_t x0,y0,dx,dy;
 
 static uint32_t PackCoordinates(int32_t x,int32_t y)
 {
-	x&=0x3ff80;
+	x&=0x3ffff;
 	y&=0x3ff80;
 	return (y>>(12-17+6))|(x<<20)|(x>>12);
 }
 
 static volatile uint32_t Pos,Delta;
+static uint8_t linetexture[480];
 
 static void Rotozoom()
 {
 	Line=0;
 	Frame=0;
 
+	memset(linetexture,0,sizeof(linetexture));
+
 	uint8_t *texture=(uint8_t *)0x20000000;
 
-	for(int y=0;y<64;y++)
-	for(int x=0;x<64;x++)
+	for(int i=0;i<32;i++)
 	{
-		int r;
-		if(x>=32) r=(63-x)/4;
-		else r=x/4;
-
-		int g;
-		if(y>=32) g=(63-y)/4;
-		else g=y/4;
-
-		int b=((x&1)<<1)|(y&1);
-
-		uint8_t c=(r<<5)|(g<<2)|b;
-
-		for(int i=0;i<32;i++)
+		for(int y=0;y<64;y++)
+		for(int x=0;x<64;x++)
 		{
+			int dx=(2*x+1)-64;
+			int dy=(2*y+1)-64;
+			int r=sqrti(dx*dx+dy*dy);
+
+			int red=0,green=0,blue=0;
+
+			if(r<2*i)
+			{
+				red=(2*i-r)/3;
+				if(red>7)
+				{
+					green=red-8;
+					red=7;
+					if(green>7)
+					{
+						blue=green-8;
+						green=7;
+
+						if(blue>3) blue=3;
+					}
+				}
+			}
+
 			int offset=(y<<(17-6))|(i<<6)|x;
-			if(offset<0x20000-0x200) texture[offset]=c;
+			if(offset<0x20000-0x200) texture[offset]=(red<<5)|(green<<2)|(blue);
 		}
 	}
 
@@ -105,12 +121,18 @@ static void Rotozoom()
 		dx=imul(scale,icos(angle));
 		dy=imul(scale,isin(angle));
 
-		dx&=0xffffff80;
+		//dx&=0xffffff80;
 		dy&=0xffffff80;
 
 		x0=-dx*320-dy*240;
 		y0=-dy*320+dx*240;
 		Delta=PackCoordinates(dx,dy);
+
+		for(int y=0;y<480;y++)
+		{
+			int pos=icos(t*20);
+			linetexture[y]=(31*(isin(y*6+pos)+Fix(1))/8192)&31;
+		}
 	}
 
 	while(UserButtonState());
@@ -138,7 +160,7 @@ static void RotozoomHSYNCHandler()
 				register uint32_t r0 __asm__("r0")=Pos;
 				register uint32_t r1 __asm__("r1")=Delta;
 				register uint32_t r2 __asm__("r2")=0x1f83f;
-				register uint32_t r3 __asm__("r3")=0x20000000;
+				register uint32_t r3 __asm__("r3")=0x20000000+(linetexture[Line]<<6);
 				register uint32_t r4 __asm__("r4")=0x40021015;
 				#define P \
 				"	adcs	r0,r1		\n" \
@@ -207,7 +229,6 @@ static void RotozoomHSYNCHandler()
 
 
 
-static uint32_t sqrti(uint32_t n);
 
 static void Starfield()
 {
@@ -232,7 +253,7 @@ static void Starfield()
 		stars[i].y=RandomInteger()%200;
 
 		int z=sqrti((numstars-1-i)*numstars)*1000/numstars;
-		stars[i].dx=60*1200/(z+200);
+		stars[i].dx=6000*1200/(z+200);
 
 		stars[i].f=(6-(z*7)/1000)+(RandomInteger()%6)*7;
 	}
