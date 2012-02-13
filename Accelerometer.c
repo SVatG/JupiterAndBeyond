@@ -35,31 +35,17 @@ void InitializeAccelerometer()
 	SPI1->I2SCFGR&=~SPI_I2SCFGR_I2SMOD; // Disable I2S mode.
 	SPI1->CR1=SPI_CR1_SSM|(1*SPI_CR1_BR_0)|SPI_CR1_SSI|SPI_CR1_MSTR|SPI_CR1_SPE;
 
-	// Configure CS pin and drive it high.
-	SetGPIOOutputMode(GPIOE,(1<<3));
+	// Configure CS pin as input to be compatible with VGA driver.
+	// Set the output register to 0 anyway, and reconfigure later in LowerCS().
+	SetGPIOInputMode(GPIOE,(1<<3));
 	SetGPIOPushPullOutput(GPIOE,(1<<3));
 	SetGPIOSpeed50MHz(GPIOE,(1<<3));
-	SetGPIOPullDownResistor(GPIOE,(1<<3));
+	SetGPIOPullUpResistor(GPIOE,(1<<3));
 	GPIOE->BSRRH=1<<3;
 
 	// Configure interrupt pins.
 	SetGPIOInputMode(GPIOE,(1<<0)|(1<<1));
 	SetGPIONoPullResistor(GPIOE,(1<<0)|(1<<1));
-}
-
-void DisableAccelerometerPins()
-{
-	// Set CS pin to input, with pullup.
-	SetGPIOInputMode(GPIOE,(1<<3));
-	SetGPIOPullUpResistor(GPIOE,(1<<3));
-}
-
-void EnableAccelerometerPins()
-{
-	// Set CS pin to output and drive it high.
-	SetGPIOOutputMode(GPIOE,(1<<3));
-	SetGPIOPullDownResistor(GPIOE,(1<<3));
-	GPIOE->BSRRH=1<<3;
 }
 
 bool PingAccelerometer()
@@ -158,12 +144,12 @@ static void WriteBytes(uint8_t *bytes,uint8_t address,int numbytes)
 
 static inline uint8_t LowerCS()
 {
-	GPIOE->BSRRH=1<<3;
+	SetGPIOOutputMode(GPIOE,(1<<3));
 }
 
 static inline uint8_t RaiseCS()
 {
-	GPIOE->BSRRL=1<<3;
+	SetGPIOInputMode(GPIOE,(1<<3));
 }
 
 #define Timeout 0x1000

@@ -17,6 +17,8 @@
 
 static void Rotozoom();
 static void Starfield();
+static void InitializeLEDFlow();
+static void RunLEDFlow();
 
 static uint32_t sqrti(uint32_t n);
 
@@ -34,7 +36,6 @@ int main()
 	InitializeLEDs();
 	InitializeUserButton();
 	InitializeAccelerometer();
-	DisableAccelerometerPins();
 
 	for(;;)
 	{
@@ -114,6 +115,8 @@ static void Rotozoom()
 		uint32_t lastframe=Frame;
 		while(Frame==lastframe); // Wait for VBL
 		int t=Frame;
+
+		SetLEDs(1<<((t/3)&3));
 
 		int32_t angle=isin(t*9);
 		int32_t scale=icos(t*17)+Fix(2);
@@ -237,9 +240,9 @@ static void Starfield()
 	memset(framebuffer1,0,320*200);
 	memset(framebuffer2,0,320*200);
 
-	SetLEDs(0x07);
 	IntializeVGAScreenMode320x200(framebuffer1);
-	SetLEDs(0x0f);
+
+	InitializeLEDFlow();
 
 	const int numstars=450;
 	struct Star
@@ -277,13 +280,13 @@ static void Starfield()
 	{
 		WaitVBL();
 
+		RunLEDFlow();
+
 		Bitmap *currframe;
 		if(frame&1) { currframe=&frame2; SetFrameBuffer(framebuffer1); }
 		else { currframe=&frame1; SetFrameBuffer(framebuffer2); }
 
 		ClearBitmap(currframe);
-
-		SetLEDs(1<<((frame/3)&3));
 
 		for(int i=0;i<numstars;i++)
 		{
@@ -303,6 +306,63 @@ static void Starfield()
 	}
 
 	while(UserButtonState());
+}
+
+
+
+static int8_t zero[3];
+static int32_t x=0,y=0;
+
+static void InitializeLEDFlow()
+{
+	WaitVBL();
+
+	SetLEDs(0x0f);
+
+	SetAccelerometerMainConfig(
+		LIS302DL_LOWPOWERMODE_ACTIVE|
+		LIS302DL_DATARATE_100|
+		LIS302DL_XYZ_ENABLE|
+		LIS302DL_FULLSCALE_2_3|
+		LIS302DL_SELFTEST_NORMAL);
+
+	for(int i=0;i<20;i++) WaitVBL();
+
+	SetAccelerometerFilterConfig(
+		LIS302DL_FILTEREDDATASELECTION_BYPASSED|
+    	LIS302DL_HIGHPASSFILTER_LEVEL_1|
+    	LIS302DL_HIGHPASSFILTERINTERRUPT_1_2);
+
+	SetLEDs(0);
+
+	if(!PingAccelerometer()) for(;;) SetLEDs(0x05);
+
+	ReadRawAccelerometerData(zero);
+}
+
+static void RunLEDFlow()
+{
+	int8_t components[3];
+	ReadRawAccelerometerData(components);
+
+	int32_t dx=components[0]-zero[0];
+	int32_t dy=components[1]-zero[1];
+	int32_t r=sqrti(dx*dx+dy*dy);
+	dx=(dx<<12)/r;
+	dy=(dy<<12)/r;
+
+	x+=r*25;
+
+//	x+=components[0]-zero[0];
+//	y+=components[1]-zero[1];
+
+	int leds=0;
+	leds|=(((x+dx)>>14)&1)<<1;
+	leds|=(((x-dx)>>14)&1)<<3;
+	leds|=(((x+dy)>>14)&1)<<0;
+	leds|=(((x-dy)>>14)&1)<<2;
+
+	SetLEDs(leds);
 }
 
 

@@ -487,8 +487,6 @@
 #define LIS302DL_CLICK_WINDOW_REG_ADDR        0x3F
 
 void InitializeAccelerometer();
-void DisableAccelerometerPins();
-void EnableAccelerometerPins();
 bool PingAccelerometer();
 void SetAccelerometerMainConfig(uint8_t config);
 void SetAccelerometerFilterConfig(uint8_t config);
