@@ -199,7 +199,7 @@ static void RotozoomHSYNCHandler()
 				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
 				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
 				P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P  P P P P 
-
+				#undef P
 			
 				".end:	\n"
 				:

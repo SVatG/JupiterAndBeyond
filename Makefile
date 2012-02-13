@@ -39,10 +39,7 @@ C_FILES =	Accelerometer.c \
 			Graphics/DrawingPixels.c \
 			Graphics/DrawingRectangles.c \
 			Graphics/DrawingRLEBitmaps.c \
-			Graphics/DrawingStraightLines.c \
-			Libraries/CMSIS/DSP_Lib/Source/CommonTables/arm_common_tables.c \
-			Libraries/CMSIS/DSP_Lib/Source/ControllerFunctions/arm_sin_cos_q31.c \
-			Libraries/CMSIS/DSP_Lib/Source/FastMathFunctions/arm_sqrt_q15.c
+			Graphics/DrawingStraightLines.c
 			
 S_FILES = TerribleStartup.S
 
