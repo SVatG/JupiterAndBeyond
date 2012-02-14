@@ -40,9 +40,9 @@ int main()
 
 	for(;;)
 	{
-		Epileptor();
 		Starfield();
 		Rotozoom();
+		Epileptor();
 	}
 }
 
@@ -459,10 +459,10 @@ static void Epileptor()
 
 		for(int j=0;j<4;j++)
 		{
-			int32_t sin1=isin(imul(t,sina)+j*1024);
-			int32_t cos1=icos(imul(t,sina)+j*1024);
-			int32_t sin2=isin(imul(t,sinb)/3+j*1024+1421);
-			int32_t cos2=icos(imul(t,sinb)/3+j*1024+1421);
+			int32_t sin1=isin(sina+j*1024);
+			int32_t cos1=icos(sina+j*1024);
+			int32_t sin2=isin(sinb/3+j*1024+1421);
+			int32_t cos2=icos(sinb/3+j*1024+1421);
 			int32_t sin3=isin(t*23);
 			int32_t sin4=isin(t*14);
 
