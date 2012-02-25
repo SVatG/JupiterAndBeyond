@@ -246,7 +246,7 @@ static void Starfield()
 
 	InitializeLEDFlow();
 
-	const int numstars=450;
+	const int numstars=1050;
 	struct Star
 	{
 		int x,y,dx,f;
@@ -393,8 +393,6 @@ static uint32_t sqrti(uint32_t n)
 
 
 
-
-#define RawRGB(r,g,b) (((r)<<5)|((g)<<2)|(b))
 
 static void DrawBlob(Bitmap *bitmap,int x0,int y0,int c);
 
