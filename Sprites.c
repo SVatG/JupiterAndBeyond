@@ -1,11 +1,6 @@
 #include "Graphics/RLEBitmap.h"
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star1_0=
-{
-	{ 32,32 },
+const RLEBitmap Star1_0={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
@@ -24,13 +19,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star1_1=
-{
-	{ 32,32 },
+const RLEBitmap Star1_1={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
@@ -49,13 +39,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star1_2=
-{
-	{ 32,32 },
+const RLEBitmap Star1_2={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
@@ -74,13 +59,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star1_3=
-{
-	{ 32,32 },
+const RLEBitmap Star1_3={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
@@ -99,13 +79,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star1_4=
-{
-	{ 32,32 },
+const RLEBitmap Star1_4={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
@@ -124,13 +99,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star1_5=
-{
-	{ 32,32 },
+const RLEBitmap Star1_5={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
@@ -149,13 +119,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star2_0=
-{
-	{ 32,32 },
+const RLEBitmap Star2_0={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
@@ -180,13 +145,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star2_1=
-{
-	{ 32,32 },
+const RLEBitmap Star2_1={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
@@ -211,13 +171,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star2_2=
-{
-	{ 32,32 },
+const RLEBitmap Star2_2={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
@@ -242,13 +197,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star2_3=
-{
-	{ 32,32 },
+const RLEBitmap Star2_3={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
@@ -273,13 +223,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star2_4=
-{
-	{ 32,32 },
+const RLEBitmap Star2_4={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
@@ -304,13 +249,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star2_5=
-{
-	{ 32,32 },
+const RLEBitmap Star2_5={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
@@ -335,13 +275,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star3_0=
-{
-	{ 32,32 },
+const RLEBitmap Star3_0={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
@@ -370,13 +305,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star3_1=
-{
-	{ 32,32 },
+const RLEBitmap Star3_1={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
@@ -405,13 +335,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star3_2=
-{
-	{ 32,32 },
+const RLEBitmap Star3_2={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
@@ -440,13 +365,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star3_3=
-{
-	{ 32,32 },
+const RLEBitmap Star3_3={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
@@ -475,13 +395,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star3_4=
-{
-	{ 32,32 },
+const RLEBitmap Star3_4={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
@@ -510,13 +425,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star3_5=
-{
-	{ 32,32 },
+const RLEBitmap Star3_5={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
@@ -545,13 +455,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star4_0=
-{
-	{ 32,32 },
+const RLEBitmap Star4_0={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
@@ -582,13 +487,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star4_1=
-{
-	{ 32,32 },
+const RLEBitmap Star4_1={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
@@ -619,13 +519,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star4_2=
-{
-	{ 32,32 },
+const RLEBitmap Star4_2={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
@@ -656,13 +551,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star4_3=
-{
-	{ 32,32 },
+const RLEBitmap Star4_3={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
@@ -693,13 +583,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star4_4=
-{
-	{ 32,32 },
+const RLEBitmap Star4_4={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
@@ -730,13 +615,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star4_5=
-{
-	{ 32,32 },
+const RLEBitmap Star4_5={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
@@ -767,13 +647,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star5_0=
-{
-	{ 32,32 },
+const RLEBitmap Star5_0={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLECode(0x0f,0x01), 
@@ -815,13 +690,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star5_1=
-{
-	{ 32,32 },
+const RLEBitmap Star5_1={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLECode(0x0f,0x01), 
@@ -863,13 +733,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star5_2=
-{
-	{ 32,32 },
+const RLEBitmap Star5_2={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLECode(0x0f,0x01), 
@@ -911,13 +776,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star5_3=
-{
-	{ 32,32 },
+const RLEBitmap Star5_3={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLECode(0x0f,0x01), 
@@ -959,13 +819,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star5_4=
-{
-	{ 32,32 },
+const RLEBitmap Star5_4={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLECode(0x0f,0x01), 
@@ -1007,13 +862,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star5_5=
-{
-	{ 32,32 },
+const RLEBitmap Star5_5={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLECode(0x0f,0x01), 
@@ -1055,13 +905,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star6_0=
-{
-	{ 32,32 },
+const RLEBitmap Star6_0={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 		RLEEndCode(0x20),   RLECode(0x0f,0x01), RGB(0x5c,0x00,0x00),RLEEndCode(0x10),   
@@ -1119,13 +964,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star6_1=
-{
-	{ 32,32 },
+const RLEBitmap Star6_1={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 		RLEEndCode(0x20),   RLECode(0x0f,0x01), RGB(0x00,0x5c,0x00),RLEEndCode(0x10),   
@@ -1183,13 +1023,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star6_2=
-{
-	{ 32,32 },
+const RLEBitmap Star6_2={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 		RLEEndCode(0x20),   RLECode(0x0f,0x01), RGB(0x00,0x00,0x5c),RLEEndCode(0x10),   
@@ -1247,13 +1082,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star6_3=
-{
-	{ 32,32 },
+const RLEBitmap Star6_3={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 		RLEEndCode(0x20),   RLECode(0x0f,0x01), RGB(0x5c,0x5c,0x00),RLEEndCode(0x10),   
@@ -1311,13 +1141,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star6_4=
-{
-	{ 32,32 },
+const RLEBitmap Star6_4={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 		RLEEndCode(0x20),   RLECode(0x0f,0x01), RGB(0x00,0x5c,0x5c),RLEEndCode(0x10),   
@@ -1375,13 +1200,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star6_5=
-{
-	{ 32,32 },
+const RLEBitmap Star6_5={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   
 		RLEEndCode(0x20),   RLECode(0x0f,0x01), RGB(0x5c,0x00,0x5c),RLEEndCode(0x10),   
@@ -1439,13 +1259,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star7_0=
-{
-	{ 32,32 },
+const RLEBitmap Star7_0={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLECode(0x0f,0x01), 
 		RGB(0x5c,0x00,0x00),RLEEndCode(0x10),   RLECode(0x0f,0x01), RGB(0xc1,0x00,0x00),
@@ -1515,13 +1330,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star7_1=
-{
-	{ 32,32 },
+const RLEBitmap Star7_1={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLECode(0x0f,0x01), 
 		RGB(0x00,0x5c,0x00),RLEEndCode(0x10),   RLECode(0x0f,0x01), RGB(0x00,0xc1,0x00),
@@ -1591,13 +1401,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star7_2=
-{
-	{ 32,32 },
+const RLEBitmap Star7_2={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLECode(0x0f,0x01), 
 		RGB(0x00,0x00,0x5c),RLEEndCode(0x10),   RLECode(0x0f,0x01), RGB(0x00,0x00,0xc1),
@@ -1667,13 +1472,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star7_3=
-{
-	{ 32,32 },
+const RLEBitmap Star7_3={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLECode(0x0f,0x01), 
 		RGB(0x5c,0x5c,0x00),RLEEndCode(0x10),   RLECode(0x0f,0x01), RGB(0xc1,0xc1,0x00),
@@ -1743,13 +1543,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star7_4=
-{
-	{ 32,32 },
+const RLEBitmap Star7_4={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLECode(0x0f,0x01), 
 		RGB(0x00,0x5c,0x5c),RLEEndCode(0x10),   RLECode(0x0f,0x01), RGB(0x00,0xc1,0xc1),
@@ -1819,13 +1614,8 @@ const struct
 		RLEEndCode(0x20),   RLEEndCode(0x20),   
 	}
 };
-const struct
-{
-	RLEBitmap rle;
-	Pixel codes[];
-} Star7_5=
-{
-	{ 32,32 },
+const RLEBitmap Star7_5={
+	32,32,
 	{
 		RLEEndCode(0x20),   RLEEndCode(0x20),   RLEEndCode(0x20),   RLECode(0x0f,0x01), 
 		RGB(0x5c,0x00,0x5c),RLEEndCode(0x10),   RLECode(0x0f,0x01), RGB(0xc1,0x00,0xc1),
