@@ -30,6 +30,7 @@ C_FILES =	Accelerometer.c \
 			Main.c \
 			Random.c \
 			Sprites.c \
+			Startup.c \
 			System.c \
 			Utils.c \
 			VGA.c \
@@ -41,7 +42,7 @@ C_FILES =	Accelerometer.c \
 			Graphics/DrawingRLEBitmaps.c \
 			Graphics/DrawingStraightLines.c
 			
-S_FILES = TerribleStartup.S
+S_FILES = 
 
 OBJS = $(C_FILES:%.c=$(BUILD_DIR)/%.o) $(S_FILES:%.S=$(BUILD_DIR)/%.o)
 

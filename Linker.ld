@@ -1,4 +1,4 @@
-ENTRY(g_pfnVectors)
+ENTRY(InterruptVectors)
 
 MEMORY
 {
@@ -7,7 +7,6 @@ MEMORY
 	sram (rwx)		: ORIGIN = 0x20000000, LENGTH = 128K
 }
 
-_estack = 0x10010000;
 __isr_vector_sram = 0x20020000-0x200;
 
 SECTIONS
@@ -38,4 +37,3 @@ SECTIONS
         _ebss = .;
     } > ccmram
 }
-

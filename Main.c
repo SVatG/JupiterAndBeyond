@@ -246,18 +246,18 @@ static void Starfield()
 
 	InitializeLEDFlow();
 
-	const int numstars=1050;
-	struct Star
+	#define NumberOfStars 1050
+	static struct Star
 	{
 		int x,y,dx,f;
-	} stars[numstars];
+	} stars[NumberOfStars];
 
-	for(int i=0;i<numstars;i++)
+	for(int i=0;i<NumberOfStars;i++)
 	{
 		stars[i].x=(RandomInteger()%352-16)<<12;
 		stars[i].y=RandomInteger()%200;
 
-		int z=sqrti((numstars-1-i)*numstars)*1000/numstars;
+		int z=sqrti((NumberOfStars-1-i)*NumberOfStars)*1000/NumberOfStars;
 		stars[i].dx=6000*1200/(z+200);
 
 		stars[i].f=(6-(z*7)/1000)+(RandomInteger()%6)*7;
@@ -290,7 +290,7 @@ static void Starfield()
 
 		ClearBitmap(currframe);
 
-		for(int i=0;i<numstars;i++)
+		for(int i=0;i<NumberOfStars;i++)
 		{
 			DrawRLEBitmap(currframe,sprites[stars[i].f],
 			(stars[i].x>>12)-16,stars[i].y-16);
