@@ -1,26 +1,26 @@
 #include <stdint.h>
 
-int main();
-
 static uint8_t stack[1024];
 
-extern uint32_t _sidata[];
-extern uint32_t _sdata[];
+extern uint32_t _data[];
+extern uint32_t _idata[];
 extern uint32_t _edata[];
-extern uint32_t _sbss[];
+extern uint32_t _bss[];
 extern uint32_t _ebss[];
 
 void Reset_Handler() __attribute__((naked,noreturn));
 void Default_Handler() __attribute__((naked,noreturn));
 
+int main();
+
 void Reset_Handler()
 {
 	// Copy the data segment initializers from flash to SRAM.
-	uint32_t *src=_sidata;
-	for(uint32_t *dest=_sdata;dest<_edata;dest++) *dest=*src++;
+	uint32_t *src=_idata;
+	for(uint32_t *dest=_data;dest<_edata;dest++) *dest=*src++;
 
 	// Zero fill the bss segment.
-	for(uint32_t *dest=_sbss;dest<_ebss;dest++) *dest=0;
+	for(uint32_t *dest=_bss;dest<_ebss;dest++) *dest=0;
 
 	// Call the application's entry point.
     main();
@@ -129,21 +129,21 @@ void FPU_IRQHandler() __attribute__((weak,alias("Default_Handler")));
 __attribute__ ((section(".isr_vector"))) const void *InterruptVectors[]=
 {
 	(stack+sizeof(stack)),
-    Reset_Handler,
-    NMI_Handler,
-    HardFault_Handler,
-    MemManage_Handler,
-    BusFault_Handler,
-    UsageFault_Handler,
-    0,
-    0,
-    0,
-    0,
-    SVCall_Handler,
-    DebugMon_Handler,
-    0,
-    PendSV_Handler,
-    SysTick_Handler,
+	Reset_Handler,
+	NMI_Handler,
+	HardFault_Handler,
+	MemManage_Handler,
+	BusFault_Handler,
+	UsageFault_Handler,
+	0,
+	0,
+	0,
+	0,
+	SVCall_Handler,
+	DebugMon_Handler,
+	0,
+	PendSV_Handler,
+	SysTick_Handler,
 	WWDG_IRQHandler,				// Window WatchDog                                        
 	PVD_IRQHandler,					// PVD through EXTI Line detection                        
 	TAMP_STAMP_IRQHandler,			// Tamper and TimeStamps through the EXTI line            

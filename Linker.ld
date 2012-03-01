@@ -20,18 +20,18 @@ SECTIONS
         *(.text*)
         *(.rodata*)
         _etext = .;
-        _sidata = .;
+        _idata = .;
     } > flash
     .data : AT(ADDR(.text) + SIZEOF(.text))
     {
-        _sdata = .;
+        _data = .;
         *(vtable)
         *(.data*)
         _edata = .;
     } > ccmram
     .bss :
     {
-        _sbss = .;
+        _bss = .;
         *(.bss*)
         *(COMMON)
         _ebss = .;

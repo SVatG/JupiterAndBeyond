@@ -47,7 +47,7 @@ S_FILES =
 OBJS = $(C_FILES:%.c=$(BUILD_DIR)/%.o) $(S_FILES:%.S=$(BUILD_DIR)/%.o)
 
 ALL_CFLAGS = $(C_OPTS) $(DEFINES) $(CFLAGS)
-ALL_LDFLAGS = $(LD_FLAGS) -mthumb -nostartfiles -Wl,-T,Linker.ld,--gc-sections
+ALL_LDFLAGS = $(LD_FLAGS) -mthumb -mcpu=cortex-m4 -nostartfiles -Wl,-T,Linker.ld,--gc-sections -specs Terrible.specs
 
 AUTODEPENDENCY_CFLAGS=-MMD -MF$(@:.o=.d) -MT$@
 
