@@ -6,6 +6,7 @@
 #include "Accelerometer.h"
 #include "VGA.h"
 #include "RCC.h"
+#include "Audio.h"
 #include "Sprites.h"
 #include "Random.h"
 #include "Utils.h"
@@ -37,6 +38,10 @@ int main()
 	InitializeLEDs();
 	InitializeUserButton();
 	InitializeAccelerometer();
+
+	InitializeAudio();
+	SetAudioOutputThroughDAC();
+	MakeDACNoise();
 
 	for(;;)
 	{

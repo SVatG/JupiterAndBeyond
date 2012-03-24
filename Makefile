@@ -5,42 +5,39 @@ LD = arm-eabi-gcc
 OBJCOPY = arm-eabi-objcopy
 
 DEFINES =	-DARM_MATH_CM4 \
-			-DRGB8Pixels
+		-DRGB8Pixels
 
 C_OPTS =	-std=c99 \
-			-mthumb \
-			-mcpu=cortex-m4 \
-			-ILibraries/CMSIS/Include \
-			-g \
-			-Werror \
-			-O3
+		-mthumb \
+		-mcpu=cortex-m4 \
+		-ILibraries/CMSIS/Include \
+		-g \
+		-Werror \
+		-O3
 
 LIBS =	-lm
 
 SOURCE_DIR = .
 BUILD_DIR = Build
 
-#			Utilities/STM32F4-Discovery/stm32f4_discovery.c \
-#			Utilities/STM32F4-Discovery/stm32f4_discovery_lis302dl.c \
-#			Utilities/STM32F4-Discovery/stm32f4_discovery_audio_codec.c
-
 C_FILES =	Accelerometer.c \
-			Button.c \
-			LED.c \
-			Main.c \
-			Random.c \
-			Sprites.c \
-			Startup.c \
-			System.c \
-			Utils.c \
-			VGA.c \
-			Graphics/Bitmap.c \
-			Graphics/DrawingBitmaps.c \
-			Graphics/DrawingLines.c \
-			Graphics/DrawingPixels.c \
-			Graphics/DrawingRectangles.c \
-			Graphics/DrawingRLEBitmaps.c \
-			Graphics/DrawingStraightLines.c
+		Audio.c \
+		Button.c \
+		LED.c \
+		Main.c \
+		Random.c \
+		Sprites.c \
+		Startup.c \
+		System.c \
+		Utils.c \
+		VGA.c \
+		Graphics/Bitmap.c \
+		Graphics/DrawingBitmaps.c \
+		Graphics/DrawingLines.c \
+		Graphics/DrawingPixels.c \
+		Graphics/DrawingRectangles.c \
+		Graphics/DrawingRLEBitmaps.c \
+		Graphics/DrawingStraightLines.c
 			
 S_FILES = 
 
