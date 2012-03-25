@@ -8,7 +8,7 @@ typedef void AudioCallbackFunction(void *context,int buffer);
 
 void InitializeAudio();
 
-void SetAudioOutputThroughDAC();
+void MakeNoise();
 
 void AudioOn();
 void AudioOff();
@@ -21,9 +21,5 @@ void StopAudio();
 
 void ProvideAudioBuffer(void *samples,int numsamples);
 bool ProvideAudioBufferWithoutBlocking(void *samples,int numsamples);
-
-void SetAudioOutputThroughDAC();
-void MakeDACNoise();
-void SetAudioDACValue(int16_t sample);
 
 #endif

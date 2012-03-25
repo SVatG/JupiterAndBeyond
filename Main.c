@@ -27,11 +27,8 @@ static uint32_t sqrti(uint32_t n);
 int main()
 {
 	InitializeLEDs();
-	SetLEDs(0x01);
 
 	InitializeSystem();
-
-	SetLEDs(0x03);
 
 	SysTick_Config(HCLKFrequency()/100);
 
@@ -40,8 +37,7 @@ int main()
 	InitializeAccelerometer();
 
 	InitializeAudio();
-	SetAudioOutputThroughDAC();
-	MakeDACNoise();
+	MakeNoise();
 
 	for(;;)
 	{
