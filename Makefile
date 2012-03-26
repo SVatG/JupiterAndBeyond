@@ -22,6 +22,7 @@ BUILD_DIR = Build
 
 C_FILES =	Accelerometer.c \
 		Audio.c \
+		BitBin.c \
 		Button.c \
 		LED.c \
 		Main.c \
@@ -29,6 +30,7 @@ C_FILES =	Accelerometer.c \
 		Sprites.c \
 		Startup.c \
 		System.c \
+		TestSong.c \
 		Utils.c \
 		VGA.c \
 		Graphics/Bitmap.c \
