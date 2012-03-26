@@ -63,6 +63,9 @@ debug:
 	arm-eabi-gdb $(NAME).elf \
 	--eval-command="target remote | openocd -f interface/stlink-v2.cfg -f target/stm32f4x_stlink.cfg -c 'gdb_port pipe'"
 
+stlink:
+	arm-eabi-gdb $(NAME).elf --eval-command="target ext :4242"
+
 clean:
 	rm -rf $(BUILD_DIR) $(NAME).elf $(NAME).bin
 

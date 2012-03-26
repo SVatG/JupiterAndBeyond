@@ -24,6 +24,13 @@ static void Epileptor();
 
 static uint32_t sqrti(uint32_t n);
 
+int16_t *buffers[2]={ (int16_t *)0x2000fe00,(int16_t *)0x2000ff00 };
+
+static void AudioCallback(void *context,int buffer)
+{
+	ProvideAudioBuffer(buffers[buffer],128);
+}
+
 int main()
 {
 	InitializeLEDs();
@@ -37,7 +44,13 @@ int main()
 	InitializeAccelerometer();
 
 	InitializeAudio(Audio44100HzSettings);
-	MakeNoise();
+
+for(int i=0;i<128;i++)
+{
+	buffers[0][i]=buffers[1][i]=i*512-0x8000;
+}
+
+	PlayAudioWithCallback(AudioCallback,NULL);
 
 	for(;;)
 	{

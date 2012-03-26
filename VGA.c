@@ -232,7 +232,6 @@ static void InitializePixelDMA(int pixelclock)
 	// DMA2 stream 1 channel 7 is triggered by timer 8.
 	// Stop it and configure interrupts.
 	DMA2_Stream1->CR&=~DMA_SxCR_EN;
-	DMA2->LISR|=DMA_LISR_TCIF1; // Enable transfer complete interrupt on DMA2 stream 1.
 	InstallInterruptHandler(DMA2_Stream1_IRQn,DMACompleteHandler);
 	EnableInterrupt(DMA2_Stream1_IRQn);
 }
@@ -268,7 +267,7 @@ static inline void StartPixelDMA()
 static inline void StopPixelDMA()
 {
 	TIM8->CR1&=~TIM_CR1_CEN; // Stop pixel clock.
-	DMA2_Stream1->CR&=~DMA_SxCR_EN; // Disable pixel DMA.
+	DMA2_Stream1->CR=0; // Disable pixel DMA.
 }
 
 
