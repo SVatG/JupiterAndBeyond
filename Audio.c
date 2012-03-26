@@ -5,7 +5,7 @@
 
 static void WriteRegister(uint8_t address,uint8_t value);
 
-void InitializeAudio()
+void InitializeAudio(int plln,int pllr,int i2sdiv,int i2sodd)
 {
 	// Turn on peripherals.
 	EnableAHB1PeripheralClock(RCC_AHB1ENR_GPIOAEN|RCC_AHB1ENR_GPIOBEN|RCC_AHB1ENR_GPIOCEN|RCC_AHB1ENR_GPIODEN);
@@ -88,27 +88,18 @@ void InitializeAudio()
 	WriteRegister(0x1a,0x0a); // Adjust PCM volume level.
 	WriteRegister(0x1b,0x0a);
 
-	// Set PLLI2S as then I2S clock source.
-	if(RCC->CFGR&RCC_CFGR_I2SSRC) RCC->CFGR&=~RCC_CFGR_I2SSRC;
+	// Disable I2S.
+ 	SPI3->I2SCFGR=0;
 
-	uint32_t plln=271;
-	uint32_t pllr=2;
-	uint32_t i2sdiv=6;
-	uint32_t i2sodd=0;
+	// I2S clock configuration
+	RCC->CFGR&=~RCC_CFGR_I2SSRC; // PLLI2S clock used as I2S clock source.
 	RCC->PLLI2SCFGR=(pllr<<28)|(plln<<6);
 
-	// Calculate the I2S source clock rate.
-/*	uint32_t plln=(RCC->PLLI2SCFGR&RCC_PLLI2SCFGR_PLLI2SN)>>6;
-	uint32_t pllr=(RCC->PLLI2SCFGR&RCC_PLLI2SCFGR_PLLI2SR)>>28;
-	uint32_t pllm=RCC->PLLCFGR&RCC_PLLCFGR_PLLM;
-	uint32_t i2sclk=((HSE_VALUE/pllm)*plln)/pllr;
+	// Enable PLLI2S and wait until it is ready.
+ 	RCC->CR|=RCC_CR_PLLI2SON;
+	while(!(RCC->CR&RCC_CR_PLLI2SRDY));
 
-	uint32_t audiorate=44100;
-	uint16_t div=((((i2sclk/256)*2)/audiorate)+1)/2;
-	uint16_t i2sodd=div&1;
-	uint16_t i2sdiv=div/2;
-if(i2sdiv<2) { i2sdiv=2; i2sodd=0; }*/
-
+	// Configure I2S.
 	SPI3->I2SPR=i2sdiv|(i2sodd<<8)|SPI_I2SPR_MCKOE;
  	SPI3->I2SCFGR=SPI_I2SCFGR_I2SMOD|SPI_I2SCFGR_I2SCFG_1|SPI_I2SCFGR_I2SE; // Master transmitter, Phillips mode, 16 bit values, clock polarity low, enable.
 }

@@ -36,7 +36,7 @@ int main()
 	InitializeUserButton();
 	InitializeAccelerometer();
 
-	InitializeAudio();
+	InitializeAudio(Audio44100HzSettings);
 	MakeNoise();
 
 	for(;;)

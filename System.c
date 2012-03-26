@@ -67,14 +67,6 @@ static void InitializeClocks()
 
 	// Wait until the main PLL is used as system clock source.
 	while((RCC->CFGR&RCC_CFGR_SWS)!=RCC_CFGR_SWS_PLL);
-
-	// I2S clock configuration
-	RCC->CFGR&=~RCC_CFGR_I2SSRC; // PLLI2S clock used as I2S clock source.
-	RCC->PLLI2SCFGR=(PLLI2S_N<<6)|(PLLI2S_R<<28); // Configure PLLI2S.
-
-	// Enable PLLI2S and wait until it is ready.
- 	RCC->CR|=RCC_CR_PLLI2SON;
-	while(!(RCC->CR&RCC_CR_PLLI2SRDY));
 }
 
 
