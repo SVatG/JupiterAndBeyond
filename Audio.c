@@ -94,7 +94,7 @@ void InitializeAudio(int plln,int pllr,int i2sdiv,int i2sodd)
 	WriteRegister(0x05,0x81); // Clock configuration: Auto detection.
 	WriteRegister(0x06,0x04); // Set slave mode and Philips audio standard.
 
-	SetAudioVolume(0x7f);
+	SetAudioVolume(0xff);
 
 	// Power on the codec.
 	WriteRegister(0x02,0x9e);
@@ -161,6 +161,7 @@ void PlayAudioWithCallback(AudioCallbackFunction *callback,void *context)
 
 	InstallInterruptHandler(DMA1_Stream7_IRQn,DMACompleteHandler);
 	EnableInterrupt(DMA1_Stream7_IRQn);
+	SetInterruptPriority(DMA1_Stream7_IRQn,4);
 
 	SPI3->CR2|=SPI_CR2_TXDMAEN; // Enable I2S TX DMA request.
 

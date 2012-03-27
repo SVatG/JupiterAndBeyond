@@ -8,9 +8,9 @@
 #include "RCC.h"
 #include "Audio.h"
 #include "Sprites.h"
-#include "BitBin.h"
 #include "Random.h"
 #include "Utils.h"
+#include "BitBin.h"
 
 #include "Graphics/Bitmap.h"
 #include "Graphics/Drawing.h"
@@ -27,7 +27,7 @@ static uint32_t sqrti(uint32_t n);
 
 
 static void AudioCallback(void *context,int buffer);
-int16_t *buffers[2]={ (int16_t *)0x2000fe00,(int16_t *)0x2000ff00 };
+int16_t *buffers[2]={ (int16_t *)0x2001fa00,(int16_t *)0x2001fc00 };
 extern BitBinNote *channels[8];
 
 
@@ -44,9 +44,9 @@ int main()
 	InitializeAccelerometer();
 
 	BitBinSong song;
-	InitializeBitBinSong(&song,BitBin44kTable,8,channels);
+	InitializeBitBinSong(&song,BitBin22kTable,8,channels);
 
-	InitializeAudio(Audio44100HzSettings);
+	InitializeAudio(Audio22050HzSettings);
 	PlayAudioWithCallback(AudioCallback,&song);
 
 	for(;;)
@@ -62,15 +62,14 @@ static void AudioCallback(void *context,int buffer)
 	BitBinSong *song=context;
 
 	int16_t *samples=buffers[buffer];
-	RenderBitBinSamples(song,64,samples);
-
-	for(int i=63;i>=0;i--)
+	RenderBitBinSamples(song,128,samples);
+	for(int i=128;i>=0;i--)
 	{
 		samples[2*i+0]=samples[i];
 		samples[2*i+1]=samples[i];
 	}
 
-	ProvideAudioBuffer(samples,128);
+	ProvideAudioBuffer(samples,256);
 }
 
 

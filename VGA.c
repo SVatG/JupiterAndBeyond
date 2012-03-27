@@ -2,6 +2,8 @@
 #include "GPIO.h"
 #include "RCC.h"
 
+#include <stdlib.h>
+
 static void InitializeState(uint8_t *framebuffer,int pixelsperrow);
 static void HSYNCHandler240();
 static void HSYNCHandler200();
@@ -12,8 +14,11 @@ static void DMACompleteHandler();
 static inline void StartPixelDMA();
 static inline void StopPixelDMA();
 
+static HBlankInterruptFunction *HBlankInterruptHandler;
+
 void InitializeVGAScreenMode240(uint8_t *framebuffer,int pixelsperrow,int pixelclock)
 {
+	HBlankInterruptHandler=NULL;
 	InitializeVGAPort();
 	InitializeState(framebuffer,pixelsperrow);
 	InitializePixelDMA(pixelclock);
@@ -22,6 +27,7 @@ void InitializeVGAScreenMode240(uint8_t *framebuffer,int pixelsperrow,int pixelc
 
 void InitializeVGAScreenMode200(uint8_t *framebuffer,int pixelsperrow,int pixelclock)
 {
+	HBlankInterruptHandler=NULL;
 	InitializeVGAPort();
 	InitializeState(framebuffer,pixelsperrow);
 	InitializePixelDMA(pixelclock);
@@ -30,6 +36,7 @@ void InitializeVGAScreenMode200(uint8_t *framebuffer,int pixelsperrow,int pixelc
 
 void InitializeVGAScreenMode175(uint8_t *framebuffer,int pixelsperrow,int pixelclock)
 {
+	HBlankInterruptHandler=NULL;
 	InitializeVGAPort();
 	InitializeState(framebuffer,pixelsperrow);
 	InitializePixelDMA(pixelclock);
@@ -69,15 +76,19 @@ void InitializeVGAHorizontalSync31kHz(InterruptHandler *handler)
 	TIM9->CCR1=633; // 168 MHz * 3.77 microseconds = 633.36 - sync pulse end
 	TIM9->CCR2=950; // 168 MHz * (3.77 + 1.89) microseconds = 950.88 - back porch end
 
-	// Enable HSYNC timer interrupt.
+	// Enable HSYNC timer interrupt and set highest priority.
 	InstallInterruptHandler(TIM1_BRK_TIM9_IRQn,handler);
 	EnableInterrupt(TIM1_BRK_TIM9_IRQn);
-	// TODO: Set high priority.
+	SetInterruptPriority(TIM1_BRK_TIM9_IRQn,0);
 
 	// Enable HSYNC timer.
 	TIM9->CR1|=TIM_CR1_CEN;
 }
 
+void SetHBlankInterruptHandler(HBlankInterruptFunction *handler)
+{
+	HBlankInterruptHandler=handler;
+}
 
 
 static uint32_t Line;
@@ -234,6 +245,7 @@ static void InitializePixelDMA(int pixelclock)
 	DMA2_Stream1->CR&=~DMA_SxCR_EN;
 	InstallInterruptHandler(DMA2_Stream1_IRQn,DMACompleteHandler);
 	EnableInterrupt(DMA2_Stream1_IRQn);
+	SetInterruptPriority(DMA2_Stream1_IRQn,0);
 }
 
 static void DMACompleteHandler()
@@ -242,7 +254,7 @@ static void DMACompleteHandler()
 	DMA2->LIFCR|=DMA_LIFCR_CTCIF1; // Clear interrupt flag.
 	StopPixelDMA();
 
-	// TODO: HBlank interrupt happens here.
+	if(HBlankInterruptHandler) HBlankInterruptHandler();
 }
 
 static inline void StartPixelDMA()

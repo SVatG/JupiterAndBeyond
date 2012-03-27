@@ -70,24 +70,25 @@ static void InitializeBitBinChannel(BitBinChannel *channel,BitBinNote *notes)
 
 
 
+int16_t NextBitBinSample(BitBinSong *self)
+{
+	MoveSongToNextSample(self);
+
+	int32_t amplitude=0;
+	for(int i=0;i<self->numchannels;i++)
+	{
+		amplitude+=ChannelAmplitude(&self->channels[i]);
+	}
+
+	amplitude>>=12+3;
+	if(amplitude>32767) return 32767;
+	else if(amplitude<-32768) return -32768;
+	else return amplitude;
+}
+
 void RenderBitBinSamples(BitBinSong *self,int numsamples,int16_t *samples)
 {
-	for(int i=0;i<numsamples;i++)
-	{
-		MoveSongToNextSample(self);
-
-		int32_t amplitude=0;
-		for(int i=0;i<self->numchannels;i++)
-		{
-			amplitude+=ChannelAmplitude(&self->channels[i]);
-		}
-
-		amplitude>>=12+3;
-		if(amplitude>32767) amplitude=32767;
-		else if(amplitude<-32768) amplitude=-32768;
-
-		*samples++=amplitude;
-	}
+	for(int i=0;i<numsamples;i++) *samples++=NextBitBinSample(self);
 }
 
 static void MoveSongToNextSample(BitBinSong *self)

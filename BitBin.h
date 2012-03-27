@@ -44,6 +44,7 @@ typedef struct BitBinSong
 } BitBinSong;
 
 void InitializeBitBinSong(BitBinSong *self,const uint32_t *phasetable,int numchannels,BitBinNote **notes);
+int16_t NextBitBinSample(BitBinSong *self);
 void RenderBitBinSamples(BitBinSong *self,int numsamples,int16_t *samples);
 
 static inline int CurrentBitBinRow(BitBinSong *self) { return self->currentrow; }

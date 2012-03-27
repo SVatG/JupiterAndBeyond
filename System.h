@@ -24,4 +24,9 @@ static inline void DisableInterrupt(IRQn_Type interrupt)
 	NVIC->ISER[regindex]&=~(1<<shift);
 }
 
+static inline void SetInterruptPriority(IRQn_Type interrupt,int priority)
+{
+	NVIC->IP[interrupt]=priority<<4;
+}
+
 #endif

@@ -1,6 +1,6 @@
 #include "BitBin.h"
 
-BitBinNote channel0[128]=
+const BitBinNote channel0[128]=
 {
 	{ 0x3f, 2,~0,'D',0x0C },
 	{ 0xff,~0,~0,'D',0x00 },
@@ -132,7 +132,7 @@ BitBinNote channel0[128]=
 	{ 0xff,~0,~0,'D',0x00 },
 };
 
-BitBinNote channel1[128]=
+const BitBinNote channel1[128]=
 {
 	{ 0xfe, 4,~0, ~0,0x00 },
 	{ 0xff,~0,~0, ~0,0x00 },
@@ -264,7 +264,7 @@ BitBinNote channel1[128]=
 	{ 0xff,~0,~0,'D',0x00 },
 };
 
-BitBinNote channel2[128]=
+const BitBinNote channel2[128]=
 {
 	{ 0x18, 4,~0, ~0,0x00 },
 	{ 0xff,~0,~0, ~0,0x00 },
@@ -396,7 +396,7 @@ BitBinNote channel2[128]=
 	{ 0xff,~0,~0,'D',0x00 },
 };
 
-BitBinNote channel3[128]=
+const BitBinNote channel3[128]=
 {
 	{ 0xfe, 4,~0, ~0,0x00 },
 	{ 0xff,~0,~0, ~0,0x00 },
@@ -528,7 +528,7 @@ BitBinNote channel3[128]=
 	{ 0xff,~0,~0,'D',0x00 },
 };
 
-BitBinNote channel4[128]=
+const BitBinNote channel4[128]=
 {
 	{ 0xfe, 4,~0, ~0,0x00 },
 	{ 0xff,~0,~0, ~0,0x00 },
@@ -660,7 +660,7 @@ BitBinNote channel4[128]=
 	{ 0xff,~0,~0,'D',0x00 },
 };
 
-BitBinNote channel5[128]=
+const BitBinNote channel5[128]=
 {
 	{ 0xff,~0,~0,'M',0x11 },
 	{ 0xff,~0,~0, ~0,0x00 },
@@ -792,7 +792,7 @@ BitBinNote channel5[128]=
 	{ 0xff,~0,~0,'D',0x00 },
 };
 
-BitBinNote channel6[128]=
+const BitBinNote channel6[128]=
 {
 	{ 0x54, 5,15,'E',0x01 },
 	{ 0xff,~0,22,'E',0x11 },
@@ -924,7 +924,7 @@ BitBinNote channel6[128]=
 	{ 0xff,~0,~0, ~0,0x00 },
 };
 
-BitBinNote channel7[128]=
+const BitBinNote channel7[128]=
 {
 	{ 0xff,~0,~0,'M',0x11 },
 	{ 0xff,~0,~0, ~0,0x00 },
@@ -1056,7 +1056,7 @@ BitBinNote channel7[128]=
 	{ 0xff,~0,~0, ~0,0x00 },
 };
 
-BitBinNote *channels[8]=
+const BitBinNote * const channels[8]=
 {
 	channel0,
 	channel1,

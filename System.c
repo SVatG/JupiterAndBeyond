@@ -33,6 +33,9 @@ void InitializeSystem()
 
 	// Set vector table offset to flash memory start.
 	SCB->VTOR=FLASH_BASE;
+
+	// Set up interrupts to 4 bits preemption priority.
+	SCB->AIRCR=0x05FA0000|0x300;
 }
 
 static void InitializeClocks()

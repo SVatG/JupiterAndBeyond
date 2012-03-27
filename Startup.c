@@ -1,6 +1,6 @@
 #include <stdint.h>
 
-static uint8_t stack[1024];
+static uint8_t stack[8192];
 
 extern uint32_t _data[];
 extern uint32_t _idata[];

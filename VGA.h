@@ -6,6 +6,8 @@
 
 #include <stdint.h>
 
+typedef void HBlankInterruptFunction(void);
+
 void InitializeVGAScreenMode240(uint8_t *framebuffer,int pixelsperrow,int pixelclock);
 void InitializeVGAScreenMode200(uint8_t *framebuffer,int pixelsperrow,int pixelclock);
 void InitializeVGAScreenMode175(uint8_t *framebuffer,int pixelsperrow,int pixelclock);
