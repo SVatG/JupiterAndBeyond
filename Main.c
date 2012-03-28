@@ -152,11 +152,8 @@ static void Rotozoom()
 		dx=imul(scale,icos(angle));
 		dy=imul(scale,isin(angle));
 
-		//dx&=0xffffff80;
-		dy&=0xffffff80;
-
 		x0=-dx*320-dy*240;
-		y0=-dy*320+dx*240;
+		y0=-(dy&0xffffff80)*320+dx*240;
 		Delta=PackCoordinates(dx,dy);
 
 		for(int y=0;y<480;y++)
@@ -176,9 +173,12 @@ static void RotozoomHSYNCHandler()
 		case VGAHorizontalSyncStartInterrupt:
 			LowerVGAHSYNCLine();
 
-			x0+=dy;
-			y0-=dx;
-			Pos=PackCoordinates(x0,y0);
+			if(Line<480)
+			{
+				x0+=dy;
+				y0-=dx;
+				Pos=PackCoordinates(x0,y0);
+			}
 		break;
 
 		case VGAHorizontalSyncEndInterrupt:
