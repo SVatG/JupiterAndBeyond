@@ -44,7 +44,8 @@ int main()
 	InitializeAccelerometer();
 
 	BitBinSong song;
-	InitializeBitBinSong(&song,BitBin22kTable,8,channels);
+	InitializeBitBinSong(&song,BitBin22kTable,8,128,channels);
+	SetBitBinSongLoops(&song,true);
 
 	InitializeAudio(Audio22050HzSettings);
 	PlayAudioWithCallback(AudioCallback,&song);
