@@ -46,6 +46,8 @@ int main()
 	InitializeAudio(Audio22050HzSettings);
 	PlayAudioWithCallback(AudioCallback,&song);
 
+	InitializeVGA();
+
 	for(;;)
 	{
 		Starfield();
@@ -124,8 +126,7 @@ static void Rotozoom()
 		}
 	}
 
-	InitializeVGAPort();
-	InitializeVGAHorizontalSync31kHz(RotozoomHSyncHandler);
+	SetVGAHorizontalSync31kHz(RotozoomHSyncHandler);
 
 	SetLEDs(0x5);
 
@@ -225,7 +226,6 @@ static void Starfield()
 	memset(framebuffer1,0,320*200);
 	memset(framebuffer2,0,320*200);
 
-	InitializeVGAScreenMode400();
 	SetVGAScreenMode320x200(framebuffer1);
 
 	InitializeLEDFlow();
@@ -382,7 +382,6 @@ static void Epileptor()
 		replacements[palette[i]]=palette[(i+1)%sizeof(palette)];
 	}
 
-	InitializeVGAScreenMode400();
 	SetVGAScreenMode320x200(framebuffer1);
 
 	Bitmap frame1,frame2;

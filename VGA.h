@@ -14,9 +14,7 @@ extern uint32_t VGAFrameBufferAddress;
 extern uint32_t VGACurrentLineAddress;
 extern uint32_t VGAPixelsPerRow;
 
-void InitializeVGAScreenMode480();
-void InitializeVGAScreenMode400();
-void InitializeVGAScreenMode350();
+void InitializeVGA();
 
 void SetBlankVGAScreenMode480();
 void SetBlankVGAScreenMode400();
@@ -55,8 +53,6 @@ static inline uint32_t VGAFrameCounter() { return VGAFrame; }
 
 // Functions for implementing your own video driving code.
 
-void InitializeVGAPort();
-void InitializeVGAHorizontalSync31kHz(InterruptHandler *handler);
 void SetVGAHorizontalSync31kHz(InterruptHandler *handler);
 
 #define VGAHorizontalSyncStartInterruptFlag 1 // Overflow interrupt
