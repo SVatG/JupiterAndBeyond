@@ -23,13 +23,9 @@ static void InitializeLEDFlow();
 static void RunLEDFlow();
 static void Epileptor();
 
-static uint32_t sqrti(uint32_t n);
-
-
 static void AudioCallback(void *context,int buffer);
 int16_t *buffers[2]={ (int16_t *)0x2001fa00,(int16_t *)0x2001fc00 };
 extern BitBinNote *channels[8];
-
 
 int main()
 {
@@ -395,28 +391,6 @@ static void RunLEDFlow()
 
 	SetLEDs(leds);
 }
-
-
-
-static uint32_t sqrti(uint32_t n)
-{
-	uint32_t s,t;
-
-	#define sqrtBit(k) \
-	t = s+(1UL<<(k-1)); t <<= k+1; if (n >= t) { n -= t; s |= 1UL<<k; }
-
-	s=0;
-	if(n>=1<<30) { n-=1<<30; s=1<<15; }
-	sqrtBit(14); sqrtBit(13); sqrtBit(12); sqrtBit(11); sqrtBit(10);
-	sqrtBit(9); sqrtBit(8); sqrtBit(7); sqrtBit(6); sqrtBit(5);
-	sqrtBit(4); sqrtBit(3); sqrtBit(2); sqrtBit(1);
-	if(n>s<<1) s|=1;
-
-	#undef sqrtBit
-
-	return s;
-}
-
 
 
 

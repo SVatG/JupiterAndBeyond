@@ -51,8 +51,27 @@ static inline int32_t idiv(int32_t num,int32_t den) { return (int32_t)idiv64(num
 static inline int64_t isq64(int64_t val) { return imul64(val,val); }
 static inline int32_t isq(int32_t val) { return imul(val,val); }
 
-static inline int64_t isqrt64(int64_t val) { return sqrt(((double)val)*4096.0); }
-static inline int32_t isqrt(int32_t val) { return sqrt(((double)val)*4096.0); }
+static uint32_t sqrti(uint32_t n)
+{
+	uint32_t s,t;
+
+	#define sqrtBit(k) \
+	t = s+(1UL<<(k-1)); t <<= k+1; if (n >= t) { n -= t; s |= 1UL<<k; }
+
+	s=0;
+	if(n>=1<<30) { n-=1<<30; s=1<<15; }
+	sqrtBit(14); sqrtBit(13); sqrtBit(12); sqrtBit(11); sqrtBit(10);
+	sqrtBit(9); sqrtBit(8); sqrtBit(7); sqrtBit(6); sqrtBit(5);
+	sqrtBit(4); sqrtBit(3); sqrtBit(2); sqrtBit(1);
+	if(n>s<<1) s|=1;
+
+	#undef sqrtBit
+
+	return s;
+}
+
+static inline int64_t isqrt64(int64_t val) { return sqrti((uint64_t)val<<12); }
+static inline int32_t isqrt(int32_t val) { return sqrti((uint64_t)val<<12); }
 
 static inline int64_t inorm64(int64_t a,int64_t b) { return sqrt((double)a*(double)a+(double)b*(double)b); }
 static inline int32_t inorm(int32_t a,int32_t b) { return sqrt((double)a*(double)a+(double)b*(double)b); }
