@@ -19,6 +19,7 @@
 
 #include <arm_math.h>
 
+static void PlasmaZoom();
 static void Fields();
 static void Rotozoom();
 static void Starfield();
@@ -53,6 +54,7 @@ int main()
 
 	for(;;)
 	{
+		PlasmaZoom();
 		Fields();
 		Starfield();
 		Rotozoom();
@@ -60,6 +62,109 @@ int main()
 	}
 }
 
+
+
+static void PlasmaZoom()
+{
+	uint8_t *framebuffer1=(uint8_t *)0x20000000;
+	uint8_t *framebuffer2=(uint8_t *)0x20010000;
+	memset(framebuffer1,0,320*200);
+	memset(framebuffer2,0,320*200);
+
+	SetVGAScreenMode320x200(framebuffer1);
+
+	int16_t offsets[320];
+
+	for(int x=0;x<320;x++) offsets[x]=-1;
+
+	for(int x=0;x<320;x++)
+	{
+		int dx=2*x-320+1;
+		int newdx=dx*5/4;
+		int newx=(newdx+320-1)/2;
+		if(newx>=0 && newx<320) offsets[newx]=x;
+	}
+
+	int t=0;
+	while(!UserButtonState())
+	{
+		WaitVBL();
+
+		uint8_t *source,*destination;
+		if(t&1)
+		{
+			source=framebuffer1;
+			destination=framebuffer2;
+			SetFrameBuffer(framebuffer1);
+		}
+		else
+		{
+			source=framebuffer2;
+			destination=framebuffer1;
+			SetFrameBuffer(framebuffer2);
+		}
+
+		//for(int i=0;i<100;i++) source[RandomInteger()%(320*200)]=RandomInteger();
+
+		uint32_t *destination32=(uint32_t *)destination;
+
+		int sourcerow=200/2*1/5;
+
+		for(int y=0;y<200;y++)
+		{
+			if((y+t)%5==0) { destination+=320; continue; }
+
+			uint8_t *sourceptr=&source[sourcerow*320+320/2*1/5];
+			uint8_t *destinationend=destination+320;
+
+			for(int i=0;i<t%5;i++) *destination++=*sourceptr++;
+
+			while(destination<destinationend)
+			{
+				for(int i=0;i<4;i++) *destination++=*sourceptr++;
+				uint8_t p1=sourceptr[-1];
+				uint8_t p2=sourceptr[0];
+				uint8_t halfp1=(p1>>1)&PixelAllButHighBits;
+                uint8_t halfp2=(p2>>1)&PixelAllButHighBits;
+                uint8_t carry=p1&p2&PixelLowBits;
+   				uint32_t r=RandomInteger();
+   				r&=r>>16;
+   				//r&=r>>8;
+   				r&=PixelLowBits;
+                *destination++=halfp1+halfp2+carry+r;
+			}
+			destination=destinationend;
+
+			sourcerow++;
+		}
+
+		for(int y=0;y<200;y++)
+		{
+			if((y+t)%5!=0) { destination32+=320/4; continue; }
+
+			uint32_t *sourceptr1=(uint32_t *)&destination32[-1*320/4];
+			uint32_t *sourceptr2=(uint32_t *)&destination32[1*320/4];
+
+			for(int i=0;i<320/4;i++)
+			{
+				uint32_t p1=*sourceptr1++;
+				uint32_t p2=*sourceptr2++;
+				uint32_t halfp1=(p1>>1)&((uint32_t)PixelAllButHighBits*0x01010101);
+                uint32_t halfp2=(p2>>1)&((uint32_t)PixelAllButHighBits*0x01010101);
+                uint32_t carry=p1&p2&(PixelLowBits*0x01010101);
+   				uint32_t r=RandomInteger();
+				r&=RandomInteger();
+				//r&=RandomInteger();
+   				r&=PixelLowBits*0x01010101;
+                *destination32++=halfp1+halfp2+carry+r;
+			}
+		}
+
+		t++;
+	}
+
+	while(UserButtonState());
+}
 
 
 
