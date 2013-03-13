@@ -17,7 +17,7 @@
 // 20.12 fixed-point operations
 //
 
-#define Fix(val) ((val)*4096)
+#define Fix(val) ((int32_t)((val)*4096))
 #define F(val) Fix(val)
 
 #define FixSqrt2 5793

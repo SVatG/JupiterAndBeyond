@@ -2,3 +2,5 @@ glob:*.elf
 glob:*.bin
 glob:Build
 glob:.DS_Store
+glob:MakeRayArray
+

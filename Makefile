@@ -24,9 +24,11 @@ C_FILES =	Accelerometer.c \
 		Audio.c \
 		BitBin.c \
 		Button.c \
+		Fields.c \
 		LED.c \
 		Main.c \
 		Random.c \
+		RayArray.c \
 		Sprites.c \
 		Startup.c \
 		System.c \

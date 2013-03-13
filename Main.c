@@ -12,11 +12,14 @@
 #include "Utils.h"
 #include "BitBin.h"
 
+#include "Fields.h"
+
 #include "Graphics/Bitmap.h"
 #include "Graphics/Drawing.h"
 
 #include <arm_math.h>
 
+static void Fields();
 static void Rotozoom();
 static void Starfield();
 static void InitializeLEDFlow();
@@ -50,11 +53,62 @@ int main()
 
 	for(;;)
 	{
+		Fields();
 		Starfield();
 		Rotozoom();
 		Epileptor();
 	}
 }
+
+
+
+
+static void Fields()
+{
+	InitializeField();
+
+	uint8_t *framebuffer1=(uint8_t *)0x20000000;
+	uint8_t *framebuffer2=(uint8_t *)0x20010000;
+	memset(framebuffer1,0,212*133);
+	memset(framebuffer2,0,212*133);
+
+	SetVGAScreenMode212x133(framebuffer1);
+
+	for(int t=0;;t++)
+	{
+		if(UserButtonState()) break;
+
+		SetLEDs(t>>3);
+
+		WaitVBL();
+
+		uint8_t *framebuffer;
+		if(t&1)
+		{
+			framebuffer=framebuffer2;
+			SetFrameBuffer(framebuffer1);
+		}
+		else
+		{
+			framebuffer=framebuffer1;
+			SetFrameBuffer(framebuffer2);
+		}
+
+		switch((t>>8)&3)
+		{
+			case 0: DrawField(framebuffer,t); break;
+			case 1: DrawField2(framebuffer,t); break;
+			case 2: DrawField3(framebuffer,t); break;
+			case 3: DrawField4(framebuffer,t); break;
+		}
+	}
+
+	while(UserButtonState());
+}
+
+
+
+
 
 static void AudioCallback(void *context,int buffer)
 {
