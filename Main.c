@@ -108,20 +108,27 @@ static void PlasmaZoom()
 
 		uint32_t *destination32=(uint32_t *)destination;
 
-		int sourcerow=200/2*1/5;
+		#define Ratio 16
+
+		int xcenter=320/2+isin(t*20)/100;
+		int ycenter=200/2+icos(t*20)/100;
+		int yoffset=0; //RandomInteger()%Ratio;
+		int xoffset=0; //RandomInteger()%Ratio;
+
+		int sourcerow=ycenter/Ratio;
 
 		for(int y=0;y<200;y++)
 		{
-			if((y+t)%5==0) { destination+=320; continue; }
+			if((y+yoffset)%Ratio==0) { destination+=320; continue; }
 
-			uint8_t *sourceptr=&source[sourcerow*320+320/2*1/5];
+			uint8_t *sourceptr=&source[sourcerow*320+xcenter/Ratio];
 			uint8_t *destinationend=destination+320;
 
-			for(int i=0;i<t%5;i++) *destination++=*sourceptr++;
+			for(int i=0;i<xoffset;i++) *destination++=*sourceptr++;
 
 			while(destination<destinationend)
 			{
-				for(int i=0;i<4;i++) *destination++=*sourceptr++;
+				for(int i=0;i<Ratio-1;i++) *destination++=*sourceptr++;
 				uint8_t p1=sourceptr[-1];
 				uint8_t p2=sourceptr[0];
 				uint8_t halfp1=(p1>>1)&PixelAllButHighBits;
@@ -140,7 +147,7 @@ static void PlasmaZoom()
 
 		for(int y=0;y<200;y++)
 		{
-			if((y+t)%5!=0) { destination32+=320/4; continue; }
+			if((y+yoffset)%Ratio!=0) { destination32+=320/4; continue; }
 
 			uint32_t *sourceptr1=(uint32_t *)&destination32[-1*320/4];
 			uint32_t *sourceptr2=(uint32_t *)&destination32[1*320/4];
