@@ -108,12 +108,12 @@ static void PlasmaZoom()
 
 		uint32_t *destination32=(uint32_t *)destination;
 
-		#define Ratio 16
+		#define Ratio 6
 
 		int xcenter=320/2+isin(t*20)/100;
 		int ycenter=200/2+icos(t*20)/100;
-		int yoffset=0; //RandomInteger()%Ratio;
-		int xoffset=0; //RandomInteger()%Ratio;
+		int yoffset=RandomInteger()%Ratio;
+		int xoffset=RandomInteger()%Ratio;
 
 		int sourcerow=ycenter/Ratio;
 
