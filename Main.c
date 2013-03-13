@@ -73,16 +73,10 @@ static void PlasmaZoom()
 
 	SetVGAScreenMode320x200(framebuffer1);
 
-	int16_t offsets[320];
-
-	for(int x=0;x<320;x++) offsets[x]=-1;
-
-	for(int x=0;x<320;x++)
+	static uint8_t nextcolour[256];
+	for(int i=0;i<256;i++)
 	{
-		int dx=2*x-320+1;
-		int newdx=dx*5/4;
-		int newx=(newdx+320-1)/2;
-		if(newx>=0 && newx<320) offsets[newx]=x;
+		nextcolour[i]=RGB(ExtractRed(i)+0x20,ExtractGreen(i)+0x20,ExtractBlue(i)+0x40);
 	}
 
 	int t=0;
@@ -108,10 +102,10 @@ static void PlasmaZoom()
 
 		uint32_t *destination32=(uint32_t *)destination;
 
-		#define Ratio 6
+		#define Ratio 16
 
-		int xcenter=320/2+isin(t*20)/100;
-		int ycenter=200/2+icos(t*20)/100;
+		int xcenter=320/2+isin(t*20)/500;
+		int ycenter=200/2+icos(t*20)/500;
 		int yoffset=RandomInteger()%Ratio;
 		int xoffset=RandomInteger()%Ratio;
 
@@ -132,13 +126,14 @@ static void PlasmaZoom()
 				uint8_t p1=sourceptr[-1];
 				uint8_t p2=sourceptr[0];
 				uint8_t halfp1=(p1>>1)&PixelAllButHighBits;
-                uint8_t halfp2=(p2>>1)&PixelAllButHighBits;
-                uint8_t carry=p1&p2&PixelLowBits;
-   				uint32_t r=RandomInteger();
-   				r&=r>>16;
-   				//r&=r>>8;
-   				r&=PixelLowBits;
-                *destination++=halfp1+halfp2+carry+r;
+				uint8_t halfp2=(p2>>1)&PixelAllButHighBits;
+				uint8_t carry=p1&p2&PixelLowBits;
+				uint8_t new=halfp1+halfp2+carry;
+				uint32_t r=RandomInteger();
+				//r&=r>>16;
+				//r&=r>>8;
+				if(r&1) new=nextcolour[new];
+				*destination++=new;
 			}
 			destination=destinationend;
 
@@ -157,13 +152,37 @@ static void PlasmaZoom()
 				uint32_t p1=*sourceptr1++;
 				uint32_t p2=*sourceptr2++;
 				uint32_t halfp1=(p1>>1)&((uint32_t)PixelAllButHighBits*0x01010101);
-                uint32_t halfp2=(p2>>1)&((uint32_t)PixelAllButHighBits*0x01010101);
-                uint32_t carry=p1&p2&(PixelLowBits*0x01010101);
-   				uint32_t r=RandomInteger();
-				r&=RandomInteger();
+				uint32_t halfp2=(p2>>1)&((uint32_t)PixelAllButHighBits*0x01010101);
+				uint32_t carry=p1&p2&(PixelLowBits*0x01010101);
+				uint32_t new=halfp1+halfp2+carry;
+				uint32_t r=RandomInteger();
 				//r&=RandomInteger();
-   				r&=PixelLowBits*0x01010101;
-                *destination32++=halfp1+halfp2+carry+r;
+if(r&1)
+{
+	uint8_t c=(new>>0)&0xff;
+	uint8_t nextc=nextcolour[c];
+	new=(new&0xffffff00)|(c<<0);
+}
+if(r&2)
+{
+	uint8_t c=(new>>8)&0xff;
+	uint8_t nextc=nextcolour[c];
+	new=(new&0xffffff00)|(c<<8);
+}
+if(r&4)
+{
+	uint8_t c=(new>>16)&0xff;
+	uint8_t nextc=nextcolour[c];
+	new=(new&0xffffff00)|(c<<16);
+}
+if(r&8)
+{
+	uint8_t c=(new>>24)&0xff;
+	uint8_t nextc=nextcolour[c];
+	new=(new&0xffffff00)|(c<<24);
+}
+
+				*destination32++=new;
 			}
 		}
 
