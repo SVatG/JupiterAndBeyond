@@ -103,7 +103,7 @@ static void PlasmaZoom()
 		uint8_t *destination2=destination;
 		uint32_t *destination32=(uint32_t *)destination;
 
-		#define Ratio 16
+		#define Ratio 32
 
 		int xskips[320/Ratio+1]={0};
 		int yskips[200/Ratio+1]={0};
@@ -140,13 +140,12 @@ static void PlasmaZoom()
 					uint8_t p2=sourceptr[0];
 					uint8_t halfp1=(p1>>1)&PixelAllButHighBits;
 					uint8_t halfp2=(p2>>1)&PixelAllButHighBits;
-					uint8_t carry=p1&p2&PixelLowBits;
-					uint8_t new=halfp1+halfp2+carry;
+                	uint8_t carry=p1&p2&PixelLowBits;
 					uint32_t r=RandomInteger();
-					//r&=r>>16;
+					r&=r>>16;
 					//r&=r>>8;
-					if(r&1) new=nextcolour[new];
-					*destination++=new;
+					r&=PixelLowBits;
+					*destination++=halfp1+halfp2+carry+r;
 				}
 			}
 
@@ -169,43 +168,19 @@ static void PlasmaZoom()
 				uint32_t halfp1=(p1>>1)&((uint32_t)PixelAllButHighBits*0x01010101);
 				uint32_t halfp2=(p2>>1)&((uint32_t)PixelAllButHighBits*0x01010101);
 				uint32_t carry=p1&p2&(PixelLowBits*0x01010101);
-				uint32_t new=halfp1+halfp2+carry;
 				uint32_t r=RandomInteger();
+				r&=RandomInteger();
 				//r&=RandomInteger();
-if(r&1)
-{
-	uint8_t c=(new>>0)&0xff;
-	uint8_t nextc=nextcolour[c];
-	new=(new&0xffffff00)|(c<<0);
-}
-if(r&2)
-{
-	uint8_t c=(new>>8)&0xff;
-	uint8_t nextc=nextcolour[c];
-	new=(new&0xffffff00)|(c<<8);
-}
-if(r&4)
-{
-	uint8_t c=(new>>16)&0xff;
-	uint8_t nextc=nextcolour[c];
-	new=(new&0xffffff00)|(c<<16);
-}
-if(r&8)
-{
-	uint8_t c=(new>>24)&0xff;
-	uint8_t nextc=nextcolour[c];
-	new=(new&0xffffff00)|(c<<24);
-}
-
-				*destination32++=new;
+				r&=PixelLowBits*0x01010101;
+				*destination32++=halfp1+halfp2+carry+r;
 			}
 		}
 
-		for(int y=0;y<200;y++)
+/*		for(int y=0;y<200;y++)
 		for(int x=320/2-8;x<320/2+8;x++)
 		{
 			destination2[x+y*320]=0;
-		}
+		}*/
 
 		t++;
 	}
