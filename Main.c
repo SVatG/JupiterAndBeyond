@@ -100,49 +100,64 @@ static void PlasmaZoom()
 
 		//for(int i=0;i<100;i++) source[RandomInteger()%(320*200)]=RandomInteger();
 
+		uint8_t *destination2=destination;
 		uint32_t *destination32=(uint32_t *)destination;
 
 		#define Ratio 16
 
-		int xcenter=320/2+isin(t*20)/500;
-		int ycenter=200/2+icos(t*20)/500;
-		int yoffset=RandomInteger()%Ratio;
-		int xoffset=RandomInteger()%Ratio;
+		int xskips[320/Ratio+1]={0};
+		int yskips[200/Ratio+1]={0};
+
+		for(int i=0;i<320/Ratio;i++) xskips[i]=i*Ratio+RandomInteger()%Ratio;
+		for(int i=0;i<200/Ratio;i++) yskips[i]=i*Ratio+RandomInteger()%Ratio;
+		if(yskips[0]==0) yskips[0]=1;
+		if(yskips[200/Ratio-1]==199) yskips[200/Ratio-1]=200;
+
+		int xcenter=320/2;//+isin(t*20)/500;
+		int ycenter=200/2;//+icos(t*20)/500;
 
 		int sourcerow=ycenter/Ratio;
 
+		int *yskipptr=yskips;
 		for(int y=0;y<200;y++)
 		{
-			if((y+yoffset)%Ratio==0) { destination+=320; continue; }
+			if(y==*yskipptr) { yskipptr++; destination+=320; continue; }
 
 			uint8_t *sourceptr=&source[sourcerow*320+xcenter/Ratio];
-			uint8_t *destinationend=destination+320;
+			int *xskipptr=xskips;
 
-			for(int i=0;i<xoffset;i++) *destination++=*sourceptr++;
-
-			while(destination<destinationend)
+			for(int x=0;x<320;x++)
 			{
-				for(int i=0;i<Ratio-1;i++) *destination++=*sourceptr++;
-				uint8_t p1=sourceptr[-1];
-				uint8_t p2=sourceptr[0];
-				uint8_t halfp1=(p1>>1)&PixelAllButHighBits;
-				uint8_t halfp2=(p2>>1)&PixelAllButHighBits;
-				uint8_t carry=p1&p2&PixelLowBits;
-				uint8_t new=halfp1+halfp2+carry;
-				uint32_t r=RandomInteger();
-				//r&=r>>16;
-				//r&=r>>8;
-				if(r&1) new=nextcolour[new];
-				*destination++=new;
+				if(x!=*xskipptr)
+				{
+					*destination++=*sourceptr++;
+				}
+				else
+				{
+					xskipptr++;
+
+					uint8_t p1=sourceptr[-1];
+					uint8_t p2=sourceptr[0];
+					uint8_t halfp1=(p1>>1)&PixelAllButHighBits;
+					uint8_t halfp2=(p2>>1)&PixelAllButHighBits;
+					uint8_t carry=p1&p2&PixelLowBits;
+					uint8_t new=halfp1+halfp2+carry;
+					uint32_t r=RandomInteger();
+					//r&=r>>16;
+					//r&=r>>8;
+					if(r&1) new=nextcolour[new];
+					*destination++=new;
+				}
 			}
-			destination=destinationend;
 
 			sourcerow++;
 		}
 
+		yskipptr=yskips;
 		for(int y=0;y<200;y++)
 		{
-			if((y+yoffset)%Ratio!=0) { destination32+=320/4; continue; }
+			if(y!=*yskipptr) { destination32+=320/4; continue; }
+			yskipptr++;
 
 			uint32_t *sourceptr1=(uint32_t *)&destination32[-1*320/4];
 			uint32_t *sourceptr2=(uint32_t *)&destination32[1*320/4];
@@ -184,6 +199,12 @@ if(r&8)
 
 				*destination32++=new;
 			}
+		}
+
+		for(int y=0;y<200;y++)
+		for(int x=320/2-8;x<320/2+8;x++)
+		{
+			destination2[x+y*320]=0;
 		}
 
 		t++;
