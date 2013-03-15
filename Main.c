@@ -116,6 +116,8 @@ static void PlasmaZoom()
 		int xcenter=320/2;//+isin(t*20)/500;
 		int ycenter=200/2;//+icos(t*20)/500;
 
+		source[xcenter/Ratio*Ratio+ycenter/Ratio*Ratio*320]=0;
+
 		int sourcerow=ycenter/Ratio;
 
 		int *yskipptr=yskips;
@@ -143,9 +145,10 @@ static void PlasmaZoom()
                 	uint8_t carry=p1&p2&PixelLowBits;
 					uint32_t r=RandomInteger();
 					r&=r>>16;
-					//r&=r>>8;
+					r&=r>>8;
+					r&=RandomInteger();
 					r&=PixelLowBits;
-					*destination++=halfp1+halfp2+carry+r;
+					*destination++=(halfp1+halfp2+carry)|r;
 				}
 			}
 
@@ -170,9 +173,10 @@ static void PlasmaZoom()
 				uint32_t carry=p1&p2&(PixelLowBits*0x01010101);
 				uint32_t r=RandomInteger();
 				r&=RandomInteger();
-				//r&=RandomInteger();
-				r&=PixelLowBits*0x01010101;
-				*destination32++=halfp1+halfp2+carry+r;
+				r&=RandomInteger();
+				r&=RandomInteger();
+				//r&=PixelLowBits*0x01010101;
+				*destination32++=(halfp1+halfp2+carry)|r;
 			}
 		}
 
