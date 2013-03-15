@@ -103,13 +103,13 @@ static void PlasmaZoom()
 		uint8_t *destination2=destination;
 		uint32_t *destination32=(uint32_t *)destination;
 
-		#define Ratio 32
+		#define Ratio 16
 
 		int xskips[320/Ratio+1]={0};
 		int yskips[200/Ratio+1]={0};
 
-		for(int i=0;i<320/Ratio;i++) xskips[i]=i*Ratio+RandomInteger()%Ratio;
-		for(int i=0;i<200/Ratio;i++) yskips[i]=i*Ratio+RandomInteger()%Ratio;
+		for(int i=0;i<320/Ratio;i++) xskips[i]=i*Ratio+(t*9)%Ratio;//RandomInteger()%Ratio;
+		for(int i=0;i<200/Ratio;i++) yskips[i]=i*Ratio+((t+6)*9)%Ratio;//RandomInteger()%Ratio;
 		if(yskips[0]==0) yskips[0]=1;
 		if(yskips[200/Ratio-1]==199) yskips[200/Ratio-1]=200;
 
