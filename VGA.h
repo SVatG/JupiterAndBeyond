@@ -157,7 +157,7 @@ static inline int HandleVGAHSync400_60Hz()
 		}
 		else if(VGALine<440)
 		{
-			return VGALine-39;
+			return VGALine-41;
 		}
 		else if(VGALine==440)
 		{
