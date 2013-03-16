@@ -79,6 +79,8 @@ static void PlasmaZoom()
 		nextcolour[i]=RGB(ExtractRed(i)+0x20,ExtractGreen(i)+0x20,ExtractBlue(i)+0x40);
 	}
 
+	uint32_t colour=(RandomInteger()&0xff)*0x01010101;
+
 	int t=0;
 	while(!UserButtonState())
 	{
@@ -99,6 +101,7 @@ static void PlasmaZoom()
 		}
 
 		//for(int i=0;i<100;i++) source[RandomInteger()%(320*200)]=RandomInteger();
+		if((RandomInteger()&63)==0) colour=(RandomInteger()&0xff)*0x01010101;
 
 		uint8_t *destination2=destination;
 		uint32_t *destination32=(uint32_t *)destination;
@@ -147,8 +150,8 @@ static void PlasmaZoom()
 					r&=r>>16;
 					r&=r>>8;
 					r&=RandomInteger();
-					r&=PixelLowBits;
-					*destination++=(halfp1+halfp2+carry)|r;
+					//r&=PixelLowBits;
+					*destination++=(halfp1+halfp2+carry)|(r&colour);
 				}
 			}
 
@@ -176,7 +179,7 @@ static void PlasmaZoom()
 				r&=RandomInteger();
 				r&=RandomInteger();
 				//r&=PixelLowBits*0x01010101;
-				*destination32++=(halfp1+halfp2+carry)|r;
+				*destination32++=(halfp1+halfp2+carry)|(r&colour);
 			}
 		}
 
