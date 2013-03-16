@@ -71,7 +71,7 @@ static void PlasmaZoom()
 	memset(framebuffer1,0,320*200);
 	memset(framebuffer2,0,320*200);
 
-	SetVGAScreenMode320x200(framebuffer1);
+	SetVGAScreenMode320x200_60Hz(framebuffer1);
 
 	static uint8_t nextcolour[256];
 	for(int i=0;i<256;i++)
@@ -206,7 +206,7 @@ static void Fields()
 	memset(framebuffer1,0,212*133);
 	memset(framebuffer2,0,212*133);
 
-	SetVGAScreenMode212x133(framebuffer1);
+	SetVGAScreenMode212x133_60Hz(framebuffer1);
 
 	for(int t=0;;t++)
 	{
@@ -347,7 +347,7 @@ static void Rotozoom()
 
 static void RotozoomHSyncHandler()
 {
-	int line=HandleVGAHSync400();
+	int line=HandleVGAHSync400_60Hz();
 	if(line<0) return;
 
 	register uint32_t r0 __asm__("r0")=Pos;
@@ -414,7 +414,7 @@ static void Starfield()
 	memset(framebuffer1,0,320*200);
 	memset(framebuffer2,0,320*200);
 
-	SetVGAScreenMode320x200(framebuffer1);
+	SetVGAScreenMode320x200_60Hz(framebuffer1);
 
 	InitializeLEDFlow();
 
@@ -570,7 +570,7 @@ static void Epileptor()
 		replacements[palette[i]]=palette[(i+1)%sizeof(palette)];
 	}
 
-	SetVGAScreenMode320x200(framebuffer1);
+	SetVGAScreenMode320x200_60Hz(framebuffer1);
 
 	Bitmap frame1,frame2;
 	InitializeBitmap(&frame1,320,200,320,framebuffer1);

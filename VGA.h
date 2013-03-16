@@ -22,18 +22,22 @@ void SetBlankVGAScreenMode350();
 
 void SetVGAScreenMode240(uint8_t *framebuffer,int pixelsperrow,int pixelclock);
 void SetVGAScreenMode200(uint8_t *framebuffer,int pixelsperrow,int pixelclock);
+void SetVGAScreenMode200_60Hz(uint8_t *framebuffer,int pixelsperrow,int pixelclock);
 void SetVGAScreenMode175(uint8_t *framebuffer,int pixelsperrow,int pixelclock);
 
 void SetVGAScreenMode160(uint8_t *framebuffer,int pixelsperrow,int pixelclock);
 void SetVGAScreenMode133(uint8_t *framebuffer,int pixelsperrow,int pixelclock);
+void SetVGAScreenMode133_60Hz(uint8_t *framebuffer,int pixelsperrow,int pixelclock);
 void SetVGAScreenMode117(uint8_t *framebuffer,int pixelsperrow,int pixelclock);
 
 static inline void SetVGAScreenMode320x240(uint8_t *framebuffer) { SetVGAScreenMode240(framebuffer,320,13); }
 static inline void SetVGAScreenMode320x200(uint8_t *framebuffer) { SetVGAScreenMode200(framebuffer,320,13); }
+static inline void SetVGAScreenMode320x200_60Hz(uint8_t *framebuffer) { SetVGAScreenMode200_60Hz(framebuffer,320,13); }
 static inline void SetVGAScreenMode320x175(uint8_t *framebuffer) { SetVGAScreenMode175(framebuffer,320,13); }
 
 static inline void SetVGAScreenMode212x160(uint8_t *framebuffer) { SetVGAScreenMode160(framebuffer,212,19); }
 static inline void SetVGAScreenMode212x133(uint8_t *framebuffer) { SetVGAScreenMode133(framebuffer,212,19); }
+static inline void SetVGAScreenMode212x133_60Hz(uint8_t *framebuffer) { SetVGAScreenMode133_60Hz(framebuffer,212,19); }
 static inline void SetVGAScreenMode212x175(uint8_t *framebuffer) { SetVGAScreenMode117(framebuffer,212,19); }
 
 static inline void WaitVBL()
@@ -129,6 +133,45 @@ static inline int HandleVGAHSync400()
 			LowerVGAVSyncLine();
 		}
 		else if(VGALine==448)
+		{
+			VGALine=0;
+			VGACurrentLineAddress=VGAFrameBufferAddress;
+		}
+	}
+	return -1;
+}
+
+static inline int HandleVGAHSync400_60Hz()
+{
+	uint32_t sr=TIM9->SR;
+	TIM9->SR=0;
+
+	if(sr==VGAHorizontalSyncStartInterruptFlag) LowerVGAHSyncLine();
+	else if(sr==VGAHorizontalSyncEndInterruptFlag) RaiseVGAHSyncLine();
+	else // if(VGAVideoStartInterruptFlag)
+	{
+		VGALine++;
+		if(VGALine<40)
+		{
+			return -1;
+		}
+		else if(VGALine<440)
+		{
+			return VGALine-41;
+		}
+		else if(VGALine==440)
+		{
+			VGAFrame++;
+		}
+		else if(VGALine==490)
+		{
+			LowerVGAVSyncLine();
+		}
+		else if(VGALine==492)
+		{
+			RaiseVGAVSyncLine();
+		}
+		else if(VGALine==524)
 		{
 			VGALine=0;
 			VGACurrentLineAddress=VGAFrameBufferAddress;
