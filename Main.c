@@ -90,9 +90,7 @@ static void PlasmaZoom()
 		nextcolour[i]=RGB(ExtractRed(i)+0x20,ExtractGreen(i)+0x20,ExtractBlue(i)+0x40);
 	}
 
-	//uint32_t colour=(RandomInteger()&0xff)*0x01010101;
 	uint32_t colour=(uint32_t)RawRGB(0x6,0x6,0x3)*0x01010101;
-
 
 	int t=0;
 	while(!UserButtonState())
@@ -134,32 +132,24 @@ static void PlasmaZoom()
 
 		source[xcenter/Ratio*Ratio+ycenter/Ratio*Ratio*320]=0;
 
-Bitmap screen;
-InitializeBitmap(&screen,320,200,320,source);
+		Bitmap screen;
+		InitializeBitmap(&screen,320,200,320,source);
 
-for(int i=0;i<6;i++)
-CompositeLine(&screen,
-xcenter/Ratio*Ratio+FixedToInt(2*icos(t*2*(i+1))),
-ycenter/Ratio*Ratio+FixedToInt(2*isin(t*2*(i+1))),
-xcenter/Ratio*Ratio+FixedToInt(100*icos(t*2*(i+1))),
-ycenter/Ratio*Ratio+FixedToInt(100*isin(t*2*(i+1))),
-0,AddRed);
+		for(int i=0;i<6;i++)
+		CompositeLine(&screen,
+		xcenter/Ratio*Ratio+FixedToInt(2*icos(t*2*(i+1))),
+		ycenter/Ratio*Ratio+FixedToInt(2*isin(t*2*(i+1))),
+		xcenter/Ratio*Ratio+FixedToInt(100*icos(t*2*(i+1))),
+		ycenter/Ratio*Ratio+FixedToInt(100*isin(t*2*(i+1))),
+		0,AddRed);
 
-for(int i=0;i<6;i++)
-CompositeLine(&screen,
-xcenter/Ratio*Ratio+FixedToInt(2*icos(t*(2*(i+1)+1))),
-ycenter/Ratio*Ratio+FixedToInt(2*isin(t*(2*(i+1)+1))),
-xcenter/Ratio*Ratio+FixedToInt(100*icos(t*(2*(i+1)+1))),
-ycenter/Ratio*Ratio+FixedToInt(100*isin(t*(2*(i+1)+1))),
-0,SubRed);
-
-/*for(int y=0;y<200;y++)
-for(int x=xcenter/Ratio*Ratio-8;x<xcenter/Ratio*Ratio+8;x++)
-source[x+y*320]=0;
-
-for(int y=ycenter/Ratio*Ratio-8;y<ycenter/Ratio*Ratio+8;y++)
-for(int x=0;x<320;x++)
-source[x+y*320]=0;*/
+		for(int i=0;i<6;i++)
+		CompositeLine(&screen,
+		xcenter/Ratio*Ratio+FixedToInt(2*icos(t*(2*(i+1)+1))),
+		ycenter/Ratio*Ratio+FixedToInt(2*isin(t*(2*(i+1)+1))),
+		xcenter/Ratio*Ratio+FixedToInt(100*icos(t*(2*(i+1)+1))),
+		ycenter/Ratio*Ratio+FixedToInt(100*isin(t*(2*(i+1)+1))),
+		0,SubRed);
 
 		int sourcerow=ycenter/Ratio;
 
