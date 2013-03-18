@@ -19,7 +19,7 @@
 
 #include <arm_math.h>
 
-static void Voxelscape();
+static void IDontEvenKnow();
 static void PlasmaZoom();
 static void Fields();
 static void Rotozoom();
