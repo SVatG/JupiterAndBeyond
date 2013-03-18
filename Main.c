@@ -19,6 +19,7 @@
 
 #include <arm_math.h>
 
+static void Voxelscape();
 static void IDontEvenKnow();
 static void PlasmaZoom();
 static void Fields();
@@ -55,6 +56,7 @@ int main()
 
 	for(;;)
 	{
+		Voxelscape();
 		IDontEvenKnow();
 		PlasmaZoom();
 		Fields();
@@ -62,6 +64,89 @@ int main()
 		Rotozoom();
 		Epileptor();
 	}
+}
+
+
+
+static void Voxelscape()
+{
+	uint8_t *framebuffer1=(uint8_t *)0x20000000;
+	uint8_t *framebuffer2=(uint8_t *)0x20010000;
+	memset(framebuffer1,0,320*200);
+	memset(framebuffer2,0,320*200);
+
+	SetVGAScreenMode320x200_60Hz(framebuffer1);
+
+	int t=0;
+	while(!UserButtonState())
+	{
+		WaitVBL();
+
+		uint8_t *destination;
+		if(t&1)
+		{
+			destination=framebuffer2;
+			SetFrameBuffer(framebuffer1);
+		}
+		else
+		{
+			destination=framebuffer1;
+			SetFrameBuffer(framebuffer2);
+		}
+
+		Bitmap screen;
+		InitializeBitmap(&screen,320,200,320,destination);
+
+ClearBitmap(&screen);
+
+		#define NumberOfStrips 64
+		#define Perspective 4
+
+		int32_t a=t*4;
+		int32_t sin_a=isin(a);
+		int32_t cos_a=icos(a);
+		int32_t u0=0;
+		int32_t v0=t*Fix(5);
+
+		int lasty[320]={0};
+
+		for(int i=0;i<NumberOfStrips;i++)
+		{
+			Pixel c=RGB(
+			255*i/NumberOfStrips,
+			255*i*i/NumberOfStrips/NumberOfStrips,
+			255*i*i*i/NumberOfStrips/NumberOfStrips/NumberOfStrips);
+
+			int32_t z=Fix((NumberOfStrips-i)*8);
+			int32_t rz=idiv(Fix(8192)/Perspective,z);
+
+			int32_t du=Perspective*imul(z,-sin_a)/320;
+			int32_t dv=Perspective*imul(z,cos_a)/320;
+			int32_t u=u0+imul(z,cos_a)-du*320/2;
+			int32_t v=v0+imul(z,sin_a)-dv*320/2;
+
+			for(int x=0;x<320;x++)
+			{
+				int32_t h=isin(u/256)+isin(v/256)-Fix(2);
+				int32_t y=100-FixedToInt(imul(h,rz));
+
+				if(y>lasty[x])
+				{
+					DrawVerticalLine(&screen,x,lasty[x]+1,y-lasty[x],c);
+				}
+					lasty[x]=y;
+
+				//DrawPixel(&screen,x,y,c);
+
+				u+=du;
+				v+=dv;
+			}
+		}
+
+		t++;
+	}
+
+	while(UserButtonState());
 }
 
 
@@ -95,7 +180,7 @@ static void IDontEvenKnow()
 		Bitmap screen;
 		InitializeBitmap(&screen,320,200,320,destination);
 
-		#define NumberOfStrips 32
+		#define NumberOfStrips2 32
 
 		int32_t a=t*4;
 		int32_t sin_a=isin(a);
@@ -103,9 +188,9 @@ static void IDontEvenKnow()
 		int32_t u=0;
 		int32_t v=0;
 
-		for(int i=0;i<NumberOfStrips;i++)
+		for(int i=0;i<NumberOfStrips2;i++)
 		{
-			Pixel c=RGB(255*i/NumberOfStrips,255*i/NumberOfStrips,255*i/NumberOfStrips);
+			Pixel c=RGB(255*i/NumberOfStrips2,255*i/NumberOfStrips2,255*i/NumberOfStrips2);
 
 			int32_t z=Fix(i*4);
 			int32_t rz=idiv(Fix(256*4),z);
