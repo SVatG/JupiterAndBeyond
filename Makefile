@@ -29,7 +29,6 @@ C_FILES =	Accelerometer.c \
 		Main.c \
 		Random.c \
 		RayArray.c \
-		Sprites.c \
 		Startup.c \
 		System.c \
 		TestSong.c \
