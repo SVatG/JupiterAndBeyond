@@ -108,16 +108,13 @@ ClearBitmap(&screen);
 		int32_t u0=0;
 		int32_t v0=t*Fix(5);
 
-		int lasty[320]={0};
+		int top[320];
+		int bottom[320];
+		for(int i=0;i<320;i++) { top[i]=0; bottom[i]=199; }
 
 		for(int i=0;i<NumberOfStrips;i++)
 		{
-			Pixel c=RGB(
-			255*i/NumberOfStrips,
-			255*i*i/NumberOfStrips/NumberOfStrips,
-			255*i*i*i/NumberOfStrips/NumberOfStrips/NumberOfStrips);
-
-			int32_t z=Fix((NumberOfStrips-i)*8);
+			int32_t z=Fix((i+1)*8);
 			int32_t rz=idiv(Fix(8192)/Perspective,z);
 
 			int32_t du=Perspective*imul(z,-sin_a)/320;
@@ -127,14 +124,28 @@ ClearBitmap(&screen);
 
 			for(int x=0;x<320;x++)
 			{
-				int32_t h=isin(u/256)+isin(v/256)-Fix(2);
-				int32_t y=100-FixedToInt(imul(h,rz));
+				if(top[x]>=bottom[x]) continue;
 
-				if(y>lasty[x])
+				int32_t h1=isin(u/256)+isin(v/256);
+				int32_t h2=isin(u/512)+isin(v/512);
+				int32_t y1=100-FixedToInt(imul(h1-Fix(2),rz));
+				int32_t y2=100-FixedToInt(imul(h2-Fix(2)+Fix(4),rz));
+
+				if(y1<bottom[x])
 				{
-					DrawVerticalLine(&screen,x,lasty[x]+1,y-lasty[x],c);
+int32_t p=(h1+Fix(2))/4;
+Pixel c=RGB(p/16,isq(p)/16,isq(isq(p))/16);
+					DrawVerticalLineNoClip(&screen,x,y1+1,bottom[x]-y1,c);
+					bottom[x]=y1;
 				}
-					lasty[x]=y;
+
+				if(y2>top[x])
+				{
+int32_t p=(h2+Fix(2))/4;
+Pixel c=RGB(p/16,p/16,p/16);
+					DrawVerticalLineNoClip(&screen,x,top[x]+1,y2-top[x],c);
+					top[x]=y2;
+				}
 
 				//DrawPixel(&screen,x,y,c);
 
