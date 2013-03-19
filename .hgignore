@@ -3,4 +3,6 @@ glob:*.bin
 glob:Build
 glob:.DS_Store
 glob:MakeRayArray
-
+glob:devkitARM
+glob:OpenOCD
+glob:*~

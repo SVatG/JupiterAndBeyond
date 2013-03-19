@@ -60,9 +60,9 @@ int main()
 		IDontEvenKnow();
 		PlasmaZoom();
 		Fields();
-		Starfield();
-		Rotozoom();
-		Epileptor();
+//  		Starfield();
+// 		Rotozoom();
+// 		Epileptor();
 	}
 }
 

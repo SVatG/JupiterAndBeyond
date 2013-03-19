@@ -34,6 +34,7 @@ C_FILES =	Accelerometer.c \
 		TestSong.c \
 		Utils.c \
 		VGA.c \
+		Cityscape.c \
 		Graphics/Bitmap.c \
 		Graphics/DrawingBitmaps.c \
 		Graphics/DrawingLines.c \

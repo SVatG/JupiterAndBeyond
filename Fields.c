@@ -12,6 +12,8 @@
 extern const int16_t rayarray[Width*Height*3];
 static uint8_t palette[32],palette2[32],palette3[32],palette4[32];
 
+#define intmin(x,y) (((x) < (y)) ? (x) : (y))
+
 void InitializeField()
 {
 	for(int i=0;i<32;i++)
@@ -44,7 +46,7 @@ void InitializeField()
 
 static inline int32_t approxabs(int32_t x) { return x^(x>>31); }
 
-void DrawField(uint8_t *pixels,int t)
+void DrawField(uint8_t *pixels,int tv)
 {
 	const int16_t *rays=rayarray;
 
@@ -54,14 +56,14 @@ void DrawField(uint8_t *pixels,int t)
 		case 2: pixels+=1; break;
 		case 3: pixels+=Width; break;
 	}*/
-
+        
 	int32_t x0=(0+Fix(0.5))<<20;
-	int32_t y0=(isin(t*20)+Fix(0.5))<<20;
-	int32_t z0=(t*150+Fix(0.5))<<20;
+        int32_t y0=(isin(tv*20)+Fix(0.5))<<20;
+        int32_t z0=(tv*150+Fix(0.5))<<20;
 
-	int32_t sin_a=isin(t*9);
-	int32_t cos_a=icos(t*9);
-
+        int32_t sin_a=isin(tv*9);
+        int32_t cos_a=icos(tv*9);
+        
 	for(int y=0;y<Height;y++)
 	{
 		for(int x=0;x<Width;x++)
@@ -77,6 +79,7 @@ void DrawField(uint8_t *pixels,int t)
 			int32_t x=x0,y=y0,z=z0;
 
 			int i=31;
+                        int32_t dist = 0;
 			while(i)
 			{
 /*				int32_t tx=approxabs(x)>>15;
@@ -157,14 +160,24 @@ void DrawField(uint8_t *pixels,int t)
 				int32_t tx=approxabs(x)>>16;
 				int32_t ty=approxabs(y)>>16;
 				int32_t tz=approxabs(z)>>16;
-
+//                                 int32_t tx2=approxabs(x+(1<<31))>>16;
+//                                 int32_t ty2=approxabs(y+(1<<31))>>16;
+//                                 int32_t tz2=approxabs((tv<<28))>>18;
+//                              tx2+=+(1<<12);
+//                                 ty2 = ty2 + ((int32_t)tv<<6);
+//                                 tx2 = tx2 + ((int32_t)tv);
+//                              tz2+=+(1<<10);
+                                
 //				int32_t dist=(tx|ty^tz)-0x5000;
 //				int32_t dist=(tx|ty&tz)-0x5000;
 //				int32_t dist=(tx|ty+tz)-0x5000;
 //				int32_t dist=(tx+ty)&tz-0x8000;
-				int32_t dist=(tx+ty+(tz&0xf0f0))-0x8000;
+				dist=(tx+ty+(tz&0xf0f0))-0x8000;
 //				int32_t dist=(tx+ty+(tz&0x005555))-0x8000;
-
+//                                 int32_t dist2=(tz2|(tx2+ty2))-0x1000;
+                                
+//                                 dist = intmin(dist,dist2);
+                                
 				if(dist<0x200) break;
 
 				x+=dx*dist;
@@ -173,8 +186,8 @@ void DrawField(uint8_t *pixels,int t)
 
 				i--;
 			}
-
-			*pixels=palette[i];
+// 			dist = approxabs(dist) >> 11;
+                        *pixels=palette[i];
 			pixels++;
 			//pixels+=2;
 		}
