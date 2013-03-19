@@ -347,46 +347,16 @@ void RasterizeInit() {
 	}
 	
 	memcpy(data.rasterizer.sortedTriangles,faces,sizeof(index_triangle_t)*numFaces);
-	memcpy(data.rasterizer.sortedTriangles+numFaces,faces_rad,sizeof(index_triangle_t)*numFaces_rad);
-	startFrame = VGAFrame;	
+	startFrame = VGAFrame;
 }
 
 inline static void RasterizeTest(uint8_t* image) {
 	int32_t rotcnt = (VGAFrame - startFrame);
-
+        int32_t rowd = rotcnt;
+        
 	int32_t render_faces_total_start = 0;
-// 	int32_t render_faces_rad = numFaces_rad;
-// 	int32_t render_faces_total_end = numFaces+render_faces_rad;
-// 
-// 	int32_t rowd = CurrentBitBinRow(&song) - 1280;
-// 	if(rowd < 183) {
-// 		render_faces_total_start = 0;
-// 		render_faces_rad = 0;
-// 		render_faces_total_end = numFaces;
-// 	}
-// 	else if(rowd < 189) {
-// 		render_faces_total_start = 0;
-// 		render_faces_rad = FixedToInt(imul(IntToFixed(numFaces_rad), (IntToFixed(rowd - 183) / 6)));
-// 		render_faces_total_end = numFaces + render_faces_rad;
-// 	}
-// 	else if(rowd < 313) {
-// 		render_faces_total_start = 0;
-// 		render_faces_rad = numFaces_rad;
-// 		render_faces_total_end = numFaces+render_faces_rad;
-// 	}
-// 	else if(rowd < 320) {
-// 		render_faces_total_start = 0;
-// 		render_faces_rad = numFaces_rad;
-// 		render_faces_total_end = FixedToInt(imul(IntToFixed(numFaces+numFaces_rad), (IntToFixed(320 - rowd) / 7)));
-// 	}
-// 	else {
-// 		// Doesn't actually happen
-// 		render_faces_total_start = 0;
-// 		render_faces_rad = 0;
-// 		render_faces_total_end = 0;
-// 	}
-
-
+	int32_t render_faces_total_end = numFaces;
+        
 	// Do a background
 	for(int i=0;i<NumberOfDotStars;i++){
 		int32_t x = iabs(data.rasterizer.dotstars[i].x + ((data.rasterizer.dotstars[i].dx * rotcnt)>>2));
@@ -411,8 +381,8 @@ inline static void RasterizeTest(uint8_t* image) {
 	// Transform
 	vertex_t transformVertex;
 	for(int32_t i = 0; i < numVertices; i++) {
-		transformVertex.p = imat4x4transform(modelview,ivec4(vertices[i].p.x,vertices[i].p.y,vertices[i].p.z,F(1)));
-		transformVertex.n = ivec4_xyz(imat4x4transform(modelview,ivec4(vertices[i].n.x,vertices[i].n.y,vertices[i].n.z,F(0))));
+		transformVertex.p = imat4x4transform(modelview,ivec4(vertices[i].x,vertices[i].y,vertices[i].z,F(1)));
+		// transformVertex.n = ivec4_xyz(imat4x4transform(modelview,ivec4(vertices[i].n.x,vertices[i].n.y,vertices[i].n.z,F(0))));
 		
 		// Project
 		transformVertex.p = imat4x4transform(proj,transformVertex.p);
@@ -423,35 +393,12 @@ inline static void RasterizeTest(uint8_t* image) {
 			Viewport(transformVertex.p.y,transformVertex.p.w,HEIGHT),
 			transformVertex.p.z
 		);
-		int32_t dist = isqrt((transformVertex.n.x*transformVertex.n.x) + (transformVertex.n.y*transformVertex.n.y))/(5793*4);
-		int32_t r = dist > 6 ? dist - 7 : 0;
-		r = r > 6 ? 6 : r;
-		int32_t g = dist > 6 ? 6 : dist;
-		data.rasterizer.transformedVertices[i].c = RastRGB(r,g,2);
-	}
-	for(int32_t i = 0; i < numVertices_rad; i++) {
-		transformVertex.p = imat4x4transform(modelview_rad,ivec4(vertices_rad[i].p.x,vertices_rad[i].p.y,vertices_rad[i].p.z,F(1)));
-		transformVertex.n = ivec4_xyz(imat4x4transform(modelview,ivec4(vertices_rad[i].n.x,vertices_rad[i].n.y,vertices_rad[i].n.z,F(0))));
-
-		// Project
-		transformVertex.p = imat4x4transform(proj,transformVertex.p);
-
-		// Perspective divide and viewport transform
-		data.rasterizer.transformedVertices[i+numVertices].p = ivec3(
-			Viewport(transformVertex.p.x,transformVertex.p.w,WIDTH),
-			Viewport(transformVertex.p.y,transformVertex.p.w,HEIGHT),
-			transformVertex.p.z
-		);
-		int32_t dist = isqrt((transformVertex.n.x*transformVertex.n.x) + (transformVertex.n.y*transformVertex.n.y))/(5793*4);
-		int32_t g = dist > 6 ? dist - 7 : 0;
-		g = g > 6 ? 6 : g;
-		int32_t r = dist > 6 ? 6 : dist;
-		data.rasterizer.transformedVertices[i+numVertices].c = RastRGB(r,g,2);
+		data.rasterizer.transformedVertices[i].c = RastRGB(3,3,2);
 	}
 
 
 	// Depth sort
-	qsort(data.rasterizer.sortedTriangles,numFaces+render_faces_rad,sizeof(index_triangle_t),&triAvgDepthCompare);
+	qsort(data.rasterizer.sortedTriangles,numFaces,sizeof(index_triangle_t),&triAvgDepthCompare);
 	
 	// For each triangle
 	triangle_t tri;
@@ -481,7 +428,7 @@ void Rasterize() {
 
 	RasterizeInit();
 
-	while(CurrentBitBinRow(&song) < 1600)
+	while(1)
 	{
 		WaitVBL();
 

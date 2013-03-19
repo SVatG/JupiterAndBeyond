@@ -12,6 +12,8 @@
 #include "Utils.h"
 #include "BitBin.h"
 
+#include "Global.h"
+
 #include "Fields.h"
 
 #include "Graphics/Bitmap.h"
@@ -32,6 +34,8 @@ static void Epileptor();
 static void AudioCallback(void *context,int buffer);
 int16_t *buffers[2]={ (int16_t *)0x2001fa00,(int16_t *)0x2001fc00 };
 extern BitBinNote *channels[8];
+
+union GlobalData data;
 
 int main()
 {
