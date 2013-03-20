@@ -60,6 +60,8 @@ int main()
 
 	for(;;)
 	{
+                RasterizeInit();
+                Rasterize();
 		Voxelscape();
 		IDontEvenKnow();
 		PlasmaZoom();

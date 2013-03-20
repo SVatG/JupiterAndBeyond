@@ -40,7 +40,7 @@ inline static void RasterizeTriangle(uint8_t* image, triangle_t* tri ) {
 	if(
 		imul(tri->v[1].p.x - tri->v[0].p.x, tri->v[2].p.y - tri->v[0].p.y) -
 		imul(tri->v[2].p.x - tri->v[0].p.x, tri->v[1].p.y - tri->v[0].p.y)
-		< 0
+		> 0
 	) {
 		return;
 	}
@@ -118,6 +118,7 @@ inline static void RasterizeTriangle(uint8_t* image, triangle_t* tri ) {
 	UdX = idiv(imul(temp, (R(lowerVertex.c)-R(upperVertex.c))) + (R(upperVertex.c)-R(centerVertex.c)),width);
 	VdX = idiv(imul(temp, (G(lowerVertex.c)-G(upperVertex.c))) + (G(upperVertex.c)-G(centerVertex.c)),width);
 
+        
 	// 16 bit packed registers
 	int32_t dUV;
 	int32_t UV;
@@ -239,7 +240,7 @@ inline static void RasterizeTriangle(uint8_t* image, triangle_t* tri ) {
 			: [U] "r" (U), [V] "r" (V)
 		);
 	}
-
+        
 	// Guard against special case C: flat lower edge
 	int32_t centerDiff = centerVertex.p.y - lowerVertex.p.y;
 	if(centerDiff == 0) {
@@ -266,7 +267,7 @@ lower_half_render:
 
 	// lower triangle half
 	scanlineMax = FixedToRoundedInt(lowerVertex.p.y);
-
+        
 	U = leftU;
 	V = leftV;
 
@@ -336,6 +337,26 @@ static int triAvgDepthCompare(const void *p1, const void *p2) {
 	);
 }
 
+static int triClosestDepthCompare(const void *p1, const void *p2) {
+    index_triangle_t* t1 = (index_triangle_t*)p1;
+    index_triangle_t* t2 = (index_triangle_t*)p2;
+    int d1 = imin(imin(
+            data.rasterizer.transformedVertices[t1->v[0]].p.z,
+            data.rasterizer.transformedVertices[t1->v[1]].p.z
+        ),
+        data.rasterizer.transformedVertices[t1->v[2]].p.z
+    );
+    int d2 = imin(imin(
+            data.rasterizer.transformedVertices[t2->v[0]].p.z,
+            data.rasterizer.transformedVertices[t2->v[1]].p.z
+        ),
+        data.rasterizer.transformedVertices[t2->v[2]].p.z
+    );
+    return(
+        d2 - d1
+    );
+}
+
 uint32_t startFrame;
 void RasterizeInit() {
 	for(int i=0;i<NumberOfDotStars;i++){
@@ -368,15 +389,9 @@ inline static void RasterizeTest(uint8_t* image) {
 	imat4x4_t proj = imat4x4diagonalperspective(IntToFixed(45),idiv(IntToFixed(WIDTH),IntToFixed(HEIGHT)),4096,IntToFixed(60));
 	
 	// Modelview matrix
-	int rotdir = (rowd>>4)%2 == 0 ? -1 : 1;
-	imat4x4_t modelview = imat4x4affinemul(imat4x4translate(ivec3(IntToFixed(0),IntToFixed(0),IntToFixed(-30))),imat4x4rotatex(rotdir*rotcnt*8));
-	modelview = imat4x4affinemul(modelview,imat4x4rotatez(rotdir*rotcnt * 4  + 700*rotdir));
-
-	imat4x4_t modelview_rad = imat4x4affinemul(
-		imat4x4translate(ivec3(IntToFixed(0),IntToFixed(0),IntToFixed(-30))),
-		imat4x4rotatey(rotcnt*5)
-	);
-	modelview_rad = imat4x4affinemul(modelview_rad,imat4x4rotatez(rotcnt * 7));
+	int rotdir = /*(rowd>>4)%2 == 0 ? -1 : */1;
+        imat4x4_t modelview = imat4x4affinemul(imat4x4translate(ivec3(IntToFixed(0),IntToFixed(0),IntToFixed(-30))),imat4x4rotatex(1700));
+        modelview = imat4x4affinemul(modelview,imat4x4rotatey(rotdir*rotcnt*8));
 	
 	// Transform
 	vertex_t transformVertex;
@@ -393,16 +408,17 @@ inline static void RasterizeTest(uint8_t* image) {
 			Viewport(transformVertex.p.y,transformVertex.p.w,HEIGHT),
 			transformVertex.p.z
 		);
-		data.rasterizer.transformedVertices[i].c = RastRGB(3,3,2);
+                data.rasterizer.transformedVertices[i].c = RastRGB(((i*7)/numVertices),((i*7)/numVertices),2);
 	}
 
-
+        
 	// Depth sort
-	qsort(data.rasterizer.sortedTriangles,numFaces,sizeof(index_triangle_t),&triAvgDepthCompare);
-	
+	qsort(data.rasterizer.sortedTriangles,numFaces,sizeof(index_triangle_t),&triClosestDepthCompare);
+
+        
 	// For each triangle
 	triangle_t tri;
-	for(int32_t i = render_faces_total_start; i < render_faces_total_end; i++ ) {
+        for(int32_t i = render_faces_total_start; i < render_faces_total_end; i++ ) {
 		tri.v[0] = data.rasterizer.transformedVertices[data.rasterizer.sortedTriangles[i].v[0]];
 		tri.v[1] = data.rasterizer.transformedVertices[data.rasterizer.sortedTriangles[i].v[1]];
 		tri.v[2] = data.rasterizer.transformedVertices[data.rasterizer.sortedTriangles[i].v[2]];
@@ -428,7 +444,7 @@ void Rasterize() {
 
 	RasterizeInit();
 
-	while(1)
+        while(!UserButtonState())
 	{
 		WaitVBL();
 
@@ -454,5 +470,5 @@ void Rasterize() {
 		t++;
 	}
 
-// 	while(UserButtonState());
+	while(UserButtonState());
 }

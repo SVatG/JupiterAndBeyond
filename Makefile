@@ -42,7 +42,9 @@ C_FILES =	Accelerometer.c \
 		Graphics/DrawingPixels.c \
 		Graphics/DrawingRectangles.c \
 		Graphics/DrawingRLEBitmaps.c \
-		Graphics/DrawingStraightLines.c
+		Graphics/DrawingStraightLines.c \
+		VectorLibrary/VectorFixed.c \
+		VectorLibrary/MatrixFixed.c \
 			
 S_FILES = 
 

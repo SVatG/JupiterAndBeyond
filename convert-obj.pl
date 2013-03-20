@@ -4,7 +4,7 @@ use warnings;
 use strict;
 
 
-my $scale = 2.0;
+my $scale = 0.7;
 my $offset = 0;
 my $suffix = "";
 
