@@ -69,7 +69,16 @@ int main()
 
 
 
-static void DrawMultibandColumn(uint8_t *pixels,int length,int h,int dh,uint8_t *palette)
+static void DrawSimpleColumnDownwards(uint8_t *pixels,int length,uint8_t c)
+{
+	for(int i=0;i<length;i++)
+	{
+		*pixels=c;
+		pixels+=320;
+	}
+}
+
+static void DrawMultiColumnDownwards(uint8_t *pixels,int length,int h,int dh,uint8_t *palette)
 {
 	for(int i=0;i<length;i++)
 	{
@@ -78,6 +87,28 @@ static void DrawMultibandColumn(uint8_t *pixels,int length,int h,int dh,uint8_t 
 		pixels+=320;
 	}
 }
+
+static void DrawSimpleColumnUpwards(uint8_t *pixels,int length,uint8_t c)
+{
+	for(int i=0;i<length;i++)
+	{
+		*pixels=c;
+		pixels-=320;
+	}
+}
+
+static void DrawMultiColumnUpwards(uint8_t *pixels,int length,int h,int dh,uint8_t *palette)
+{
+	for(int i=0;i<length;i++)
+	{
+		*pixels=palette[(h>>13)&7];
+		h+=dh;
+		pixels-=320;
+	}
+}
+
+static int toplimity[320],toplasty[320],toplasth[320];
+static int bottomlimity[320],bottomlasty[320],bottomlasth[320];
 
 static void Voxelscape()
 {
@@ -128,13 +159,11 @@ ClearBitmap(&screen);
 		int32_t u0=0;
 		int32_t v0=t*Fix(5);
 
-		int top[320],toph[320];
-		int bottom[320],bottomh[320];
-		for(int i=0;i<320;i++) { top[i]=0; bottom[i]=199; }
+		for(int i=0;i<320;i++) { toplimity[i]=-1; bottomlimity[i]=200; }
 
 		for(int i=0;i<NumberOfStrips;i++)
 		{
-			int32_t z=Fix((NumberOfStrips-i)*8);
+			int32_t z=Fix((i+1)*8);
 			int32_t rz=idiv(Fix(8191<<6)/Perspective,z);
 
 			int32_t du=Perspective*imul(z,-sin_a)/320;
@@ -144,101 +173,68 @@ ClearBitmap(&screen);
 
 			for(int x=0;x<320;x++)
 			{
-				//if(top[x]>=bottom[x]) continue;
+				if(toplimity[x]>=bottomlimity[x]) { u+=du; v+=dv; continue; }
 
-				int h1=(isin(u/256)+isin(v/256)+Fix(2))>>6;
-				int h2=(isin(u/512)+isin(v/512)+Fix(2))>>6;
-				int y1=100+FixedToInt(imul(h1,rz));
-				int y2=100+FixedToInt(imul(-h2,rz));
+				int bottomh=(isin(u/256)+isin(v/256)+Fix(2))>>6;
+				int bottomy=100+FixedToInt(imul(bottomh,rz));
 
-				if(y1>bottom[x])
+				if(bottomy<bottomlimity[x] && i!=0)
 				{
-					int starth=bottomh[x];
-					int endh=h1;
+					int starth=bottomh;
+					int endh=bottomlasth[x];
 					int startc=(starth>>5)&7;
 					int endc=(endh>>5)&7;
-					int starty=bottom[x];
-					int length=y1-bottom[x];
 
 					if(startc==endc)
 					{
-						DrawVerticalLine(&screen,x,starty,length,bottompalette[endc]);
+						DrawSimpleColumnDownwards(destination+x+bottomy*320,
+						bottomlimity[x]-bottomy,bottompalette[endc]);
 					}
 					else
 					{
-						int dh=((endh-starth)<<8)/length;
+						int dh=((endh-starth)<<8)/(bottomlasty[x]-bottomy);
 
-						if(starty+length>200) length=200-starty;
-
-						DrawMultibandColumn(destination+x+starty*320,
-						length,starth<<8,dh,bottompalette);
+						DrawMultiColumnDownwards(destination+x+bottomy*320,
+						bottomlimity[x]-bottomy,starth<<8,dh,bottompalette);
 					}
-				}
-				bottom[x]=y1;
-				bottomh[x]=h1;
 
-				if(y2<top[x])
+					bottomlimity[x]=bottomy;
+				}
+				bottomlasty[x]=bottomy;
+				bottomlasth[x]=bottomh;
+
+				int toph=(isin(u/512)+isin(v/512)+Fix(2))>>6;
+				int topy=100+FixedToInt(imul(-toph,rz));
+
+				if(topy>toplimity[x] && i!=0)
 				{
-					int c=(h2>>5)&7;
-					int oldc=(toph[x]>>5)&7;
-					if(c==oldc)
-					DrawVerticalLine(&screen,x,y2+1,top[x]-y2,toppalette[(h2>>5)&7]);
-				}
-				top[x]=y2;
-				toph[x]=h2;
+					int starth=toph;
+					int endh=toplasth[x];
+					int startc=(starth>>5)&7;
+					int endc=(endh>>5)&7;
 
-				//DrawPixel(&screen,x,y,c);
+					if(startc==endc)
+					{
+						DrawSimpleColumnUpwards(destination+x+topy*320,
+						topy-toplimity[x],toppalette[endc]);
+					}
+					else
+					{
+						int dh=((endh-starth)<<8)/(topy-toplasty[x]);
+
+						DrawMultiColumnUpwards(destination+x+topy*320,
+						topy-toplimity[x],starth<<8,dh,toppalette);
+					}
+
+					toplimity[x]=topy;
+				}
+				toplasty[x]=topy;
+				toplasth[x]=toph;
 
 				u+=du;
 				v+=dv;
 			}
 		}
-
-/*		int top[320];
-		int bottom[320];
-		for(int i=0;i<320;i++) { top[i]=0; bottom[i]=199; }
-
-		for(int i=0;i<NumberOfStrips;i++)
-		{
-			int32_t z=Fix((i+1)*8);
-			int32_t rz=idiv(Fix(8192)/Perspective,z);
-
-			int32_t du=Perspective*imul(z,-sin_a)/320;
-			int32_t dv=Perspective*imul(z,cos_a)/320;
-			int32_t u=u0+imul(z,cos_a)-du*320/2;
-			int32_t v=v0+imul(z,sin_a)-dv*320/2;
-
-			for(int x=0;x<320;x++)
-			{
-				if(top[x]>=bottom[x]) continue;
-
-				int32_t h1=isin(u/256)+isin(v/256);
-				int32_t h2=isin(u/512)+isin(v/512);
-				int32_t y1=100-FixedToInt(imul(h1-Fix(2),rz));
-				int32_t y2=100-FixedToInt(imul(h2-Fix(2)+Fix(4),rz));
-
-				if(y1<bottom[x])
-				{
-int32_t p=(h1+Fix(2))/4;
-Pixel c=RGB(p/16,isq(p)/16,isq(isq(p))/16);
-					DrawVerticalLineNoClip(&screen,x,y1+1,bottom[x]-y1,c);
-					bottom[x]=y1;
-				}
-
-				if(y2>top[x])
-				{
-int32_t p=(h2+Fix(2))/4;
-Pixel c=RGB(p/16,p/16,p/16);
-					DrawVerticalLineNoClip(&screen,x,top[x]+1,y2-top[x],c);
-					top[x]=y2;
-				}
-
-				//DrawPixel(&screen,x,y,c);
-
-				u+=du;
-				v+=dv;
-			}
-		}*/
 
 		t++;
 	}
