@@ -68,6 +68,17 @@ int main()
 
 
 
+
+static void DrawMultibandColumn(uint8_t *pixels,int length,int h,int dh,uint8_t *palette)
+{
+	for(int i=0;i<length;i++)
+	{
+		*pixels=palette[(h>>13)&7];
+		h+=dh;
+		pixels+=320;
+	}
+}
+
 static void Voxelscape()
 {
 	uint8_t *framebuffer1=(uint8_t *)0x20000000;
@@ -99,6 +110,15 @@ static void Voxelscape()
 
 ClearBitmap(&screen);
 
+		uint8_t toppalette[8],bottompalette[8];
+		for(int i=0;i<8;i++)
+		{
+			int j=7-i;
+			toppalette[i]=RawRGB(i,i,i/2);
+			bottompalette[i]=RawRGB(j,j*j/7,j*j*j*j/(7*7*7)/2);
+		}
+
+
 		#define NumberOfStrips 64
 		#define Perspective 4
 
@@ -108,7 +128,73 @@ ClearBitmap(&screen);
 		int32_t u0=0;
 		int32_t v0=t*Fix(5);
 
-		int top[320];
+		int top[320],toph[320];
+		int bottom[320],bottomh[320];
+		for(int i=0;i<320;i++) { top[i]=0; bottom[i]=199; }
+
+		for(int i=0;i<NumberOfStrips;i++)
+		{
+			int32_t z=Fix((NumberOfStrips-i)*8);
+			int32_t rz=idiv(Fix(8191<<6)/Perspective,z);
+
+			int32_t du=Perspective*imul(z,-sin_a)/320;
+			int32_t dv=Perspective*imul(z,cos_a)/320;
+			int32_t u=u0+imul(z,cos_a)-du*320/2;
+			int32_t v=v0+imul(z,sin_a)-dv*320/2;
+
+			for(int x=0;x<320;x++)
+			{
+				//if(top[x]>=bottom[x]) continue;
+
+				int h1=(isin(u/256)+isin(v/256)+Fix(2))>>6;
+				int h2=(isin(u/512)+isin(v/512)+Fix(2))>>6;
+				int y1=100+FixedToInt(imul(h1,rz));
+				int y2=100+FixedToInt(imul(-h2,rz));
+
+				if(y1>bottom[x])
+				{
+					int starth=bottomh[x];
+					int endh=h1;
+					int startc=(starth>>5)&7;
+					int endc=(endh>>5)&7;
+					int starty=bottom[x];
+					int length=y1-bottom[x];
+
+					if(startc==endc)
+					{
+						DrawVerticalLine(&screen,x,starty,length,bottompalette[endc]);
+					}
+					else
+					{
+						int dh=((endh-starth)<<8)/length;
+
+						if(starty+length>200) length=200-starty;
+
+						DrawMultibandColumn(destination+x+starty*320,
+						length,starth<<8,dh,bottompalette);
+					}
+				}
+				bottom[x]=y1;
+				bottomh[x]=h1;
+
+				if(y2<top[x])
+				{
+					int c=(h2>>5)&7;
+					int oldc=(toph[x]>>5)&7;
+					if(c==oldc)
+					DrawVerticalLine(&screen,x,y2+1,top[x]-y2,toppalette[(h2>>5)&7]);
+				}
+				top[x]=y2;
+				toph[x]=h2;
+
+				//DrawPixel(&screen,x,y,c);
+
+				u+=du;
+				v+=dv;
+			}
+		}
+
+/*		int top[320];
 		int bottom[320];
 		for(int i=0;i<320;i++) { top[i]=0; bottom[i]=199; }
 
@@ -152,7 +238,7 @@ Pixel c=RGB(p/16,p/16,p/16);
 				u+=du;
 				v+=dv;
 			}
-		}
+		}*/
 
 		t++;
 	}
