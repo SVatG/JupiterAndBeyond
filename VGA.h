@@ -59,12 +59,6 @@ static inline uint32_t VGAFrameCounter() { return VGAFrame; }
 
 void SetVGAHorizontalSync31kHz(InterruptHandler *handler);
 
-#define VGAHorizontalSyncStartInterruptFlag 1 // Overflow interrupt
-#define VGAHorizontalSyncEndInterruptFlag 2 // Output compare 1 interrupt
-#define VGAVideoStartInterruptFlag 4 // Output compare 2 interrupt
-
-static inline void RaiseVGAHSyncLine() { GPIOB->BSRRL=(1<<11); }
-static inline void LowerVGAHSyncLine() { GPIOB->BSRRH=(1<<11); }
 static inline void RaiseVGAVSyncLine() { GPIOB->BSRRL=(1<<12); }
 static inline void LowerVGAVSyncLine() { GPIOB->BSRRH=(1<<12); }
 
@@ -73,144 +67,120 @@ static inline void SetVGASignal(uint8_t pixel) { ((uint8_t *)&GPIOE->ODR)[1]=pix
 
 static inline int HandleVGAHSync480()
 {
-	uint32_t sr=TIM9->SR;
-	TIM9->SR=0;
+	TIM2->SR=0;
 
-	if(sr==VGAHorizontalSyncStartInterruptFlag) LowerVGAHSyncLine();
-	else if(sr==VGAHorizontalSyncEndInterruptFlag) RaiseVGAHSyncLine();
-	else // if(VGAVideoStartInterruptFlag)
+	VGALine++;
+	if(VGALine<480)
 	{
-		VGALine++;
-		if(VGALine<480)
-		{
-			return VGALine;
-		}
-		else if(VGALine==480)
-		{
-			VGAFrame++;
-		}
-		else if(VGALine==490)
-		{
-			LowerVGAVSyncLine();
-		}
-		else if(VGALine==492)
-		{
-			RaiseVGAVSyncLine();
-		}
-		else if(VGALine==524)
-		{
-			VGALine=0;
-			VGACurrentLineAddress=VGAFrameBufferAddress;
-		}
+		return VGALine;
+	}
+	else if(VGALine==480)
+	{
+		VGAFrame++;
+	}
+	else if(VGALine==490)
+	{
+		LowerVGAVSyncLine();
+	}
+	else if(VGALine==492)
+	{
+		RaiseVGAVSyncLine();
+	}
+	else if(VGALine==524)
+	{
+		VGALine=0;
+		VGACurrentLineAddress=VGAFrameBufferAddress;
 	}
 	return -1;
 }
 
 static inline int HandleVGAHSync400()
 {
-	uint32_t sr=TIM9->SR;
-	TIM9->SR=0;
+	TIM2->SR=0;
 
-	if(sr==VGAHorizontalSyncStartInterruptFlag) LowerVGAHSyncLine();
-	else if(sr==VGAHorizontalSyncEndInterruptFlag) RaiseVGAHSyncLine();
-	else // if(VGAVideoStartInterruptFlag)
+	VGALine++;
+	if(VGALine<400)
 	{
-		VGALine++;
-		if(VGALine<400)
-		{
-			return VGALine;
-		}
-		else if(VGALine==400)
-		{
-			VGAFrame++;
-		}
-		else if(VGALine==412)
-		{
-			RaiseVGAVSyncLine();
-		}
-		else if(VGALine==414)
-		{
-			LowerVGAVSyncLine();
-		}
-		else if(VGALine==448)
-		{
-			VGALine=0;
-			VGACurrentLineAddress=VGAFrameBufferAddress;
-		}
+		return VGALine;
+	}
+	else if(VGALine==400)
+	{
+		VGAFrame++;
+	}
+	else if(VGALine==412)
+	{
+		RaiseVGAVSyncLine();
+	}
+	else if(VGALine==414)
+	{
+		LowerVGAVSyncLine();
+	}
+	else if(VGALine==448)
+	{
+		VGALine=0;
+		VGACurrentLineAddress=VGAFrameBufferAddress;
 	}
 	return -1;
 }
 
 static inline int HandleVGAHSync400_60Hz()
 {
-	uint32_t sr=TIM9->SR;
-	TIM9->SR=0;
+	TIM2->SR=0;
 
-	if(sr==VGAHorizontalSyncStartInterruptFlag) LowerVGAHSyncLine();
-	else if(sr==VGAHorizontalSyncEndInterruptFlag) RaiseVGAHSyncLine();
-	else // if(VGAVideoStartInterruptFlag)
+	VGALine++;
+	if(VGALine<40)
 	{
-		VGALine++;
-		if(VGALine<40)
-		{
-			return -1;
-		}
-		else if(VGALine<440)
-		{
-			return VGALine-41;
-		}
-		else if(VGALine==440)
-		{
-			VGAFrame++;
-		}
-		else if(VGALine==490)
-		{
-			LowerVGAVSyncLine();
-		}
-		else if(VGALine==492)
-		{
-			RaiseVGAVSyncLine();
-		}
-		else if(VGALine==524)
-		{
-			VGALine=0;
-			VGACurrentLineAddress=VGAFrameBufferAddress;
-		}
+		return -1;
+	}
+	else if(VGALine<440)
+	{
+		return VGALine-41;
+	}
+	else if(VGALine==440)
+	{
+		VGAFrame++;
+	}
+	else if(VGALine==490)
+	{
+		LowerVGAVSyncLine();
+	}
+	else if(VGALine==492)
+	{
+		RaiseVGAVSyncLine();
+	}
+	else if(VGALine==524)
+	{
+		VGALine=0;
+		VGACurrentLineAddress=VGAFrameBufferAddress;
 	}
 	return -1;
 }
 
 static inline int HandleVGAHSync350()
 {
-	uint32_t sr=TIM9->SR;
-	TIM9->SR=0;
+	TIM2->SR=0;
 
-	if(sr==VGAHorizontalSyncStartInterruptFlag) RaiseVGAHSyncLine();
-	else if(sr==VGAHorizontalSyncEndInterruptFlag) LowerVGAHSyncLine();
-	else // if(VGAVideoStartInterruptFlag)
+	VGALine++;
+	if(VGALine<350)
 	{
-		VGALine++;
-		if(VGALine<350)
-		{
-			return VGALine;
-		}
-		else if(VGALine==350)
-		{
-			VGAFrame++;
-		}
-		else if(VGALine==387)
-		{
-			LowerVGAVSyncLine();
-		}
-		else if(VGALine==389)
-		{
-			RaiseVGAVSyncLine();
-		}
-		else if(VGALine==448)
-		{
-			VGALine=0;
-			VGACurrentLineAddress=VGAFrameBufferAddress;
-		}
+		return VGALine;
+	}
+	else if(VGALine==350)
+	{
+		VGAFrame++;
+	}
+	else if(VGALine==387)
+	{
+		LowerVGAVSyncLine();
+	}
+	else if(VGALine==389)
+	{
+		RaiseVGAVSyncLine();
+	}
+	else if(VGALine==448)
+	{
+		VGALine=0;
+		VGACurrentLineAddress=VGAFrameBufferAddress;
 	}
 	return -1;
 }
