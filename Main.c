@@ -147,7 +147,7 @@ static void Voxelscape()
 		}
 
 
-		#define NumberOfStrips 64
+		#define NumberOfStrips 48
 		#define Perspective 4
 
 		int32_t a=t*4;
@@ -162,9 +162,8 @@ static void Voxelscape()
 		{
 			//if(i>6 && (i&1)) continue;
 
-			//int32_t z=Fix(i*i/8+1);
-
-			int32_t z=Fix((i+1)*8);
+			int32_t z=Fix(i*i/4+1);
+			//int32_t z=Fix((i+1)*8);
 			int32_t rz=idiv(Fix(8191<<6)/Perspective,z);
 
 			int32_t du=Perspective*imul(z,-sin_a)/320;
@@ -177,6 +176,17 @@ static void Voxelscape()
 				if(toplimity[x]>=bottomlimity[x]) { u+=du; v+=dv; continue; }
 
 				int bottomh=HeightMap[((u>>5)&0xff00)|((v>>13)&0xff)];
+				/*int offset=((u>>5)&0xff00)|((v>>13)&0xff);
+				int bottomh1=HeightMap[offset];
+				int bottomh2=HeightMap[offset+1];
+				int bottomh3=HeightMap[offset+256];
+				int bottomh4=HeightMap[offset+257];
+				int ufrac=u&0x1fff;
+				int vfrac=v&0x1fff;
+				int bottomh5=bottomh1+((bottomh2-bottomh1)*vfrac>>13);
+				int bottomh6=bottomh3+((bottomh4-bottomh3)*vfrac>>13);
+				int bottomh=bottomh5+((bottomh6-bottomh5)*ufrac>>13);*/
+
 				//int bottomh=(isin(u/256)+isin(v/256)+Fix(2))>>6;
 				int bottomy=100+FixedToInt(imul(bottomh,rz));
 
