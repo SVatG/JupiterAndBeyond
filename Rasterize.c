@@ -40,7 +40,7 @@ inline static void RasterizeTriangle(uint8_t* image, triangle_t* tri ) {
 	if(
 		imul(tri->v[1].p.x - tri->v[0].p.x, tri->v[2].p.y - tri->v[0].p.y) -
 		imul(tri->v[2].p.x - tri->v[0].p.x, tri->v[1].p.y - tri->v[0].p.y)
-		> 0
+		< 0
 	) {
 		return;
 	}
@@ -193,52 +193,69 @@ inline static void RasterizeTriangle(uint8_t* image, triangle_t* tri ) {
 		: [U] "r" (U), [V] "r" (V)
 	);
 	
-	scanlineMax = FixedToRoundedInt(centerVertex.p.y);
+        scanlineMax = imin(FixedToRoundedInt(centerVertex.p.y), HEIGHT);
 	for(scanline = FixedToRoundedInt(upperVertex.p.y); scanline < scanlineMax; scanline++ ) {
-  		uint32_t xMax = FixedToRoundedInt(rightX);
-		uint32_t offset = scanline*WIDTH;
-		int32_t x = FixedToRoundedInt(leftX);
-		__asm__ volatile(
-			"cmp %[x], %[xMax]\n"
-			"bgt end_inner_loop_a\n"
-			"inner_loop_a:\n"
-			"and r0, %[UV], %[unpackMask]\n"
-			"umull r1, r0, r0, %[unpackMagic]\n"
-			"orr r0, r0, #2\n"
-			"add r1, %[x], %[offset]\n"
-			"strb r0, [%[image], r1]\n"
-			"qadd16 %[UV], %[UV], %[dUV]\n"
-			"qadd16 %[UV], %[UV], %[tmpAdd]\n"
-			"qsub16 %[UV], %[UV], %[tmpAdd]\n"
-			"add %[x], #1\n"
-			"cmp %[x], %[xMax]\n"
-			"ble inner_loop_a\n"
-			"end_inner_loop_a:\n"
-			: [UV] "+r" (UV)
-			: [dUV] "r" (dUV),
-			  [x] "r" (x),
-			  [xMax] "r" (xMax),
-			  [offset] "r" (offset),
-			  [image] "r" (image),
-			  [unpackMask] "r" (unpackMask),
-			  [unpackMagic] "r" (unpackMagic),
-			  [tmpAdd] "r" (tmpAdd)
-			: "r0", "r1"
-		);
-		
-		leftX += leftXd;
-		rightX += rightXd;
-		leftU += leftUd;
-		leftV += leftVd;
+                if(scanline > 0) {
+                    uint32_t xMax = imin(FixedToRoundedInt(rightX), WIDTH);
+                    uint32_t offset = scanline*WIDTH;
+                    int32_t x = FixedToRoundedInt(leftX);
 
-		U = leftU;
-		V = leftV;
-		
-		__asm__ volatile(
-			"pkhbt %[UV], %[V], %[U], lsl #16\n"
-			: [UV] "=r" (UV)
-			: [U] "r" (U), [V] "r" (V)
-		);
+                    __asm__ volatile(
+                            "cmp %[x], #-1\n"
+                            "bgt start_inner_loop_a\n"
+                            "pre_inner_loop_a:\n"
+                            "and r0, %[UV], %[unpackMask]\n"
+                            "umull r1, r0, r0, %[unpackMagic]\n"
+                            "orr r0, r0, #2\n"
+                            "qadd16 %[UV], %[UV], %[dUV]\n"
+                            "qadd16 %[UV], %[UV], %[tmpAdd]\n"
+                            "qsub16 %[UV], %[UV], %[tmpAdd]\n"
+                            "add %[x], #1\n"
+                            "cmp %[x], #-1\n"
+                            "ble pre_inner_loop_a\n"
+                            "start_inner_loop_a:\n"
+                            
+                            "cmp %[x], %[xMax]\n"
+                            "bgt end_inner_loop_a\n"
+                            "inner_loop_a:\n"
+                            "and r0, %[UV], %[unpackMask]\n"
+                            "umull r1, r0, r0, %[unpackMagic]\n"
+                            "orr r0, r0, #2\n"
+                            "add r1, %[x], %[offset]\n"
+                            "strb r0, [%[image], r1]\n"
+                            "qadd16 %[UV], %[UV], %[dUV]\n"
+                            "qadd16 %[UV], %[UV], %[tmpAdd]\n"
+                            "qsub16 %[UV], %[UV], %[tmpAdd]\n"
+                            "add %[x], #1\n"
+                            "cmp %[x], %[xMax]\n"
+                            "ble inner_loop_a\n"
+                            "end_inner_loop_a:\n"
+                            : [UV] "+r" (UV)
+                            : [dUV] "r" (dUV),
+                            [x] "r" (x),
+                            [xMax] "r" (xMax),
+                            [offset] "r" (offset),
+                            [image] "r" (image),
+                            [unpackMask] "r" (unpackMask),
+                            [unpackMagic] "r" (unpackMagic),
+                            [tmpAdd] "r" (tmpAdd)
+                            : "r0", "r1"
+                    );
+
+                    leftX += leftXd;
+                    rightX += rightXd;
+                    leftU += leftUd;
+                    leftV += leftVd;
+
+                    U = leftU;
+                    V = leftV;
+
+                    __asm__ volatile(
+                            "pkhbt %[UV], %[V], %[U], lsl #16\n"
+                            : [UV] "=r" (UV)
+                            : [U] "r" (U), [V] "r" (V)
+                    );
+                }
 	}
         
 	// Guard against special case C: flat lower edge
@@ -266,7 +283,7 @@ inline static void RasterizeTriangle(uint8_t* image, triangle_t* tri ) {
 lower_half_render:
 
 	// lower triangle half
-	scanlineMax = FixedToRoundedInt(lowerVertex.p.y);
+	scanlineMax = imin(FixedToRoundedInt(lowerVertex.p.y), HEIGHT);
         
 	U = leftU;
 	V = leftV;
@@ -278,37 +295,53 @@ lower_half_render:
 	);
 
 	for(scanline = FixedToRoundedInt(centerVertex.p.y); scanline < scanlineMax; scanline++ ) {
-		uint32_t xMax = FixedToRoundedInt(rightX);
-		uint32_t offset = scanline*WIDTH;
-		int32_t x = FixedToRoundedInt(leftX);
-		__asm__ volatile(
-			"cmp %[x], %[xMax]\n"
-			"bgt end_inner_loop_b\n"
-			"inner_loop_b:\n"
-			"and r0, %[UV], %[unpackMask]\n"
-			"umull r1, r0, r0, %[unpackMagic]\n"
-			"orr r0, r0, #2\n"
-			"add r1, %[x], %[offset]\n"
-			"strb r0, [%[image], r1]\n"
-			"qadd16 %[UV], %[UV], %[dUV]\n"
-			"qadd16 %[UV], %[UV], %[tmpAdd]\n"
-			"qsub16 %[UV], %[UV], %[tmpAdd]\n"
-			"add %[x], #1\n"
-			"cmp %[x], %[xMax]\n"
-			"ble inner_loop_b\n"
-			"end_inner_loop_b:\n"
-			: [UV] "+r" (UV)
-			: [dUV] "r" (dUV),
-			  [x] "r" (x),
-			  [xMax] "r" (xMax),
-			  [offset] "r" (offset),
-			  [image] "r" (image),
-			  [unpackMask] "r" (unpackMask),
-			  [unpackMagic] "r" (unpackMagic),
-			  [tmpAdd] "r" (tmpAdd)
-			: "r0", "r1"
-		);
-		
+                if(scanline > 0) {
+                    uint32_t xMax = imin(FixedToRoundedInt(rightX), WIDTH);
+                    uint32_t offset = scanline*WIDTH;
+                    int32_t x = FixedToRoundedInt(leftX);
+                    __asm__ volatile(
+                            "cmp %[x], #-1\n"
+                            "bgt start_inner_loop_b\n"
+                            "pre_inner_loop_b:\n"
+                            "and r0, %[UV], %[unpackMask]\n"
+                            "umull r1, r0, r0, %[unpackMagic]\n"
+                            "orr r0, r0, #2\n"
+                            "qadd16 %[UV], %[UV], %[dUV]\n"
+                            "qadd16 %[UV], %[UV], %[tmpAdd]\n"
+                            "qsub16 %[UV], %[UV], %[tmpAdd]\n"
+                            "add %[x], #1\n"
+                            "cmp %[x], #-1\n"
+                            "ble pre_inner_loop_b\n"
+                            "start_inner_loop_b:\n"
+
+                            "cmp %[x], %[xMax]\n"
+                            "bgt end_inner_loop_b\n"
+                            "inner_loop_b:\n"
+                            "and r0, %[UV], %[unpackMask]\n"
+                            "umull r1, r0, r0, %[unpackMagic]\n"
+                            "orr r0, r0, #2\n"
+                            "add r1, %[x], %[offset]\n"
+                            "strb r0, [%[image], r1]\n"
+                            "qadd16 %[UV], %[UV], %[dUV]\n"
+                            "qadd16 %[UV], %[UV], %[tmpAdd]\n"
+                            "qsub16 %[UV], %[UV], %[tmpAdd]\n"
+                            "add %[x], #1\n"
+                            "cmp %[x], %[xMax]\n"
+                            "ble inner_loop_b\n"
+                            "end_inner_loop_b:\n"
+                            : [UV] "+r" (UV)
+                            : [dUV] "r" (dUV),
+                            [x] "r" (x),
+                            [xMax] "r" (xMax),
+                            [offset] "r" (offset),
+                            [image] "r" (image),
+                            [unpackMask] "r" (unpackMask),
+                            [unpackMagic] "r" (unpackMagic),
+                            [tmpAdd] "r" (tmpAdd)
+                            : "r0", "r1"
+                    );
+                }
+                
 		leftX += leftXd;
 		rightX += rightXd;
 		leftU += leftUd;
@@ -395,6 +428,7 @@ inline static void RasterizeTest(uint8_t* image) {
 	
 	// Transform
 	vertex_t transformVertex;
+        srand(233);
 	for(int32_t i = 0; i < numVertices; i++) {
 		transformVertex.p = imat4x4transform(modelview,ivec4(vertices[i].x,vertices[i].y,vertices[i].z,F(1)));
 		// transformVertex.n = ivec4_xyz(imat4x4transform(modelview,ivec4(vertices[i].n.x,vertices[i].n.y,vertices[i].n.z,F(0))));
@@ -408,12 +442,12 @@ inline static void RasterizeTest(uint8_t* image) {
 			Viewport(transformVertex.p.y,transformVertex.p.w,HEIGHT),
 			transformVertex.p.z
 		);
-                data.rasterizer.transformedVertices[i].c = RastRGB(((i*7)/numVertices),((i*7)/numVertices),2);
+                data.rasterizer.transformedVertices[i].c = RastRGB(rand()%7,rand()%7,rand()%3);
 	}
 
         
 	// Depth sort
-	qsort(data.rasterizer.sortedTriangles,numFaces,sizeof(index_triangle_t),&triClosestDepthCompare);
+	qsort(data.rasterizer.sortedTriangles,numFaces,sizeof(index_triangle_t),&triAvgDepthCompare);
 
         
 	// For each triangle

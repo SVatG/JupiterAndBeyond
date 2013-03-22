@@ -36,6 +36,9 @@ C_FILES =	Accelerometer.c \
 		VGA.c \
 		Cityscape.c \
 		Rasterize.c \
+		Jupiter1.c \
+		Jupiter3.c \
+		LogoShow.c \
 		Graphics/Bitmap.c \
 		Graphics/DrawingBitmaps.c \
 		Graphics/DrawingLines.c \
