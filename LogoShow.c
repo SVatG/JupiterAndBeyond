@@ -84,7 +84,7 @@ void LogoShow() {
 	ClearBitmap(&frame1);
 	ClearBitmap(&frame2);
 	
-	SetVGAScreenMode320x200(framebuffer1);
+	SetVGAScreenMode320x200_60Hz(framebuffer1);
 
 	int t=0;
 
