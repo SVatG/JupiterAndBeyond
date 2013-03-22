@@ -4,18 +4,18 @@
 
 #include <stdlib.h>
 
-uint32_t VGALine;
+volatile uint32_t VGALine;
 volatile uint32_t VGAFrame;
-uint32_t VGAFrameBufferAddress;
-uint32_t VGACurrentLineAddress;
-uint32_t VGAPixelsPerRow;
-uint16_t VGAThreeLineCounter;
+static uint32_t VGAFrameBufferAddress;
+static uint32_t VGACurrentLineAddress;
+static uint32_t VGAPixelsPerRow;
+static uint16_t VGAThreeLineCounter;
 
 static HBlankInterruptFunction *HBlankInterruptHandler;
 
 void InitializeVGA()
 {
-	VGALine=0xffffffff;
+	VGALine=-1;
 	VGAFrame=0;
 
 	HBlankInterruptHandler=NULL;
@@ -47,8 +47,8 @@ void InitializeVGA()
 	// CC4 is used to generate the HSync pulse, using PWM mode and driving the pin directly.
 	// CC3 is used to generate a trigger signal for TIM8, which drives the pixel DMA.
 	TIM2->CR1=TIM_CR1_ARPE;
-	TIM2->CR2=(6*TIM_CR2_MMS_0); // trigger-out on CCR3
-	TIM2->DIER=TIM_DIER_CC4IE; // Enable compare 4 interrupt.
+	TIM2->CR2=(6*TIM_CR2_MMS_0); // Trigger-out on CCR3.
+	TIM2->DIER=TIM_DIER_UIE; // Enable update interrupt.
 	TIM2->CCER=0; // Disable CC, so we can program it.
 	TIM2->CCMR1=0;
 	// PWM-mode: Channel 4 set to active level on reload, passive level after CC4-match.
@@ -124,12 +124,12 @@ static void BlankHSyncHandler350()
 
 
 static void PixelHSyncHandler240();
-static void PixelHSyncHandler200();
 static void PixelHSyncHandler200_60Hz();
+static void PixelHSyncHandler200();
 static void PixelHSyncHandler175();
 static void PixelHSyncHandler160();
-static void PixelHSyncHandler133();
 static void PixelHSyncHandler133_60Hz();
+static void PixelHSyncHandler133();
 static void PixelHSyncHandler117();
 
 static void InitializePixelDMA(int pixelclock,int pixelsperrow);
@@ -139,7 +139,7 @@ static inline void StopPixelDMA();
 
 static inline void WaitVBLIfVGAIsActive()
 {
-	if(VGALine!=0xffffffff) WaitVBL();
+	if(IsInterruptEnabled(TIM2_IRQn)) WaitVBL();
 }
 
 void SetVGAScreenMode240(uint8_t *framebuffer,int pixelsperrow,int pixelclock)
@@ -150,20 +150,20 @@ void SetVGAScreenMode240(uint8_t *framebuffer,int pixelsperrow,int pixelclock)
 	SetVGAHorizontalSync31kHz(PixelHSyncHandler240);
 }
 
-void SetVGAScreenMode200(uint8_t *framebuffer,int pixelsperrow,int pixelclock)
-{
-	WaitVBLIfVGAIsActive();
-	InitializePixelDMA(pixelclock,pixelsperrow);
-	SetFrameBuffer(framebuffer);
-	SetVGAHorizontalSync31kHz(PixelHSyncHandler200);
-}
-
 void SetVGAScreenMode200_60Hz(uint8_t *framebuffer,int pixelsperrow,int pixelclock)
 {
 	WaitVBLIfVGAIsActive();
 	InitializePixelDMA(pixelclock,pixelsperrow);
 	SetFrameBuffer(framebuffer);
 	SetVGAHorizontalSync31kHz(PixelHSyncHandler200_60Hz);
+}
+
+void SetVGAScreenMode200(uint8_t *framebuffer,int pixelsperrow,int pixelclock)
+{
+	WaitVBLIfVGAIsActive();
+	InitializePixelDMA(pixelclock,pixelsperrow);
+	SetFrameBuffer(framebuffer);
+	SetVGAHorizontalSync31kHz(PixelHSyncHandler200);
 }
 
 void SetVGAScreenMode175(uint8_t *framebuffer,int pixelsperrow,int pixelclock)
@@ -183,15 +183,6 @@ void SetVGAScreenMode160(uint8_t *framebuffer,int pixelsperrow,int pixelclock)
 	SetVGAHorizontalSync31kHz(PixelHSyncHandler160);
 }
 
-void SetVGAScreenMode133(uint8_t *framebuffer,int pixelsperrow,int pixelclock)
-{
-	WaitVBLIfVGAIsActive();
-	InitializePixelDMA(pixelclock,pixelsperrow);
-	SetFrameBuffer(framebuffer);
-	VGAThreeLineCounter=0;
-	SetVGAHorizontalSync31kHz(PixelHSyncHandler133);
-}
-
 void SetVGAScreenMode133_60Hz(uint8_t *framebuffer,int pixelsperrow,int pixelclock)
 {
 	WaitVBLIfVGAIsActive();
@@ -199,6 +190,15 @@ void SetVGAScreenMode133_60Hz(uint8_t *framebuffer,int pixelsperrow,int pixelclo
 	SetFrameBuffer(framebuffer);
 	VGAThreeLineCounter=0;
 	SetVGAHorizontalSync31kHz(PixelHSyncHandler133_60Hz);
+}
+
+void SetVGAScreenMode133(uint8_t *framebuffer,int pixelsperrow,int pixelclock)
+{
+	WaitVBLIfVGAIsActive();
+	InitializePixelDMA(pixelclock,pixelsperrow);
+	SetFrameBuffer(framebuffer);
+	VGAThreeLineCounter=0;
+	SetVGAHorizontalSync31kHz(PixelHSyncHandler133);
 }
 
 void SetVGAScreenMode117(uint8_t *framebuffer,int pixelsperrow,int pixelclock)
@@ -210,20 +210,17 @@ void SetVGAScreenMode117(uint8_t *framebuffer,int pixelsperrow,int pixelclock)
 	SetVGAHorizontalSync31kHz(PixelHSyncHandler117);
 }
 
+void SetFrameBuffer(uint8_t *framebuffer)
+{
+	VGAFrameBufferAddress=VGACurrentLineAddress=(uint32_t)framebuffer;
+}
+
 static void PixelHSyncHandler240()
 {
 	int line=HandleVGAHSync480();
 	if(line<0) return;
 
-	StartPixelDMA();
-	if(line&1) VGACurrentLineAddress+=VGAPixelsPerRow;
-}
-
-static void PixelHSyncHandler200()
-{
-	int line=HandleVGAHSync400();
-	if(line<0) return;
-
+	if(line==0) VGACurrentLineAddress=VGAFrameBufferAddress;
 	StartPixelDMA();
 	if(line&1) VGACurrentLineAddress+=VGAPixelsPerRow;
 }
@@ -233,6 +230,17 @@ static void PixelHSyncHandler200_60Hz()
 	int line=HandleVGAHSync400_60Hz();
 	if(line<0) return;
 
+	if(line==0) VGACurrentLineAddress=VGAFrameBufferAddress;
+	StartPixelDMA();
+	if(line&1) VGACurrentLineAddress+=VGAPixelsPerRow;
+}
+
+static void PixelHSyncHandler200()
+{
+	int line=HandleVGAHSync400();
+	if(line<0) return;
+
+	if(line==0) VGACurrentLineAddress=VGAFrameBufferAddress;
 	StartPixelDMA();
 	if(line&1) VGACurrentLineAddress+=VGAPixelsPerRow;
 }
@@ -242,6 +250,7 @@ static void PixelHSyncHandler175()
 	int line=HandleVGAHSync350();
 	if(line<0) return;
 
+	if(line==0) VGACurrentLineAddress=VGAFrameBufferAddress;
 	StartPixelDMA();
 	if(line&1) VGACurrentLineAddress+=VGAPixelsPerRow;
 }
@@ -251,19 +260,7 @@ static void PixelHSyncHandler160()
 	int line=HandleVGAHSync480();
 	if(line<0) return;
 
-	StartPixelDMA();
-	if(VGAThreeLineCounter++==2)
-	{
-		VGACurrentLineAddress+=VGAPixelsPerRow;
-		VGAThreeLineCounter=0;
-	}
-}
-
-static void PixelHSyncHandler133()
-{
-	int line=HandleVGAHSync400();
-	if(line<0) return;
-
+	if(line==0) VGACurrentLineAddress=VGAFrameBufferAddress;
 	StartPixelDMA();
 	if(VGAThreeLineCounter++==2)
 	{
@@ -277,6 +274,21 @@ static void PixelHSyncHandler133_60Hz()
 	int line=HandleVGAHSync400_60Hz();
 	if(line<0) return;
 
+	if(line==0) VGACurrentLineAddress=VGAFrameBufferAddress;
+	StartPixelDMA();
+	if(VGAThreeLineCounter++==2)
+	{
+		VGACurrentLineAddress+=VGAPixelsPerRow;
+		VGAThreeLineCounter=0;
+	}
+}
+
+static void PixelHSyncHandler133()
+{
+	int line=HandleVGAHSync400();
+	if(line<0) return;
+
+	if(line==0) VGACurrentLineAddress=VGAFrameBufferAddress;
 	StartPixelDMA();
 	if(VGAThreeLineCounter++==2)
 	{
@@ -290,6 +302,7 @@ static void PixelHSyncHandler117()
 	int line=HandleVGAHSync350();
 	if(line<0) return;
 
+	if(line==0) VGACurrentLineAddress=VGAFrameBufferAddress;
 	StartPixelDMA();
 	if(VGAThreeLineCounter++==2)
 	{
@@ -347,13 +360,13 @@ static inline void StartPixelDMA()
 	DMA2_Stream1->PAR=((uint32_t)&GPIOE->ODR)+1;
 	DMA2_Stream1->M0AR=VGACurrentLineAddress;
 
-	DMA2_Stream1->CR|=DMA_SxCR_EN;
-
 	// Enable pixel clock. Clock will only start once TIM2 allows it.
-	TIM8->DIER=0;  // Update DMA request has to be disabled while zeroing the counter.
-	TIM8->CNT=0;
+	TIM8->DIER=0; // Update DMA request has to be disabled while zeroing the counter.
+	TIM8->EGR=TIM_EGR_UG; // Force an update event to reset counter. Setting CNT is not reliable.
 	TIM8->DIER=TIM_DIER_UDE; // Re-enable update DMA request.
-	TIM8->CR1|=TIM_CR1_CEN;	 
+	TIM8->CR1|=TIM_CR1_CEN;
+
+	DMA2_Stream1->CR|=DMA_SxCR_EN;
 }
 
 static inline void StopPixelDMA()

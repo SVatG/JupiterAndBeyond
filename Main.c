@@ -51,7 +51,7 @@ int main()
 	for(;;)
 	{
 		Starfield();
-		Rotozoom();
+		//Rotozoom();
 		Epileptor();
 	}
 }
