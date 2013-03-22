@@ -20,26 +20,28 @@ LIBS =	-lm
 SOURCE_DIR = .
 BUILD_DIR = Build
 
-C_FILES =	Accelerometer.c \
-		Audio.c \
+C_FILES = Audio.c \
 		BitBin.c \
 		Button.c \
+		Cityscape.c \
 		Fields.c \
 		HeightMap.c \
+		Jupiter1.c \
+		Jupiter3.c \
 		LED.c \
+		LogoShow.c \
 		Main.c \
+		Mystery.c \
+		Pukezoomer.c \
 		Random.c \
+		Rasterize.c \
 		RayArray.c \
 		Startup.c \
 		System.c \
 		TestSong.c \
 		Utils.c \
 		VGA.c \
-		Cityscape.c \
-		Rasterize.c \
-		Jupiter1.c \
-		Jupiter3.c \
-		LogoShow.c \
+		Voxelscape.c \
 		Graphics/Bitmap.c \
 		Graphics/DrawingBitmaps.c \
 		Graphics/DrawingLines.c \

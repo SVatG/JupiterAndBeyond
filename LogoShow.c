@@ -4,7 +4,6 @@
 
 #include "Global.h"
 #include "VGA.h"
-#include "Sprites.h"
 #include "LED.h"
 #include "Utils.h"
 #include "Button.h"

@@ -1,17 +1,14 @@
-#ifndef __EFFECTS_H__
-#define __EFFECTS_H__
+#ifndef __FIELDS_H__
+#define __FIELDS_H__
 
 #include <stdint.h>
 
-//void InitializeTunnel();
-//void DrawTunnel(uint8_t *pixels,int t);
+struct FieldsData
+{
+	uint8_t palette[32],palette2[32],palette3[32],palette4[32];
+};
 
-void InitializeField();
-void DrawField(uint8_t *pixels,int t);
-void DrawField2(uint8_t *pixels,int t);
-void DrawField3(uint8_t *pixels,int t);
-void DrawField4(uint8_t *pixels,int t);
-
+void Fields();
 
 #endif
 
