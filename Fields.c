@@ -1,5 +1,9 @@
 #include "Fields.h"
+#include "VGA.h"
+#include "Random.h"
 #include "Utils.h"
+#include "Global.h"
+#include "LED.h"
 
 #include "Graphics/Bitmap.h"
 
@@ -9,12 +13,61 @@
 #define Width 212
 #define Height 133
 
+static void InitializeField();
+static void DrawField(uint8_t *pixels,int t);
+static void DrawField2(uint8_t *pixels,int t);
+static void DrawField3(uint8_t *pixels,int t);
+static void DrawField4(uint8_t *pixels,int t);
+
 extern const int16_t rayarray[Width*Height*3];
 static uint8_t palette[32],palette2[32],palette3[32],palette4[32];
 
 #define intmin(x,y) (((x) < (y)) ? (x) : (y))
 
-void InitializeField()
+void Fields()
+{
+	InitializeField();
+
+	uint8_t *framebuffer1=(uint8_t *)0x20000000;
+	uint8_t *framebuffer2=(uint8_t *)0x20010000;
+	memset(framebuffer1,0,212*133);
+	memset(framebuffer2,0,212*133);
+
+	SetVGAScreenMode212x133_60Hz(framebuffer1);
+
+	for(int t=0;;t++)
+	{
+		if(UserButtonState()) break;
+
+		SetLEDs(t>>3);
+
+		WaitVBL();
+
+		uint8_t *framebuffer;
+		if(t&1)
+		{
+			framebuffer=framebuffer2;
+			SetFrameBuffer(framebuffer1);
+		}
+		else
+		{
+			framebuffer=framebuffer1;
+			SetFrameBuffer(framebuffer2);
+		}
+
+		switch((t>>8)&3)
+		{
+			case 0: DrawField(framebuffer,t); break;
+			case 1: DrawField2(framebuffer,t); break;
+			case 2: DrawField3(framebuffer,t); break;
+			case 3: DrawField4(framebuffer,t); break;
+		}
+	}
+
+	while(UserButtonState());
+}
+
+static void InitializeField()
 {
 	for(int i=0;i<32;i++)
 	{
@@ -46,7 +99,7 @@ void InitializeField()
 
 static inline int32_t approxabs(int32_t x) { return x^(x>>31); }
 
-void DrawField(uint8_t *pixels,int tv)
+static void DrawField(uint8_t *pixels,int tv)
 {
 	const int16_t *rays=rayarray;
 
@@ -195,7 +248,7 @@ void DrawField(uint8_t *pixels,int tv)
 	}
 }
 
-void DrawField2(uint8_t *pixels,int t)
+static void DrawField2(uint8_t *pixels,int t)
 {
 	const int16_t *rays=rayarray;
 
@@ -244,7 +297,7 @@ void DrawField2(uint8_t *pixels,int t)
 	}
 }
 
-void DrawField3(uint8_t *pixels,int t)
+static void DrawField3(uint8_t *pixels,int t)
 {
 	const int16_t *rays=rayarray;
 
@@ -293,7 +346,7 @@ void DrawField3(uint8_t *pixels,int t)
 	}
 }
 
-void DrawField4(uint8_t *pixels,int t)
+static void DrawField4(uint8_t *pixels,int t)
 {
 	const int16_t *rays=rayarray;
 

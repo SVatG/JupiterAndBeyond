@@ -472,7 +472,7 @@ void Rasterize() {
 	InitializeBitmap(&frame1,320,200,320,framebuffer1);
 	InitializeBitmap(&frame2,320,200,320,framebuffer2);
 
-	SetVGAScreenMode320x200(framebuffer1);
+	SetVGAScreenMode320x200_60Hz(framebuffer1);
 	
 	int t=0;
 
