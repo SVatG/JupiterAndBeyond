@@ -60,6 +60,7 @@ void InitializeVGA()
 	// On CNT==0: sync pulse start
 	TIM2->CCR4=320; // 84 MHz * 3.813 microseconds = 320.292 - sync pulse end
 	TIM2->CCR3=480; // 84 MHz * (3.813 + 1.907) microseconds = 480.48 - back porch end, start pixel clock
+	TIM2->CCR2=480; // 84 MHz * (3.813 + 1.907) microseconds = 480.48 - back porch end, start pixel clock
 
 	// Enable HSync timer.
 	TIM2->CNT=-10; // Make sure it hits ARR. 
@@ -72,10 +73,11 @@ static inline void WaitForLastLineIfVGAEnabled()
 	while(VGALine!=0xffffffff);
 }
 
-void SetVGAHorizontalSync31kHz(InterruptHandler *handler)
+static void SetVGAHorizontalSync31kHzAtInterrupt(InterruptHandler *handler,int dier)
 {
 	WaitForLastLineIfVGAEnabled();
 
+	TIM2->DIER=dier;
 	TIM2->CCER=TIM_CCER_CC4E|TIM_CCER_CC4P; // Channel 4 enabled, reversed polarity (active low).
 
 	// Enable HSync timer interrupt and set highest priority.
@@ -84,16 +86,49 @@ void SetVGAHorizontalSync31kHz(InterruptHandler *handler)
 	SetInterruptPriority(TIM2_IRQn,0);
 }
 
-void SetVGAHorizontalSync31kHzActiveHigh(InterruptHandler *handler)
+static void SetVGAHorizontalSync31kHzActiveHighAtInterrupt(InterruptHandler *handler,int dier)
 {
 	WaitForLastLineIfVGAEnabled();
 
+	TIM2->DIER=dier; // Enable update interrupt.
 	TIM2->CCER=TIM_CCER_CC4E; // Channel 4 enabled, normal polarity (active high).
 
 	// Enable HSync timer interrupt and set highest priority.
 	InstallInterruptHandler(TIM2_IRQn,handler);
 	EnableInterrupt(TIM2_IRQn);
 	SetInterruptPriority(TIM2_IRQn,0);
+}
+
+static void SetVGAHorizontalSync31kHzForDMA(InterruptHandler *handler)
+{
+	SetVGAHorizontalSync31kHzAtInterrupt(handler,TIM_DIER_UIE); // Use update interrupt.
+}
+
+static void SetVGAHorizontalSync31kHzActiveHighForDMA(InterruptHandler *handler)
+{
+	SetVGAHorizontalSync31kHzActiveHighAtInterrupt(handler,TIM_DIER_UIE); // Use update interrupt.
+}
+
+void SetVGAHorizontalSync31kHz(InterruptHandler *handler)
+{
+	SetVGAHorizontalSync31kHzAtInterrupt(handler,TIM_DIER_CC2IE); // Use CC2 interrupt.
+}
+
+void SetVGAHorizontalSync31kHzActiveHigh(InterruptHandler *handler)
+{
+	SetVGAHorizontalSync31kHzActiveHighAtInterrupt(handler,TIM_DIER_CC2IE); // Use CC2 interrupt.
+}
+
+void SetVGAHorizontalSync31kHzWithEarlyStart(InterruptHandler *handler,int offset)
+{
+	TIM2->CCR2=480-offset; // 84 MHz * (3.813 + 1.907) microseconds = 480.48 - back porch end, start pixel clock
+	SetVGAHorizontalSync31kHzAtInterrupt(handler,TIM_DIER_CC2IE); // Use CC2 interrupt.
+}
+
+void SetVGAHorizontalSync31kHzActiveHighWithEarlyStart(InterruptHandler *handler,int offset)
+{
+	TIM2->CCR2=480-offset; // 84 MHz * (3.813 + 1.907) microseconds = 480.48 - back porch end, start pixel clock
+	SetVGAHorizontalSync31kHzActiveHighAtInterrupt(handler,TIM_DIER_CC2IE); // Use CC2 interrupt.
 }
 
 void SetHBlankInterruptHandler(HBlankInterruptFunction *handler)
@@ -111,19 +146,19 @@ static void BlankHSyncHandler350();
 void SetBlankVGAScreenMode480()
 {
 	SetVGASignalToBlack();
-	SetVGAHorizontalSync31kHz(BlankHSyncHandler480);
+	SetVGAHorizontalSync31kHzForDMA(BlankHSyncHandler480);
 }
 
 void SetBlankVGAScreenMode400()
 {
 	SetVGASignalToBlack();
-	SetVGAHorizontalSync31kHz(BlankHSyncHandler400);
+	SetVGAHorizontalSync31kHzForDMA(BlankHSyncHandler400);
 }
 
 void SetBlankVGAScreenMode350()
 {
 	SetVGASignalToBlack();
-	SetVGAHorizontalSync31kHzActiveHigh(BlankHSyncHandler350);
+	SetVGAHorizontalSync31kHzActiveHighForDMA(BlankHSyncHandler350);
 }
 
 static void BlankHSyncHandler480()
@@ -163,7 +198,7 @@ void SetVGAScreenMode240(uint8_t *framebuffer,int pixelsperrow,int pixelclock)
 	WaitForLastLineIfVGAEnabled();
 	InitializePixelDMA(pixelclock,pixelsperrow);
 	SetFrameBuffer(framebuffer);
-	SetVGAHorizontalSync31kHz(PixelHSyncHandler240);
+	SetVGAHorizontalSync31kHzForDMA(PixelHSyncHandler240);
 }
 
 void SetVGAScreenMode200_60Hz(uint8_t *framebuffer,int pixelsperrow,int pixelclock)
@@ -171,7 +206,7 @@ void SetVGAScreenMode200_60Hz(uint8_t *framebuffer,int pixelsperrow,int pixelclo
 	WaitForLastLineIfVGAEnabled();
 	InitializePixelDMA(pixelclock,pixelsperrow);
 	SetFrameBuffer(framebuffer);
-	SetVGAHorizontalSync31kHz(PixelHSyncHandler200_60Hz);
+	SetVGAHorizontalSync31kHzForDMA(PixelHSyncHandler200_60Hz);
 }
 
 void SetVGAScreenMode200(uint8_t *framebuffer,int pixelsperrow,int pixelclock)
@@ -179,7 +214,7 @@ void SetVGAScreenMode200(uint8_t *framebuffer,int pixelsperrow,int pixelclock)
 	WaitForLastLineIfVGAEnabled();
 	InitializePixelDMA(pixelclock,pixelsperrow);
 	SetFrameBuffer(framebuffer);
-	SetVGAHorizontalSync31kHz(PixelHSyncHandler200);
+	SetVGAHorizontalSync31kHzForDMA(PixelHSyncHandler200);
 }
 
 void SetVGAScreenMode175(uint8_t *framebuffer,int pixelsperrow,int pixelclock)
@@ -187,7 +222,7 @@ void SetVGAScreenMode175(uint8_t *framebuffer,int pixelsperrow,int pixelclock)
 	WaitForLastLineIfVGAEnabled();
 	InitializePixelDMA(pixelclock,pixelsperrow);
 	SetFrameBuffer(framebuffer);
-	SetVGAHorizontalSync31kHzActiveHigh(PixelHSyncHandler175);
+	SetVGAHorizontalSync31kHzActiveHighForDMA(PixelHSyncHandler175);
 }
 
 void SetVGAScreenMode160(uint8_t *framebuffer,int pixelsperrow,int pixelclock)
@@ -196,7 +231,7 @@ void SetVGAScreenMode160(uint8_t *framebuffer,int pixelsperrow,int pixelclock)
 	InitializePixelDMA(pixelclock,pixelsperrow);
 	SetFrameBuffer(framebuffer);
 	VGAThreeLineCounter=0;
-	SetVGAHorizontalSync31kHz(PixelHSyncHandler160);
+	SetVGAHorizontalSync31kHzForDMA(PixelHSyncHandler160);
 }
 
 void SetVGAScreenMode133_60Hz(uint8_t *framebuffer,int pixelsperrow,int pixelclock)
@@ -205,7 +240,7 @@ void SetVGAScreenMode133_60Hz(uint8_t *framebuffer,int pixelsperrow,int pixelclo
 	InitializePixelDMA(pixelclock,pixelsperrow);
 	SetFrameBuffer(framebuffer);
 	VGAThreeLineCounter=0;
-	SetVGAHorizontalSync31kHz(PixelHSyncHandler133_60Hz);
+	SetVGAHorizontalSync31kHzForDMA(PixelHSyncHandler133_60Hz);
 }
 
 void SetVGAScreenMode133(uint8_t *framebuffer,int pixelsperrow,int pixelclock)
@@ -214,7 +249,7 @@ void SetVGAScreenMode133(uint8_t *framebuffer,int pixelsperrow,int pixelclock)
 	InitializePixelDMA(pixelclock,pixelsperrow);
 	SetFrameBuffer(framebuffer);
 	VGAThreeLineCounter=0;
-	SetVGAHorizontalSync31kHz(PixelHSyncHandler133);
+	SetVGAHorizontalSync31kHzForDMA(PixelHSyncHandler133);
 }
 
 void SetVGAScreenMode117(uint8_t *framebuffer,int pixelsperrow,int pixelclock)
@@ -223,7 +258,7 @@ void SetVGAScreenMode117(uint8_t *framebuffer,int pixelsperrow,int pixelclock)
 	InitializePixelDMA(pixelclock,pixelsperrow);
 	SetFrameBuffer(framebuffer);
 	VGAThreeLineCounter=0;
-	SetVGAHorizontalSync31kHzActiveHigh(PixelHSyncHandler117);
+	SetVGAHorizontalSync31kHzActiveHighForDMA(PixelHSyncHandler117);
 }
 
 void SetFrameBuffer(uint8_t *framebuffer)

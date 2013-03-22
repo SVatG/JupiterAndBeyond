@@ -53,6 +53,8 @@ static inline uint32_t VGAFrameCounter() { return VGAFrame; }
 
 void SetVGAHorizontalSync31kHz(InterruptHandler *handler);
 void SetVGAHorizontalSync31kHzActiveHigh(InterruptHandler *handler);
+void SetVGAHorizontalSync31kHzWithEarlyStart(InterruptHandler *handler,int offset);
+void SetVGAHorizontalSync31kHzActiveHighWithEarlyStart(InterruptHandler *handler,int offset);
 
 static inline void RaiseVGAVSyncLine() { GPIOB->BSRRL=(1<<12); }
 static inline void LowerVGAVSyncLine() { GPIOB->BSRRH=(1<<12); }
