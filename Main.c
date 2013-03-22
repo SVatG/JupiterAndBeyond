@@ -60,9 +60,9 @@ int main()
 
 	for(;;)
 	{
-                LogoShow();
                 RasterizeInit();
                 Rasterize();
+                LogoShow();
 		Voxelscape();
 		IDontEvenKnow();
 		PlasmaZoom();

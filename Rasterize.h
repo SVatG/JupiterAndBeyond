@@ -15,6 +15,7 @@ typedef struct {
 
 typedef struct {
 	ivec3_t p;
+//         ivec3_t n;
 	uint32_t c;
 } ss_vertex_t;
 

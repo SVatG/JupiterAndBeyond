@@ -63,6 +63,7 @@ for(my $faceidx = 0; $faceidx < scalar @faces; $faceidx++) {
     my $plen = sqrt($p[0] * $p[0] + $p[1] * $p[1] + $p[2] * $p[2]);
     if($plen == 0) {
         splice(@faces, $faceidx, 1);
+        $faceidx--;
         next;
     }
     @p = ($p[0] / $plen, $p[1] / $plen, $p[2] / $plen);

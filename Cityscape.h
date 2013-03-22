@@ -8,7 +8,7 @@
 
 #define numVertices 607
 #define numNormals 89
-#define numFaces 838
+#define numFaces 837
 
 extern const init_vertex_t vertices[];
 extern const init_vertex_t normals[];

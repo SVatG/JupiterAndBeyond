@@ -405,11 +405,18 @@ void RasterizeInit() {
 }
 
 inline static void RasterizeTest(uint8_t* image) {
+        
 	int32_t rotcnt = (VGAFrame - startFrame);
         int32_t rowd = rotcnt;
         
 	int32_t render_faces_total_start = 0;
 	int32_t render_faces_total_end = numFaces;
+
+        ivec3_t tolight = ivec3norm(imat3x3transform(
+                imat3x3rotatey(256),
+                ivec3(F(0),isin((rotcnt*20)%4096), icos((rotcnt*20)%4096))
+        ));
+        rotcnt = 0;
         
 	// Do a background
 	for(int i=0;i<NumberOfDotStars;i++){
@@ -431,7 +438,6 @@ inline static void RasterizeTest(uint8_t* image) {
         srand(233);
 	for(int32_t i = 0; i < numVertices; i++) {
 		transformVertex.p = imat4x4transform(modelview,ivec4(vertices[i].x,vertices[i].y,vertices[i].z,F(1)));
-		// transformVertex.n = ivec4_xyz(imat4x4transform(modelview,ivec4(vertices[i].n.x,vertices[i].n.y,vertices[i].n.z,F(0))));
 		
 		// Project
 		transformVertex.p = imat4x4transform(proj,transformVertex.p);
@@ -442,8 +448,8 @@ inline static void RasterizeTest(uint8_t* image) {
 			Viewport(transformVertex.p.y,transformVertex.p.w,HEIGHT),
 			transformVertex.p.z
 		);
-                data.rasterizer.transformedVertices[i].c = RastRGB(rand()%7,rand()%7,rand()%3);
-	}
+//                 data.rasterizer.transformedVertices[i].n = ivec3norm(ivec3sub(light, vertices[i]));
+        }
 
         
 	// Depth sort
@@ -453,10 +459,16 @@ inline static void RasterizeTest(uint8_t* image) {
 	// For each triangle
 	triangle_t tri;
         for(int32_t i = render_faces_total_start; i < render_faces_total_end; i++ ) {
-		tri.v[0] = data.rasterizer.transformedVertices[data.rasterizer.sortedTriangles[i].v[0]];
-		tri.v[1] = data.rasterizer.transformedVertices[data.rasterizer.sortedTriangles[i].v[1]];
-		tri.v[2] = data.rasterizer.transformedVertices[data.rasterizer.sortedTriangles[i].v[2]];
-		RasterizeTriangle(image, &tri);
+                for(int ver = 0; ver < 3; ver++) {
+                        tri.v[ver] = data.rasterizer.transformedVertices[data.rasterizer.sortedTriangles[i].v[ver]];
+                        tri.v[ver].c = ivec3dot(
+                            tolight,
+                            normals[data.rasterizer.sortedTriangles[i].v[3]]
+                        );
+                        tri.v[ver].c = imin(imax(F(0), tri.v[ver].c)>>9,7);
+                        tri.v[ver].c = RastRGB(tri.v[ver].c,tri.v[ver].c,0);
+                }
+                RasterizeTriangle(image, &tri);
 	}
 	
 	rotcnt++;
