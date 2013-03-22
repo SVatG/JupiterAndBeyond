@@ -311,8 +311,14 @@ static void PixelHSyncHandler160()
 	int line=HandleVGAHSync480();
 	if(line<0) return;
 
-	if(line==0) VGACurrentLineAddress=VGAFrameBufferAddress;
+	if(line==0)
+	{
+		VGACurrentLineAddress=VGAFrameBufferAddress;
+		VGAThreeLineCounter=0;
+	}
+
 	StartPixelDMA();
+
 	if(VGAThreeLineCounter++==2)
 	{
 		VGACurrentLineAddress+=VGAPixelsPerRow;
@@ -325,8 +331,14 @@ static void PixelHSyncHandler133_60Hz()
 	int line=HandleVGAHSync400_60Hz();
 	if(line<0) return;
 
-	if(line==0) VGACurrentLineAddress=VGAFrameBufferAddress;
+	if(line==0)
+	{
+		VGACurrentLineAddress=VGAFrameBufferAddress;
+		VGAThreeLineCounter=0;
+	}
+
 	StartPixelDMA();
+
 	if(VGAThreeLineCounter++==2)
 	{
 		VGACurrentLineAddress+=VGAPixelsPerRow;
@@ -339,8 +351,14 @@ static void PixelHSyncHandler133()
 	int line=HandleVGAHSync400();
 	if(line<0) return;
 
-	if(line==0) VGACurrentLineAddress=VGAFrameBufferAddress;
+	if(line==0)
+	{
+		VGACurrentLineAddress=VGAFrameBufferAddress;
+		VGAThreeLineCounter=0;
+	}
+
 	StartPixelDMA();
+
 	if(VGAThreeLineCounter++==2)
 	{
 		VGACurrentLineAddress+=VGAPixelsPerRow;
@@ -353,8 +371,14 @@ static void PixelHSyncHandler117()
 	int line=HandleVGAHSync350();
 	if(line<0) return;
 
-	if(line==0) VGACurrentLineAddress=VGAFrameBufferAddress;
+	if(line==0)
+	{
+		VGACurrentLineAddress=VGAFrameBufferAddress;
+		VGAThreeLineCounter=0;
+	}
+
 	StartPixelDMA();
+
 	if(VGAThreeLineCounter++==2)
 	{
 		VGACurrentLineAddress+=VGAPixelsPerRow;
