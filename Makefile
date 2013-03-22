@@ -25,6 +25,7 @@ C_FILES =	Accelerometer.c \
 		BitBin.c \
 		Button.c \
 		Fields.c \
+		HeightMap.c \
 		LED.c \
 		Main.c \
 		Random.c \

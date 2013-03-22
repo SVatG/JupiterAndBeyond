@@ -117,6 +117,8 @@ static void DrawMultiColumnUpwards(uint8_t *pixels,int length,int h,int dh,uint8
 static int toplimity[320],toplasty[320],toplasth[320];
 static int bottomlimity[320],bottomlasty[320],bottomlasth[320];
 
+extern uint8_t HeightMap[256*256];
+
 static void Voxelscape()
 {
 	uint8_t *framebuffer1=(uint8_t *)0x20000000;
@@ -143,11 +145,6 @@ static void Voxelscape()
 			SetFrameBuffer(framebuffer2);
 		}
 
-		Bitmap screen;
-		InitializeBitmap(&screen,320,200,320,destination);
-
-ClearBitmap(&screen);
-
 		uint8_t toppalette[8],bottompalette[8];
 		for(int i=0;i<8;i++)
 		{
@@ -157,7 +154,7 @@ ClearBitmap(&screen);
 		}
 
 
-		#define NumberOfStrips 64
+		#define NumberOfStrips 48
 		#define Perspective 4
 
 		int32_t a=t*4;
@@ -170,7 +167,10 @@ ClearBitmap(&screen);
 
 		for(int i=0;i<NumberOfStrips;i++)
 		{
-			int32_t z=Fix((i+1)*8);
+			//if(i>6 && (i&1)) continue;
+
+			int32_t z=Fix(i*i/4+1);
+			//int32_t z=Fix((i+1)*8);
 			int32_t rz=idiv(Fix(8191<<6)/Perspective,z);
 
 			int32_t du=Perspective*imul(z,-sin_a)/320;
@@ -182,7 +182,19 @@ ClearBitmap(&screen);
 			{
 				if(toplimity[x]>=bottomlimity[x]) { u+=du; v+=dv; continue; }
 
-				int bottomh=(isin(u/256)+isin(v/256)+Fix(2))>>6;
+				int bottomh=HeightMap[((u>>5)&0xff00)|((v>>13)&0xff)];
+				/*int offset=((u>>5)&0xff00)|((v>>13)&0xff);
+				int bottomh1=HeightMap[offset];
+				int bottomh2=HeightMap[offset+1];
+				int bottomh3=HeightMap[offset+256];
+				int bottomh4=HeightMap[offset+257];
+				int ufrac=u&0x1fff;
+				int vfrac=v&0x1fff;
+				int bottomh5=bottomh1+((bottomh2-bottomh1)*vfrac>>13);
+				int bottomh6=bottomh3+((bottomh4-bottomh3)*vfrac>>13);
+				int bottomh=bottomh5+((bottomh6-bottomh5)*ufrac>>13);*/
+
+				//int bottomh=(isin(u/256)+isin(v/256)+Fix(2))>>6;
 				int bottomy=100+FixedToInt(imul(bottomh,rz));
 
 				if(bottomy<bottomlimity[x] && i!=0)
@@ -210,8 +222,8 @@ ClearBitmap(&screen);
 				bottomlasty[x]=bottomy;
 				bottomlasth[x]=bottomh;
 
-				int toph=(isin(u/512)+isin(v/512)+Fix(2))>>6;
-				int topy=100+FixedToInt(imul(-toph,rz));
+				int toph=HeightMap[((u>>6)&0xff00)|((v>>14)&0xff)];
+				int topy=100+FixedToInt(imul(-toph-40,rz/2));
 
 				if(topy>toplimity[x] && i!=0)
 				{
@@ -240,6 +252,15 @@ ClearBitmap(&screen);
 
 				u+=du;
 				v+=dv;
+			}
+		}
+
+		for(int x=0;x<320;x++)
+		{
+			if(toplimity[x]<bottomlimity[x])
+			{
+				DrawSimpleColumnDownwards(destination+x+(toplimity[x]+1)*320,
+				bottomlimity[x]-toplimity[x]-1,0);
 			}
 		}
 
