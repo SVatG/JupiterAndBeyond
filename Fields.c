@@ -20,7 +20,6 @@ static void DrawField3(uint8_t *pixels,int t);
 static void DrawField4(uint8_t *pixels,int t);
 
 extern const int16_t rayarray[Width*Height*3];
-static uint8_t palette[32],palette2[32],palette3[32],palette4[32];
 
 #define intmin(x,y) (((x) < (y)) ? (x) : (y))
 
@@ -71,25 +70,25 @@ static void InitializeField()
 {
 	for(int i=0;i<32;i++)
 	{
-		palette[i]=RGB(
+		data.fields.palette[i]=RGB(
 			i*i*255/(31*31),
 			i*i*i*255/(31*31*31),
 			i*255/31
 		);
 
-		palette2[i]=RGB(
+		data.fields.palette2[i]=RGB(
 			i*i*i*255/(31*31*31),
 			i*255/31,
 			i*i*255/(31*31)
 		);
 
-		palette3[i]=RGB(
+		data.fields.palette3[i]=RGB(
 			i*255/31,
 			i*i*i*255/(31*31*31),
 			i*i*255/(31*31)
 		);
 
-		palette4[i]=RGB(
+		data.fields.palette4[i]=RGB(
 			i*255/31,
 			i*255/31,
 			i*i*i*255/(31*31*31)
@@ -240,7 +239,7 @@ static void DrawField(uint8_t *pixels,int tv)
 				i--;
 			}
 // 			dist = approxabs(dist) >> 11;
-                        *pixels=palette[i];
+			*pixels=data.fields.palette[i];
 			pixels++;
 			//pixels+=2;
 		}
@@ -291,7 +290,7 @@ static void DrawField2(uint8_t *pixels,int t)
 				i--;
 			}
 
-			*pixels=palette2[i];
+			*pixels=data.fields.palette2[i];
 			pixels++;
 		}
 	}
@@ -340,7 +339,7 @@ static void DrawField3(uint8_t *pixels,int t)
 				i--;
 			}
 
-			*pixels=palette3[i];
+			*pixels=data.fields.palette3[i];
 			pixels++;
 		}
 	}
@@ -390,7 +389,7 @@ static void DrawField4(uint8_t *pixels,int t)
 				i--;
 			}
 
-			*pixels=palette4[i];
+			*pixels=data.fields.palette4[i];
 			pixels++;
 		}
 	}
