@@ -1,6 +1,8 @@
 #ifndef __SYSTEM_H__
 #define __SYSTEM_H__
 
+#include <stdbool.h>
+
 #include "stm32f4xx.h"
 
 typedef void InterruptHandler();
@@ -22,6 +24,14 @@ static inline void DisableInterrupt(IRQn_Type interrupt)
 	int regindex=interrupt>>5;
 	int shift=interrupt&0x1f;
 	NVIC->ISER[regindex]&=~(1<<shift);
+}
+
+static inline bool IsInterruptEnabled(IRQn_Type interrupt)
+{
+	int regindex=interrupt>>5;
+	int shift=interrupt&0x1f;
+	if(NVIC->ISER[regindex]&(1<<shift)) return true;
+	else return false;
 }
 
 static inline void SetInterruptPriority(IRQn_Type interrupt,int priority)

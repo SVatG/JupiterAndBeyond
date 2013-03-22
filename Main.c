@@ -570,7 +570,7 @@ static void RotozoomHSyncHandler();
 
 static volatile int32_t x0,y0,dx,dy;
 static volatile uint32_t Pos,Delta;
-static uint8_t linetexture[480];
+static uint8_t linetexture[400];
 
 static uint32_t PackCoordinates(int32_t x,int32_t y)
 {
@@ -618,7 +618,7 @@ static void Rotozoom()
 		}
 	}
 
-	SetVGAHorizontalSync31kHz(RotozoomHSyncHandler);
+	SetVGAHorizontalSync31kHzWithEarlyStart(RotozoomHSyncHandler,35);
 
 	SetLEDs(0x5);
 
@@ -635,11 +635,11 @@ static void Rotozoom()
 		dx=imul(scale,icos(angle));
 		dy=imul(scale,isin(angle));
 
-		x0=-dx*320-dy*240;
-		y0=-(dy&0xffffff80)*320+dx*240;
+		x0=-dx*320-dy*200;
+		y0=-(dy&0xffffff80)*320+dx*200;
 		Delta=PackCoordinates(dx,dy);
 
-		for(int y=0;y<480;y++)
+		for(int y=0;y<400;y++)
 		{
 			int pos=icos(t*20);
 			linetexture[y]=(31*(isin(y*6+pos)+Fix(1))/8192)&31;
