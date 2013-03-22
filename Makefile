@@ -35,13 +35,20 @@ C_FILES =	Accelerometer.c \
 		TestSong.c \
 		Utils.c \
 		VGA.c \
+		Cityscape.c \
+		Rasterize.c \
+		Jupiter1.c \
+		Jupiter3.c \
+		LogoShow.c \
 		Graphics/Bitmap.c \
 		Graphics/DrawingBitmaps.c \
 		Graphics/DrawingLines.c \
 		Graphics/DrawingPixels.c \
 		Graphics/DrawingRectangles.c \
 		Graphics/DrawingRLEBitmaps.c \
-		Graphics/DrawingStraightLines.c
+		Graphics/DrawingStraightLines.c \
+		VectorLibrary/VectorFixed.c \
+		VectorLibrary/MatrixFixed.c \
 			
 S_FILES = 
 
