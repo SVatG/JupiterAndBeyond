@@ -34,24 +34,28 @@ void Fields()
 
 	SetVGAScreenMode212x133_60Hz(framebuffer1);
 
-	for(int t=0;;t++)
+	int frame=0;
+	for(;;)
 	{
 		if(UserButtonState()) break;
+		int t=VGAFrameCounter();
 
 		SetLEDs(t>>3);
 
 		WaitVBL();
 
 		uint8_t *framebuffer;
-		if(t&1)
+		if(frame)
 		{
 			framebuffer=framebuffer2;
 			SetFrameBuffer(framebuffer1);
+			frame=0;
 		}
 		else
 		{
 			framebuffer=framebuffer1;
 			SetFrameBuffer(framebuffer2);
+			frame=1;
 		}
 
 		switch((t>>8)&3)
@@ -110,11 +114,11 @@ static void DrawField(uint8_t *pixels,int tv)
 	}*/
         
 	int32_t x0=(0+Fix(0.5))<<20;
-        int32_t y0=(isin(tv*20)+Fix(0.5))<<20;
-        int32_t z0=(tv*150+Fix(0.5))<<20;
+	int32_t y0=(isin(tv*20/4)+Fix(0.5))<<20;
+	int32_t z0=(tv*150/4+Fix(0.5))<<20;
 
-        int32_t sin_a=isin(tv*9);
-        int32_t cos_a=icos(tv*9);
+	int32_t sin_a=isin(tv*9/4);
+	int32_t cos_a=icos(tv*9/4);
         
 	for(int y=0;y<Height;y++)
 	{
@@ -131,7 +135,7 @@ static void DrawField(uint8_t *pixels,int tv)
 			int32_t x=x0,y=y0,z=z0;
 
 			int i=31;
-                        int32_t dist = 0;
+			int32_t dist = 0;
 			while(i)
 			{
 /*				int32_t tx=approxabs(x)>>15;
@@ -251,12 +255,12 @@ static void DrawField2(uint8_t *pixels,int t)
 {
 	const int16_t *rays=rayarray;
 
-	int32_t x0=(-t*150+Fix(0.5))<<20;
+	int32_t x0=(-t*150/4+Fix(0.5))<<20;
 	int32_t y0=(0+Fix(0.5))<<20;
 	int32_t z0=(0+Fix(0.5))<<20;
 
-	int32_t sin_a=isin(isin(t*2));
-	int32_t cos_a=icos(isin(t*2));
+	int32_t sin_a=isin(isin(t*2/4));
+	int32_t cos_a=icos(isin(t*2/4));
 
 	for(int y=0;y<Height;y++)
 	{
@@ -302,10 +306,10 @@ static void DrawField3(uint8_t *pixels,int t)
 
 	int32_t x0=(0+Fix(0.5))<<20;
 	int32_t y0=(0+Fix(0.5))<<20;
-	int32_t z0=(t*150+Fix(0.5))<<20;
+	int32_t z0=(t*150/4+Fix(0.5))<<20;
 
-	int32_t sin_a=isin(t*17);
-	int32_t cos_a=icos(t*17);
+	int32_t sin_a=isin(t*17/4);
+	int32_t cos_a=icos(t*17/4);
 
 	for(int y=0;y<Height;y++)
 	{
@@ -351,10 +355,10 @@ static void DrawField4(uint8_t *pixels,int t)
 
 	int32_t x0=(0+Fix(0.5))<<20;
 	int32_t y0=(0+Fix(0.5))<<20;
-	int32_t z0=(t*220+Fix(0.5))<<20;
+	int32_t z0=(t*220/4+Fix(0.5))<<20;
 
-	int32_t sin_a=isin(t*5);
-	int32_t cos_a=icos(t*5);
+	int32_t sin_a=isin(t*5/4);
+	int32_t cos_a=icos(t*5/4);
 
 	for(int y=0;y<Height;y++)
 	{
