@@ -416,7 +416,6 @@ inline static void RasterizeTest(uint8_t* image) {
                 imat3x3rotatey(256),
                 ivec3(F(0),isin((rotcnt*20)%4096), icos((rotcnt*20)%4096))
         ));
-        rotcnt = 0;
         
 	// Do a background
 	for(int i=0;i<NumberOfDotStars;i++){
@@ -430,8 +429,8 @@ inline static void RasterizeTest(uint8_t* image) {
 	
 	// Modelview matrix
 	int rotdir = /*(rowd>>4)%2 == 0 ? -1 : */1;
-        imat4x4_t modelview = imat4x4affinemul(imat4x4translate(ivec3(IntToFixed(0),IntToFixed(0),IntToFixed(-30))),imat4x4rotatex(1700));
-        modelview = imat4x4affinemul(modelview,imat4x4rotatey(rotdir*rotcnt*8));
+        imat4x4_t modelview = imat4x4affinemul(imat4x4translate(ivec3(IntToFixed(0),IntToFixed(0),IntToFixed(-30+(rotcnt>>4)))),imat4x4rotatex(1700));
+        modelview = imat4x4affinemul(modelview,imat4x4rotatey(/*rotdir*rotcnt**/8));
 	
 	// Transform
 	vertex_t transformVertex;

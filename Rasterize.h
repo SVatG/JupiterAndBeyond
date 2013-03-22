@@ -24,7 +24,7 @@ typedef struct {
 } triangle_t;
 
 typedef struct {
-	int32_t v[4];
+	int16_t v[4];
 } index_triangle_t;
 
 typedef ivec3_t init_vertex_t;
