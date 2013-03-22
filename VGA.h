@@ -52,6 +52,7 @@ static inline uint32_t VGAFrameCounter() { return VGAFrame; }
 // Functions for implementing your own video driving code.
 
 void SetVGAHorizontalSync31kHz(InterruptHandler *handler);
+void SetVGAHorizontalSync31kHzActiveHigh(InterruptHandler *handler);
 
 static inline void RaiseVGAVSyncLine() { GPIOB->BSRRL=(1<<12); }
 static inline void LowerVGAVSyncLine() { GPIOB->BSRRH=(1<<12); }
