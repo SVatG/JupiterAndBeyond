@@ -9,6 +9,8 @@
 
 #include <string.h>
 
+extern uint8_t HeightMap[256*256];
+
 static void DrawSimpleColumnDownwards(uint8_t *pixels,int length,uint8_t c)
 {
 	for(int i=0;i<length;i++)
@@ -47,11 +49,6 @@ static void DrawMultiColumnUpwards(uint8_t *pixels,int length,int h,int dh,uint8
 	}
 }
 
-static int toplimity[320],toplasty[320],toplasth[320];
-static int bottomlimity[320],bottomlasty[320],bottomlasth[320];
-
-extern uint8_t HeightMap[256*256];
-
 void Voxelscape()
 {
 	uint8_t *framebuffer1=(uint8_t *)0x20000000;
@@ -61,10 +58,11 @@ void Voxelscape()
 
 	SetVGAScreenMode320x200_60Hz(framebuffer1);
 
-	int t=0;
 	while(!UserButtonState())
 	{
 		WaitVBL();
+
+		int t=VGAFrameCounter();
 
 		uint8_t *destination;
 		if(t&1)
@@ -96,7 +94,7 @@ void Voxelscape()
 		int32_t u0=0;
 		int32_t v0=t*Fix(5);
 
-		for(int i=0;i<320;i++) { toplimity[i]=-1; bottomlimity[i]=200; }
+		for(int i=0;i<320;i++) { data.voxel.toplimity[i]=-1; data.voxel.bottomlimity[i]=200; }
 
 		for(int i=0;i<NumberOfStrips;i++)
 		{
@@ -113,7 +111,7 @@ void Voxelscape()
 
 			for(int x=0;x<320;x++)
 			{
-				if(toplimity[x]>=bottomlimity[x]) { u+=du; v+=dv; continue; }
+				if(data.voxel.toplimity[x]>=data.voxel.bottomlimity[x]) { u+=du; v+=dv; continue; }
 
 				int bottomh=HeightMap[((u>>5)&0xff00)|((v>>13)&0xff)];
 				/*int offset=((u>>5)&0xff00)|((v>>13)&0xff);
@@ -130,58 +128,58 @@ void Voxelscape()
 				//int bottomh=(isin(u/256)+isin(v/256)+Fix(2))>>6;
 				int bottomy=100+FixedToInt(imul(bottomh,rz));
 
-				if(bottomy<bottomlimity[x] && i!=0)
+				if(bottomy<data.voxel.bottomlimity[x] && i!=0)
 				{
 					int starth=bottomh;
-					int endh=bottomlasth[x];
+					int endh=data.voxel.bottomlasth[x];
 					int startc=(starth>>5)&7;
 					int endc=(endh>>5)&7;
 
 					if(startc==endc)
 					{
 						DrawSimpleColumnDownwards(destination+x+bottomy*320,
-						bottomlimity[x]-bottomy,bottompalette[endc]);
+						data.voxel.bottomlimity[x]-bottomy,bottompalette[endc]);
 					}
 					else
 					{
-						int dh=((endh-starth)<<8)/(bottomlasty[x]-bottomy);
+						int dh=((endh-starth)<<8)/(data.voxel.bottomlasty[x]-bottomy);
 
 						DrawMultiColumnDownwards(destination+x+bottomy*320,
-						bottomlimity[x]-bottomy,starth<<8,dh,bottompalette);
+						data.voxel.bottomlimity[x]-bottomy,starth<<8,dh,bottompalette);
 					}
 
-					bottomlimity[x]=bottomy;
+					data.voxel.bottomlimity[x]=bottomy;
 				}
-				bottomlasty[x]=bottomy;
-				bottomlasth[x]=bottomh;
+				data.voxel.bottomlasty[x]=bottomy;
+				data.voxel.bottomlasth[x]=bottomh;
 
 				int toph=HeightMap[((u>>6)&0xff00)|((v>>14)&0xff)];
 				int topy=100+FixedToInt(imul(-toph-40,rz/2));
 
-				if(topy>toplimity[x] && i!=0)
+				if(topy>data.voxel.toplimity[x] && i!=0)
 				{
 					int starth=toph;
-					int endh=toplasth[x];
+					int endh=data.voxel.toplasth[x];
 					int startc=(starth>>5)&7;
 					int endc=(endh>>5)&7;
 
 					if(startc==endc)
 					{
 						DrawSimpleColumnUpwards(destination+x+topy*320,
-						topy-toplimity[x],toppalette[endc]);
+						topy-data.voxel.toplimity[x],toppalette[endc]);
 					}
 					else
 					{
-						int dh=((endh-starth)<<8)/(topy-toplasty[x]);
+						int dh=((endh-starth)<<8)/(topy-data.voxel.toplasty[x]);
 
 						DrawMultiColumnUpwards(destination+x+topy*320,
-						topy-toplimity[x],starth<<8,dh,toppalette);
+						topy-data.voxel.toplimity[x],starth<<8,dh,toppalette);
 					}
 
-					toplimity[x]=topy;
+					data.voxel.toplimity[x]=topy;
 				}
-				toplasty[x]=topy;
-				toplasth[x]=toph;
+				data.voxel.toplasty[x]=topy;
+				data.voxel.toplasth[x]=toph;
 
 				u+=du;
 				v+=dv;
@@ -190,14 +188,12 @@ void Voxelscape()
 
 		for(int x=0;x<320;x++)
 		{
-			if(toplimity[x]<bottomlimity[x])
+			if(data.voxel.toplimity[x]<data.voxel.bottomlimity[x])
 			{
-				DrawSimpleColumnDownwards(destination+x+(toplimity[x]+1)*320,
-				bottomlimity[x]-toplimity[x]-1,0);
+				DrawSimpleColumnDownwards(destination+x+(data.voxel.toplimity[x]+1)*320,
+				data.voxel.bottomlimity[x]-data.voxel.toplimity[x]-1,0);
 			}
 		}
-
-		t++;
 	}
 
 	while(UserButtonState());
