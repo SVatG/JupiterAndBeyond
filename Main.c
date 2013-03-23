@@ -13,6 +13,7 @@
 #include "Fields.h"
 #include "LogoShow.h"
 #include "Mystery.h"
+#include "PixelParticles.h"
 #include "Pukezoomer.h"
 #include "Rasterize.h"
 #include "Voxelscape.h"
@@ -47,6 +48,7 @@ int main()
 
 	for(;;)
 	{
+		PixelParticles();
                 RasterizeInit();
                 Rasterize();
                 LogoShow();

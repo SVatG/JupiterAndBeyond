@@ -3,6 +3,7 @@
 
 #include "Fields.h"
 #include "LogoShow.h"
+#include "PixelParticles.h"
 #include "Rasterize.h"
 #include "Voxelscape.h"
 
@@ -11,8 +12,9 @@
 extern union GlobalData
 {
     struct FieldsData fields;
-    struct RasterizeData rasterizer;
     struct LogoShowData logoshow;
+	struct PixelParticlesData pp;
+    struct RasterizeData rasterizer;
     struct VoxelscapeData voxel;
 } data;
 
