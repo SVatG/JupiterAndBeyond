@@ -13,18 +13,16 @@ static inline uint32_t PixelAverage(uint32_t a,uint32_t b)
 {
 	uint32_t halfa=(a>>1)&((uint32_t)PixelAllButHighBits*0x01010101);
 	uint32_t halfb=(b>>1)&((uint32_t)PixelAllButHighBits*0x01010101);
-	uint32_t carry=a&b&(PixelLowBits*0x01010101);
+	uint32_t carry=a&b&(0x21*0x01010101);
 	return halfa+halfb+carry;
 }
-
-extern uint8_t BlendTable[256][256];
 
 void PixelParticles()
 {
 	uint8_t *framebuffer1=(uint8_t *)0x20000000;
 	uint8_t *framebuffer2=(uint8_t *)0x20010000;
-	memset(framebuffer1,0,320*200);
-	memset(framebuffer2,0,320*200);
+	memset(framebuffer1,RawRGB(0,0,0),320*200);
+	memset(framebuffer2,RawRGB(0,0,0),320*200);
 
 	SetVGAScreenMode320x200_60Hz(framebuffer1);
 
@@ -62,7 +60,7 @@ void PixelParticles()
 
 		uint32_t *sourceptr=(uint32_t *)&source[320];
 		uint32_t *destinationptr=(uint32_t *)&destination[320];
-		uint32_t previous=0;
+		uint32_t previous=RawRGB(0,0,0)*0x01010101;
 		uint32_t current=*sourceptr++;
 		for(int y=1;y<199;y++)
 		{
@@ -110,7 +108,7 @@ void PixelParticles()
 			}
 			data.pp.particles[i].x=newx;
 			data.pp.particles[i].y=newy;
-			DrawPixelNoClip(&screen,FixedToInt(newx),FixedToInt(newy),RawRGB(7,6,3));
+			DrawPixelNoClip(&screen,FixedToInt(newx),FixedToInt(newy),RawRGB(7,7,3));
 		}
 		uint32_t line3=VGALine;
 

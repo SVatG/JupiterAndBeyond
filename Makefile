@@ -22,7 +22,6 @@ BUILD_DIR = Build
 
 C_FILES = Audio.c \
 		BitBin.c \
-		BlendTable.c \
 		Button.c \
 		Cityscape.c \
 		Fields.c \
