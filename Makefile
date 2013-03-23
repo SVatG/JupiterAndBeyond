@@ -28,6 +28,7 @@ C_FILES = Audio.c \
 		HeightMap.c \
 		Jupiter1.c \
 		Jupiter3.c \
+		JupiterHands.c \
 		LED.c \
 		LogoShow.c \
 		Main.c \

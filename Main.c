@@ -48,12 +48,12 @@ int main()
 
 	for(;;)
 	{
+		IDontEvenKnow();
 		Voxelscape();
 		RasterizeInit();
 		Rasterize();
 		PixelParticles();
 		LogoShow();
-		IDontEvenKnow();
 		Pukezoomer();
 		Fields();
 	}
