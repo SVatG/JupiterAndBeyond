@@ -38,6 +38,9 @@ void PixelParticles()
 	int32_t tx1=0,ty1=0;
 	int32_t tx2=0,ty2=0;
 	int32_t tx3=0,ty3=0;
+	int32_t s1=Fix(0.5);
+	int32_t s2=Fix(1);
+	int32_t s3=Fix(2);
 	while(!UserButtonState())
 	{
 		WaitVBL();
@@ -92,12 +95,14 @@ void PixelParticles()
 		{
 			int32_t x=data.pp.particles[i].x;
 			int32_t y=data.pp.particles[i].y;
-			int newx=x+isin(y/32+ty1/32);
-			int newy=y-icos(x/32+tx1/32);
-			newx+=isin(y/96+ty2/96);
-			newy-=icos(x/96+tx2/96);
-			newx+=isin(y/192+ty3/192);
-			newy-=icos(x/192+tx3/192);
+			int32_t newx=x;
+			int32_t newy=y;
+			newx+=isin((y+ty1)>>6)>>1;
+			newx-=icos((x+tx1)>>6)>>1;
+			newx+=isin((y+ty2)>>7);
+			newy-=icos((x+tx2)>>7);
+			newx+=isin((y+ty3)>>8)<<1;
+			newy-=icos((x+tx3)>>8)<<1;
 			if(newx<0 || newx>=Fix(320) || newy<0 || newy>=Fix(200))
 			{
 				newx=RandomInteger()%Fix(320);
