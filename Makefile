@@ -22,6 +22,7 @@ BUILD_DIR = Build
 
 C_FILES = Audio.c \
 		BitBin.c \
+		BlendTable.c \
 		Button.c \
 		Cityscape.c \
 		Fields.c \
@@ -32,6 +33,7 @@ C_FILES = Audio.c \
 		LogoShow.c \
 		Main.c \
 		Mystery.c \
+		PixelParticles.c \
 		Pukezoomer.c \
 		Random.c \
 		Rasterize.c \

@@ -7,3 +7,5 @@ glob:MakeHeightMap
 glob:OpenOCD
 glob:*~
 glob:devkitARM
+glob:MakeBlendTable
+
