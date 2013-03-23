@@ -47,14 +47,13 @@ int main()
 
 	for(;;)
 	{
+                RasterizeInit();
+                Rasterize();
                 LogoShow();
 		Voxelscape();
 		IDontEvenKnow();
 		Pukezoomer();
 		Fields();
-		LogoShow();
-		RasterizeInit();
-		Rasterize();
 	}
 }
 

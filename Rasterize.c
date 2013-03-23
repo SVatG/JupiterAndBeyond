@@ -36,15 +36,6 @@
 #include "Global.h"
 
 inline static void RasterizeTriangle(uint8_t* image, triangle_t* tri ) {
-	// Winding test
-	if(
-		imul(tri->v[1].p.x - tri->v[0].p.x, tri->v[2].p.y - tri->v[0].p.y) -
-		imul(tri->v[2].p.x - tri->v[0].p.x, tri->v[1].p.y - tri->v[0].p.y)
-		< 0
-	) {
-		return;
-	}
-
 	// Vertex sorting
 	ss_vertex_t upperVertex;
 	ss_vertex_t centerVertex;
@@ -193,10 +184,10 @@ inline static void RasterizeTriangle(uint8_t* image, triangle_t* tri ) {
 		: [U] "r" (U), [V] "r" (V)
 	);
 	
-        scanlineMax = imin(FixedToRoundedInt(centerVertex.p.y), HEIGHT);
+        scanlineMax = imin(FixedToRoundedInt(centerVertex.p.y), HEIGHT-1);
 	for(scanline = FixedToRoundedInt(upperVertex.p.y); scanline < scanlineMax; scanline++ ) {
                 if(scanline > 0) {
-                    uint32_t xMax = imin(FixedToRoundedInt(rightX), WIDTH);
+                    uint32_t xMax = imin(FixedToRoundedInt(rightX), WIDTH-1);
                     uint32_t offset = scanline*WIDTH;
                     int32_t x = FixedToRoundedInt(leftX);
 
@@ -283,7 +274,7 @@ inline static void RasterizeTriangle(uint8_t* image, triangle_t* tri ) {
 lower_half_render:
 
 	// lower triangle half
-	scanlineMax = imin(FixedToRoundedInt(lowerVertex.p.y), HEIGHT);
+	scanlineMax = imin(FixedToRoundedInt(lowerVertex.p.y), HEIGHT-1);
         
 	U = leftU;
 	V = leftV;
@@ -296,7 +287,7 @@ lower_half_render:
 
 	for(scanline = FixedToRoundedInt(centerVertex.p.y); scanline < scanlineMax; scanline++ ) {
                 if(scanline > 0) {
-                    uint32_t xMax = imin(FixedToRoundedInt(rightX), WIDTH);
+                    uint32_t xMax = imin(FixedToRoundedInt(rightX), WIDTH-1);
                     uint32_t offset = scanline*WIDTH;
                     int32_t x = FixedToRoundedInt(leftX);
                     __asm__ volatile(
@@ -429,18 +420,30 @@ inline static void RasterizeTest(uint8_t* image) {
 	
 	// Modelview matrix
 	int rotdir = /*(rowd>>4)%2 == 0 ? -1 : */1;
-        imat4x4_t modelview = imat4x4affinemul(imat4x4translate(ivec3(IntToFixed(0),IntToFixed(0),IntToFixed(-30+(rotcnt>>4)))),imat4x4rotatex(1700));
-        modelview = imat4x4affinemul(modelview,imat4x4rotatey(/*rotdir*rotcnt**/8));
+//         imat4x4_t modelview = imat4x4affinemul(imat4x4translate(ivec3(IntToFixed(0),IntToFixed(0),IntToFixed(-100))),imat4x4rotatex(1700));
+//         modelview = imat4x4affinemul(modelview,imat4x4rotatey(rotdir*rotcnt*8));
+//         modelview = imat4x4affinemul(modelview,imat4x4translate(ivec3(IntToFixed(0),IntToFixed(0),rotcnt<<4)));
+        imat4x4_t modelview = imat4x4lookat(
+            ivec3(F(0), F(20), F(0)),
+            ivec3(F(0), F(0), F(0)),
+            ivec3(F(0), F(0), F(1))
+        );
 	
 	// Transform
 	vertex_t transformVertex;
         srand(233);
 	for(int32_t i = 0; i < numVertices; i++) {
 		transformVertex.p = imat4x4transform(modelview,ivec4(vertices[i].x,vertices[i].y,vertices[i].z,F(1)));
-		
+                if(transformVertex.p.z >= -4096) {
+                    data.rasterizer.transformedVertices[i].clip = 1;
+                }
+                else {
+                    data.rasterizer.transformedVertices[i].clip = 0;
+                }
+                
 		// Project
 		transformVertex.p = imat4x4transform(proj,transformVertex.p);
-		
+                
 		// Perspective divide and viewport transform
 		data.rasterizer.transformedVertices[i].p = ivec3(
 			Viewport(transformVertex.p.x,transformVertex.p.w,WIDTH),
@@ -457,9 +460,37 @@ inline static void RasterizeTest(uint8_t* image) {
         
 	// For each triangle
 	triangle_t tri;
+        uint32_t dontrasterize = 0;
         for(int32_t i = render_faces_total_start; i < render_faces_total_end; i++ ) {
+                dontrasterize = 0;
+
                 for(int ver = 0; ver < 3; ver++) {
                         tri.v[ver] = data.rasterizer.transformedVertices[data.rasterizer.sortedTriangles[i].v[ver]];
+                }
+                
+                for(int ver = 0; ver < 3; ver++) {
+                        // Whole-triangle clipper
+                        if(tri.v[ver].clip == 1) {
+                            dontrasterize = 1;
+                            break;
+                        }
+                        
+                        // Winding test
+                        if(
+                            imul(tri.v[1].p.x - tri.v[0].p.x, tri.v[2].p.y - tri.v[0].p.y) -
+                            imul(tri.v[2].p.x - tri.v[0].p.x, tri.v[1].p.y - tri.v[0].p.y)
+                            < 0
+                        ) {
+                            dontrasterize = 1;
+                            break;
+                        }
+                }
+
+                if(dontrasterize == 1) {
+                        continue;
+                }
+                
+                for(int ver = 0; ver < 3; ver++) {
                         tri.v[ver].c = ivec3dot(
                             tolight,
                             normals[data.rasterizer.sortedTriangles[i].v[3]]
@@ -467,6 +498,7 @@ inline static void RasterizeTest(uint8_t* image) {
                         tri.v[ver].c = imin(imax(F(0), tri.v[ver].c)>>9,7);
                         tri.v[ver].c = RastRGB(tri.v[ver].c,tri.v[ver].c,0);
                 }
+                
                 RasterizeTriangle(image, &tri);
 	}
 	
