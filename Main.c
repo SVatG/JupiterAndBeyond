@@ -48,9 +48,9 @@ int main()
 
 	for(;;)
 	{
-		PixelParticles();
                 RasterizeInit();
                 Rasterize();
+		PixelParticles();
                 LogoShow();
 		Voxelscape();
 		IDontEvenKnow();

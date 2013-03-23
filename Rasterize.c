@@ -232,21 +232,21 @@ inline static void RasterizeTriangle(uint8_t* image, triangle_t* tri ) {
                             [tmpAdd] "r" (tmpAdd)
                             : "r0", "r1"
                     );
-
-                    leftX += leftXd;
-                    rightX += rightXd;
-                    leftU += leftUd;
-                    leftV += leftVd;
-
-                    U = leftU;
-                    V = leftV;
-
-                    __asm__ volatile(
-                            "pkhbt %[UV], %[V], %[U], lsl #16\n"
-                            : [UV] "=r" (UV)
-                            : [U] "r" (U), [V] "r" (V)
-                    );
                 }
+
+                leftX += leftXd;
+                rightX += rightXd;
+                leftU += leftUd;
+                leftV += leftVd;
+
+                U = leftU;
+                V = leftV;
+
+                __asm__ volatile(
+                "pkhbt %[UV], %[V], %[U], lsl #16\n"
+                : [UV] "=r" (UV)
+                : [U] "r" (U), [V] "r" (V)
+                );
 	}
         
 	// Guard against special case C: flat lower edge
@@ -352,12 +352,12 @@ static int triAvgDepthCompare(const void *p1, const void *p2) {
 	index_triangle_t* t1 = (index_triangle_t*)p1;
 	index_triangle_t* t2 = (index_triangle_t*)p2;
 	return(
-		data.rasterizer.transformedVertices[t2->v[0]].p.z +
-		data.rasterizer.transformedVertices[t2->v[1]].p.z +
-		data.rasterizer.transformedVertices[t2->v[2]].p.z -
-		data.rasterizer.transformedVertices[t1->v[0]].p.z -
-		data.rasterizer.transformedVertices[t1->v[1]].p.z -
-		data.rasterizer.transformedVertices[t1->v[2]].p.z
+		data.rasterizer.transformedVertices[t1->v[0]].p.z +
+		data.rasterizer.transformedVertices[t1->v[1]].p.z +
+		data.rasterizer.transformedVertices[t1->v[2]].p.z -
+		data.rasterizer.transformedVertices[t2->v[0]].p.z -
+		data.rasterizer.transformedVertices[t2->v[1]].p.z -
+		data.rasterizer.transformedVertices[t2->v[2]].p.z
 	);
 }
 
@@ -395,6 +395,17 @@ void RasterizeInit() {
 	startFrame = VGAFrame;
 }
 
+imat4x4_t notGluLookAt(ivec3_t eye, ivec3_t center, ivec3_t up ){
+    ivec3_t forward = ivec3norm(ivec3sub(center, eye));
+    ivec3_t side = ivec3norm(ivec3cross(forward, up));
+    ivec3_t realup = ivec3cross(forward, side);
+    ivec3_t backward = ivec3sub(ivec3(0, 0, 0), forward);
+    ivec3_t eyeinv = ivec3sub(ivec3(0, 0, 0), eye);
+    imat3x3_t lookdir = imat3x3cols(side, realup, backward);
+    imat4x4_t lookat = imat4x4affine3x3(lookdir, eyeinv);
+    return lookat;
+}
+
 inline static void RasterizeTest(uint8_t* image) {
         
 	int32_t rotcnt = (VGAFrame - startFrame);
@@ -416,17 +427,17 @@ inline static void RasterizeTest(uint8_t* image) {
 	}
 	
 	// Projection matrix
-	imat4x4_t proj = imat4x4diagonalperspective(IntToFixed(45),idiv(IntToFixed(WIDTH),IntToFixed(HEIGHT)),4096,IntToFixed(60));
+	imat4x4_t proj = imat4x4diagonalperspective(IntToFixed(45),idiv(IntToFixed(WIDTH),IntToFixed(HEIGHT)),4096,IntToFixed(400));
 	
 	// Modelview matrix
 	int rotdir = /*(rowd>>4)%2 == 0 ? -1 : */1;
-//         imat4x4_t modelview = imat4x4affinemul(imat4x4translate(ivec3(IntToFixed(0),IntToFixed(0),IntToFixed(-100))),imat4x4rotatex(1700));
+//         imat4x4_t modelview = imat4x4affinemul(imat4x4translate(ivec3(IntToFixed(0),IntToFixed(0),IntToFixed(40))),imat4x4rotatex(-512));
 //         modelview = imat4x4affinemul(modelview,imat4x4rotatey(rotdir*rotcnt*8));
 //         modelview = imat4x4affinemul(modelview,imat4x4translate(ivec3(IntToFixed(0),IntToFixed(0),rotcnt<<4)));
         imat4x4_t modelview = imat4x4lookat(
-            ivec3(F(0), F(20), F(0)),
-            ivec3(F(0), F(0), F(0)),
-            ivec3(F(0), F(0), F(1))
+            ivec3(IntToFixed(5), IntToFixed(-20), IntToFixed(-60)+(rotcnt<<8)),
+            ivec3(IntToFixed(0), IntToFixed(5), IntToFixed(0)),
+            ivec3(IntToFixed(0), IntToFixed(1), IntToFixed(0))
         );
 	
 	// Transform
@@ -434,8 +445,9 @@ inline static void RasterizeTest(uint8_t* image) {
         srand(233);
 	for(int32_t i = 0; i < numVertices; i++) {
 		transformVertex.p = imat4x4transform(modelview,ivec4(vertices[i].x,vertices[i].y,vertices[i].z,F(1)));
-                if(transformVertex.p.z >= -4096) {
+                if(transformVertex.p.z <= 4096) {
                     data.rasterizer.transformedVertices[i].clip = 1;
+                    continue;
                 }
                 else {
                     data.rasterizer.transformedVertices[i].clip = 0;
@@ -479,7 +491,7 @@ inline static void RasterizeTest(uint8_t* image) {
                         if(
                             imul(tri.v[1].p.x - tri.v[0].p.x, tri.v[2].p.y - tri.v[0].p.y) -
                             imul(tri.v[2].p.x - tri.v[0].p.x, tri.v[1].p.y - tri.v[0].p.y)
-                            < 0
+                            > 0
                         ) {
                             dontrasterize = 1;
                             break;
