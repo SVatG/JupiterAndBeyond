@@ -48,11 +48,11 @@ int main()
 
 	for(;;)
 	{
-                RasterizeInit();
-                Rasterize();
-		PixelParticles();
-                LogoShow();
 		Voxelscape();
+		RasterizeInit();
+		Rasterize();
+		PixelParticles();
+		LogoShow();
 		IDontEvenKnow();
 		Pukezoomer();
 		Fields();

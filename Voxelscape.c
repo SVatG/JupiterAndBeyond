@@ -102,7 +102,7 @@ void Voxelscape()
 
 			int32_t z=Fix(i*i/4+1);
 			//int32_t z=Fix((i+1)*8);
-			int32_t rz=idiv(Fix(8191<<6)/Perspective,z);
+			int32_t rz=idiv(Fix(1024000/Perspective),z);
 
 			int32_t du=Perspective*imul(z,-sin_a)/320;
 			int32_t dv=Perspective*imul(z,cos_a)/320;
