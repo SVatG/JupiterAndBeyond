@@ -9,11 +9,11 @@
 
 #include <string.h>
 
-static inline uint16_t PixelSum(uint16_t a,uint16_t b)
+static inline uint32_t PixelAverage(uint32_t a,uint32_t b)
 {
-	uint16_t halfa=(a>>1)&(PixelAllButHighBits*0x0101);
-	uint16_t halfb=(b>>1)&(PixelAllButHighBits*0x0101);
-	uint16_t carry=a&b&(PixelLowBits*0x0101);
+	uint32_t halfa=(a>>1)&((uint32_t)PixelAllButHighBits*0x01010101);
+	uint32_t halfb=(b>>1)&((uint32_t)PixelAllButHighBits*0x01010101);
+	uint32_t carry=a&b&(PixelLowBits*0x01010101);
 	return halfa+halfb+carry;
 }
 
@@ -37,6 +37,7 @@ void PixelParticles()
 	int t=0;
 	int32_t tx1=0,ty1=0;
 	int32_t tx2=0,ty2=0;
+	int32_t tx3=0,ty3=0;
 	while(!UserButtonState())
 	{
 		WaitVBL();
@@ -54,37 +55,49 @@ void PixelParticles()
 		}
 		SetFrameBuffer(source);
 
+		uint32_t line1=VGALine;
+
+		uint32_t *sourceptr=(uint32_t *)&source[320];
+		uint32_t *destinationptr=(uint32_t *)&destination[320];
+		uint32_t previous=0;
+		uint32_t current=*sourceptr++;
 		for(int y=1;y<199;y++)
-		for(int x=1;x<319;x++)
 		{
-			int offs=x+y*320;
-			uint8_t sum1=BlendTable[source[offs-1]][source[offs+1]];
-			uint8_t sum2=BlendTable[source[offs-320]][source[offs+320]];
-			uint8_t sum3=BlendTable[sum1][sum2];
-			uint8_t sum4=BlendTable[sum3][source[offs]];
-//sum4+=(sum3>>2)&PixelLowBits;
-			destination[offs]=sum4;
+			for(int x=0;x<320/4;x++)
+			{
+				uint32_t sum1=PixelAverage(sourceptr[-320/4-1],sourceptr[320/4-1]);
+				uint32_t next=*sourceptr++;
+				uint32_t sum2=PixelAverage((current<<8)|(previous>>24),(current>>8)|(next<<24));
+				uint32_t sum3=PixelAverage(sum1,sum2);
+				uint32_t sum4=PixelAverage(sum3,current);
+				*destinationptr++=sum4;
+				previous=current;
+				current=next;
+			}
 		}
+
+		uint32_t line2=VGALine;
 
 		Bitmap screen;
 		InitializeBitmap(&screen,320,200,320,destination);
-
-		int x0=FixedToInt(50*icos(t*30*2))+FixedToInt(50*icos(t*23*2))+159;
-		int y0=FixedToInt(50*isin(t*30*2))+FixedToInt(50*isin(t*23*2))+99;
 
 		tx1+=icos(t*3);
 		ty1+=isin(t*3);
 		tx2+=icos(-t*2);
 		ty2+=isin(-t*2);
+		tx3+=icos(-t*2);
+		ty3+=isin(-t*2);
 
 		for(int i=0;i<NumberOfPixelParticles;i++)
 		{
 			int32_t x=data.pp.particles[i].x;
 			int32_t y=data.pp.particles[i].y;
-			int newx=x+isin(y/32+tx1/32);
-			int newy=y-icos(x/32+ty1/32);
-			//newx+=isin(y/96+tx2/96);
-			//newy-=icos(x/96+ty2/96);
+			int newx=x+isin(y/32+ty1/32);
+			int newy=y-icos(x/32+tx1/32);
+			newx+=isin(y/96+ty2/96);
+			newy-=icos(x/96+tx2/96);
+			newx+=isin(y/192+ty3/192);
+			newy-=icos(x/192+tx3/192);
 			if(newx<0 || newx>=Fix(320) || newy<0 || newy>=Fix(200))
 			{
 				newx=RandomInteger()%Fix(320);
@@ -94,6 +107,15 @@ void PixelParticles()
 			data.pp.particles[i].y=newy;
 			DrawPixelNoClip(&screen,FixedToInt(newx),FixedToInt(newy),RawRGB(7,6,3));
 		}
+		uint32_t line3=VGALine;
+
+int diff1=line2-line1;
+if(diff1<0) diff1+=480;
+int diff2=line3-line2;
+if(diff2<0) diff2+=480;
+
+		DrawHorizontalLine(&screen,0,0,diff1,RGB(0,255,0));
+		DrawHorizontalLine(&screen,0,199,diff2,RGB(0,255,0));
 
 		t++;
 	}

@@ -1,7 +1,7 @@
 #ifndef __PIXELPARTICLES_H__
 #define __PIXELPARTICLES_H__
 
-#define NumberOfPixelParticles 4096
+#define NumberOfPixelParticles (1024*6)
 
 #include <stdint.h>
 
