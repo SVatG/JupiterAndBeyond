@@ -114,13 +114,13 @@ void PixelParticles()
 		}
 		uint32_t line3=VGALine;
 
-int diff1=line2-line1;
+/*int diff1=line2-line1;
 if(diff1<0) diff1+=480;
 int diff2=line3-line2;
 if(diff2<0) diff2+=480;
 
-		DrawHorizontalLine(&screen,0,0,diff1,RGB(0,255,0));
-		DrawHorizontalLine(&screen,0,199,diff2,RGB(0,255,0));
+DrawHorizontalLine(&screen,0,0,diff1,RGB(0,255,0));
+DrawHorizontalLine(&screen,0,199,diff2,RGB(0,255,0));*/
 
 		t++;
 	}
