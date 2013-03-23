@@ -48,14 +48,14 @@ int main()
 
 	for(;;)
 	{
+                RasterizeInit();
+                Rasterize();
 		PixelParticles();
+                LogoShow();
 		Voxelscape();
 		IDontEvenKnow();
 		Pukezoomer();
 		Fields();
-		LogoShow();
-		RasterizeInit();
-		Rasterize();
 	}
 }
 

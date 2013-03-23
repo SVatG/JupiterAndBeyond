@@ -36,15 +36,6 @@
 #include "Global.h"
 
 inline static void RasterizeTriangle(uint8_t* image, triangle_t* tri ) {
-	// Winding test
-	if(
-		imul(tri->v[1].p.x - tri->v[0].p.x, tri->v[2].p.y - tri->v[0].p.y) -
-		imul(tri->v[2].p.x - tri->v[0].p.x, tri->v[1].p.y - tri->v[0].p.y)
-		< 0
-	) {
-		return;
-	}
-
 	// Vertex sorting
 	ss_vertex_t upperVertex;
 	ss_vertex_t centerVertex;
@@ -193,10 +184,10 @@ inline static void RasterizeTriangle(uint8_t* image, triangle_t* tri ) {
 		: [U] "r" (U), [V] "r" (V)
 	);
 	
-        scanlineMax = imin(FixedToRoundedInt(centerVertex.p.y), HEIGHT);
+        scanlineMax = imin(FixedToRoundedInt(centerVertex.p.y), HEIGHT-1);
 	for(scanline = FixedToRoundedInt(upperVertex.p.y); scanline < scanlineMax; scanline++ ) {
                 if(scanline > 0) {
-                    uint32_t xMax = imin(FixedToRoundedInt(rightX), WIDTH);
+                    uint32_t xMax = imin(FixedToRoundedInt(rightX), WIDTH-1);
                     uint32_t offset = scanline*WIDTH;
                     int32_t x = FixedToRoundedInt(leftX);
 
@@ -241,21 +232,21 @@ inline static void RasterizeTriangle(uint8_t* image, triangle_t* tri ) {
                             [tmpAdd] "r" (tmpAdd)
                             : "r0", "r1"
                     );
-
-                    leftX += leftXd;
-                    rightX += rightXd;
-                    leftU += leftUd;
-                    leftV += leftVd;
-
-                    U = leftU;
-                    V = leftV;
-
-                    __asm__ volatile(
-                            "pkhbt %[UV], %[V], %[U], lsl #16\n"
-                            : [UV] "=r" (UV)
-                            : [U] "r" (U), [V] "r" (V)
-                    );
                 }
+
+                leftX += leftXd;
+                rightX += rightXd;
+                leftU += leftUd;
+                leftV += leftVd;
+
+                U = leftU;
+                V = leftV;
+
+                __asm__ volatile(
+                "pkhbt %[UV], %[V], %[U], lsl #16\n"
+                : [UV] "=r" (UV)
+                : [U] "r" (U), [V] "r" (V)
+                );
 	}
         
 	// Guard against special case C: flat lower edge
@@ -283,7 +274,7 @@ inline static void RasterizeTriangle(uint8_t* image, triangle_t* tri ) {
 lower_half_render:
 
 	// lower triangle half
-	scanlineMax = imin(FixedToRoundedInt(lowerVertex.p.y), HEIGHT);
+	scanlineMax = imin(FixedToRoundedInt(lowerVertex.p.y), HEIGHT-1);
         
 	U = leftU;
 	V = leftV;
@@ -296,7 +287,7 @@ lower_half_render:
 
 	for(scanline = FixedToRoundedInt(centerVertex.p.y); scanline < scanlineMax; scanline++ ) {
                 if(scanline > 0) {
-                    uint32_t xMax = imin(FixedToRoundedInt(rightX), WIDTH);
+                    uint32_t xMax = imin(FixedToRoundedInt(rightX), WIDTH-1);
                     uint32_t offset = scanline*WIDTH;
                     int32_t x = FixedToRoundedInt(leftX);
                     __asm__ volatile(
@@ -361,12 +352,12 @@ static int triAvgDepthCompare(const void *p1, const void *p2) {
 	index_triangle_t* t1 = (index_triangle_t*)p1;
 	index_triangle_t* t2 = (index_triangle_t*)p2;
 	return(
-		data.rasterizer.transformedVertices[t2->v[0]].p.z +
-		data.rasterizer.transformedVertices[t2->v[1]].p.z +
-		data.rasterizer.transformedVertices[t2->v[2]].p.z -
-		data.rasterizer.transformedVertices[t1->v[0]].p.z -
-		data.rasterizer.transformedVertices[t1->v[1]].p.z -
-		data.rasterizer.transformedVertices[t1->v[2]].p.z
+		data.rasterizer.transformedVertices[t1->v[0]].p.z +
+		data.rasterizer.transformedVertices[t1->v[1]].p.z +
+		data.rasterizer.transformedVertices[t1->v[2]].p.z -
+		data.rasterizer.transformedVertices[t2->v[0]].p.z -
+		data.rasterizer.transformedVertices[t2->v[1]].p.z -
+		data.rasterizer.transformedVertices[t2->v[2]].p.z
 	);
 }
 
@@ -404,12 +395,29 @@ void RasterizeInit() {
 	startFrame = VGAFrame;
 }
 
+imat4x4_t notGluLookAt(ivec3_t eye, ivec3_t center, ivec3_t up ){
+    ivec3_t forward = ivec3norm(ivec3sub(center, eye));
+    ivec3_t side = ivec3norm(ivec3cross(forward, up));
+    ivec3_t realup = ivec3cross(forward, side);
+    ivec3_t backward = ivec3sub(ivec3(0, 0, 0), forward);
+    ivec3_t eyeinv = ivec3sub(ivec3(0, 0, 0), eye);
+    imat3x3_t lookdir = imat3x3cols(side, realup, backward);
+    imat4x4_t lookat = imat4x4affine3x3(lookdir, eyeinv);
+    return lookat;
+}
+
 inline static void RasterizeTest(uint8_t* image) {
+        
 	int32_t rotcnt = (VGAFrame - startFrame);
         int32_t rowd = rotcnt;
         
 	int32_t render_faces_total_start = 0;
 	int32_t render_faces_total_end = numFaces;
+
+        ivec3_t tolight = ivec3norm(imat3x3transform(
+                imat3x3rotatey(256),
+                ivec3(F(0),isin((rotcnt*20)%4096), icos((rotcnt*20)%4096))
+        ));
         
 	// Do a background
 	for(int i=0;i<NumberOfDotStars;i++){
@@ -419,31 +427,43 @@ inline static void RasterizeTest(uint8_t* image) {
 	}
 	
 	// Projection matrix
-	imat4x4_t proj = imat4x4diagonalperspective(IntToFixed(45),idiv(IntToFixed(WIDTH),IntToFixed(HEIGHT)),4096,IntToFixed(60));
+	imat4x4_t proj = imat4x4diagonalperspective(IntToFixed(45),idiv(IntToFixed(WIDTH),IntToFixed(HEIGHT)),4096,IntToFixed(400));
 	
 	// Modelview matrix
 	int rotdir = /*(rowd>>4)%2 == 0 ? -1 : */1;
-        imat4x4_t modelview = imat4x4affinemul(imat4x4translate(ivec3(IntToFixed(0),IntToFixed(0),IntToFixed(-30))),imat4x4rotatex(1700));
-        modelview = imat4x4affinemul(modelview,imat4x4rotatey(rotdir*rotcnt*8));
+//         imat4x4_t modelview = imat4x4affinemul(imat4x4translate(ivec3(IntToFixed(0),IntToFixed(0),IntToFixed(40))),imat4x4rotatex(-512));
+//         modelview = imat4x4affinemul(modelview,imat4x4rotatey(rotdir*rotcnt*8));
+//         modelview = imat4x4affinemul(modelview,imat4x4translate(ivec3(IntToFixed(0),IntToFixed(0),rotcnt<<4)));
+        imat4x4_t modelview = imat4x4lookat(
+            ivec3(IntToFixed(5), IntToFixed(-20), IntToFixed(-60)+(rotcnt<<8)),
+            ivec3(IntToFixed(0), IntToFixed(5), IntToFixed(0)),
+            ivec3(IntToFixed(0), IntToFixed(1), IntToFixed(0))
+        );
 	
 	// Transform
 	vertex_t transformVertex;
         srand(233);
 	for(int32_t i = 0; i < numVertices; i++) {
 		transformVertex.p = imat4x4transform(modelview,ivec4(vertices[i].x,vertices[i].y,vertices[i].z,F(1)));
-		// transformVertex.n = ivec4_xyz(imat4x4transform(modelview,ivec4(vertices[i].n.x,vertices[i].n.y,vertices[i].n.z,F(0))));
-		
+                if(transformVertex.p.z <= 4096) {
+                    data.rasterizer.transformedVertices[i].clip = 1;
+                    continue;
+                }
+                else {
+                    data.rasterizer.transformedVertices[i].clip = 0;
+                }
+                
 		// Project
 		transformVertex.p = imat4x4transform(proj,transformVertex.p);
-		
+                
 		// Perspective divide and viewport transform
 		data.rasterizer.transformedVertices[i].p = ivec3(
 			Viewport(transformVertex.p.x,transformVertex.p.w,WIDTH),
 			Viewport(transformVertex.p.y,transformVertex.p.w,HEIGHT),
 			transformVertex.p.z
 		);
-                data.rasterizer.transformedVertices[i].c = RastRGB(rand()%7,rand()%7,rand()%3);
-	}
+//                 data.rasterizer.transformedVertices[i].n = ivec3norm(ivec3sub(light, vertices[i]));
+        }
 
         
 	// Depth sort
@@ -452,11 +472,46 @@ inline static void RasterizeTest(uint8_t* image) {
         
 	// For each triangle
 	triangle_t tri;
+        uint32_t dontrasterize = 0;
         for(int32_t i = render_faces_total_start; i < render_faces_total_end; i++ ) {
-		tri.v[0] = data.rasterizer.transformedVertices[data.rasterizer.sortedTriangles[i].v[0]];
-		tri.v[1] = data.rasterizer.transformedVertices[data.rasterizer.sortedTriangles[i].v[1]];
-		tri.v[2] = data.rasterizer.transformedVertices[data.rasterizer.sortedTriangles[i].v[2]];
-		RasterizeTriangle(image, &tri);
+                dontrasterize = 0;
+
+                for(int ver = 0; ver < 3; ver++) {
+                        tri.v[ver] = data.rasterizer.transformedVertices[data.rasterizer.sortedTriangles[i].v[ver]];
+                }
+                
+                for(int ver = 0; ver < 3; ver++) {
+                        // Whole-triangle clipper
+                        if(tri.v[ver].clip == 1) {
+                            dontrasterize = 1;
+                            break;
+                        }
+                        
+                        // Winding test
+                        if(
+                            imul(tri.v[1].p.x - tri.v[0].p.x, tri.v[2].p.y - tri.v[0].p.y) -
+                            imul(tri.v[2].p.x - tri.v[0].p.x, tri.v[1].p.y - tri.v[0].p.y)
+                            > 0
+                        ) {
+                            dontrasterize = 1;
+                            break;
+                        }
+                }
+
+                if(dontrasterize == 1) {
+                        continue;
+                }
+                
+                for(int ver = 0; ver < 3; ver++) {
+                        tri.v[ver].c = ivec3dot(
+                            tolight,
+                            normals[data.rasterizer.sortedTriangles[i].v[3]]
+                        );
+                        tri.v[ver].c = imin(imax(F(0), tri.v[ver].c)>>9,7);
+                        tri.v[ver].c = RastRGB(tri.v[ver].c,tri.v[ver].c,0);
+                }
+                
+                RasterizeTriangle(image, &tri);
 	}
 	
 	rotcnt++;
@@ -472,7 +527,7 @@ void Rasterize() {
 	InitializeBitmap(&frame1,320,200,320,framebuffer1);
 	InitializeBitmap(&frame2,320,200,320,framebuffer2);
 
-	SetVGAScreenMode320x200_60Hz(framebuffer1);
+        SetVGAScreenMode320x200_60Hz(framebuffer1);
 	
 	int t=0;
 
