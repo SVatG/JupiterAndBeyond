@@ -32,6 +32,14 @@ void PixelParticles()
 		data.pp.particles[i].y=RandomInteger()%Fix(200);
 	}
 
+	Bitmap screen;
+	InitializeBitmap(&screen,320,200,320,framebuffer1);
+	DrawHorizontalLine(&screen,0,0,320,0xff);
+	DrawHorizontalLine(&screen,0,199,320,0xff);
+	InitializeBitmap(&screen,320,200,320,framebuffer2);
+	DrawHorizontalLine(&screen,0,0,320,0xff);
+	DrawHorizontalLine(&screen,0,199,320,0xff);
+
 	int t=0;
 	int32_t tx1=0,ty1=0;
 	int32_t tx2=0,ty2=0;
