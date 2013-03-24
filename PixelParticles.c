@@ -11,8 +11,8 @@
 
 static inline uint32_t PixelAverage(uint32_t a,uint32_t b)
 {
-	uint32_t halfa=(a>>1)&((uint32_t)PixelAllButHighBits*0x01010101);
-	uint32_t halfb=(b>>1)&((uint32_t)PixelAllButHighBits*0x01010101);
+	uint32_t halfa=(a>>1)&(PixelAllButHighBits*(uint32_t)0x01010101);
+	uint32_t halfb=(b>>1)&(PixelAllButHighBits*(uint32_t)0x01010101);
 	uint32_t carry=a&b&(0x21*0x01010101);
 	return halfa+halfb+carry;
 }
