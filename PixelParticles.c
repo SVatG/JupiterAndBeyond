@@ -11,9 +11,9 @@
 
 static inline uint32_t PixelAverage(uint32_t a,uint32_t b)
 {
-	uint32_t halfa=(a>>1)&(PixelAllButHighBits*(uint32_t)0x01010101);
-	uint32_t halfb=(b>>1)&(PixelAllButHighBits*(uint32_t)0x01010101);
-	uint32_t carry=a&b&(0x21*0x01010101);
+	uint32_t halfa=(a>>1)&(PixelAllButHighBits*0x01010101);
+	uint32_t halfb=(b>>1)&(PixelAllButHighBits*0x01010101);
+	uint32_t carry=a&b&(PixelLowBits*0x01010101);
 	return halfa+halfb+carry;
 }
 
@@ -116,7 +116,7 @@ void PixelParticles()
 			}
 			data.pp.particles[i].x=newx;
 			data.pp.particles[i].y=newy;
-			DrawPixelNoClip(&screen,FixedToInt(newx),FixedToInt(newy),RawRGB(7,7,3));
+			DrawPixelNoClip(&screen,FixedToInt(newx),FixedToInt(newy),RawRGB(7,6,3));
 		}
 		uint32_t line3=VGALine;
 
