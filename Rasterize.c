@@ -462,7 +462,6 @@ inline static void RasterizeTest(uint8_t* image) {
 			Viewport(transformVertex.p.y,transformVertex.p.w,HEIGHT),
 			transformVertex.p.z
 		);
-//                 data.rasterizer.transformedVertices[i].n = ivec3norm(ivec3sub(light, vertices[i]));
         }
 
         
@@ -501,15 +500,42 @@ inline static void RasterizeTest(uint8_t* image) {
                 if(dontrasterize == 1) {
                         continue;
                 }
-                
+
+                // Find same-height verts
+                init_vertex_t origVertices[3];
                 for(int ver = 0; ver < 3; ver++) {
-                        tri.v[ver].c = ivec3dot(
-                            tolight,
-                            normals[data.rasterizer.sortedTriangles[i].v[3]]
-                        );
-                        tri.v[ver].c = imin(imax(F(0), tri.v[ver].c)>>9,7);
-                        tri.v[ver].c = RastRGB(tri.v[ver].c,tri.v[ver].c,0);
+                    origVertices[ver] = vertices[data.rasterizer.sortedTriangles[i].v[ver]];
                 }
+                
+                if(origVertices[0].y - origVertices[1].y < 8) {
+                    // top vertices are 01
+                    tri.v[0].c = RastRGB(7,0,0);
+                    tri.v[1].c = RastRGB(0,7,0);
+                    tri.v[2].c = RastRGB(0,0,0);
+                }
+                else {
+                    if(origVertices[0].y - origVertices[2].y < 8) {
+                        // top vertices are 02
+                        tri.v[0].c = RastRGB(7,0,0);
+                        tri.v[2].c = RastRGB(0,7,0);
+                        tri.v[1].c = RastRGB(0,0,0);
+                    }
+                    else {
+                        // top vertices are 12
+                        tri.v[1].c = RastRGB(7,0,0);
+                        tri.v[2].c = RastRGB(0,7,0);
+                        tri.v[0].c = RastRGB(0,0,0);
+                    }
+                }
+                
+//                 for(int ver = 0; ver < 3; ver++) {
+//                         tri.v[ver].c = ivec3dot(
+//                             tolight,
+//                             normals[data.rasterizer.sortedTriangles[i].v[3]]
+//                         );
+//                         tri.v[ver].c = imin(imax(F(0), tri.v[ver].c)>>9,7);
+//                         tri.v[ver].c = RastRGB(tri.v[ver].c,tri.v[ver].c,0);
+//                 }
                 
                 RasterizeTriangle(image, &tri);
 	}
