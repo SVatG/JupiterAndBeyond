@@ -49,13 +49,13 @@ int main()
 
 	for(;;)
 	{
+		LogoShow();
 		Starfield();
 		IDontEvenKnow();
 		Voxelscape();
 		RasterizeInit();
 		Rasterize();
 		PixelParticles();
-		LogoShow();
 		Pukezoomer();
 		Fields();
 	}
