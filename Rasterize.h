@@ -16,7 +16,8 @@ typedef struct {
 typedef struct {
 	ivec3_t p;
         uint8_t clip;
-	uint32_t c;
+	int16_t uw;
+        int16_t vw;
 } ss_vertex_t;
 
 typedef struct {
@@ -25,19 +26,17 @@ typedef struct {
 
 typedef struct {
 	int16_t v[4];
+        uint8_t indices;
 } index_triangle_t;
 
 typedef ivec3_t init_vertex_t;
 
 #include "Cityscape.h"
 
-#define NumberOfDotStars 300
+#define NumberOfDotStars 2
 struct RasterizeData {
 	ss_vertex_t transformedVertices[numVertices];
 	index_triangle_t sortedTriangles[numFaces];
-	struct DotStar1 {
-		int x,y,dx,f;
-	} dotstars[NumberOfDotStars];
 };
 
 

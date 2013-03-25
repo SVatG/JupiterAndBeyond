@@ -50,11 +50,11 @@ int main()
 	for(;;)
 	{
 		LogoShow();
+		RasterizeInit();
+		Rasterize();
 		Starfield();
 		IDontEvenKnow();
 		Voxelscape();
-		RasterizeInit();
-		Rasterize();
 		PixelParticles();
 		Pukezoomer();
 		Fields();
