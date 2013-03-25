@@ -29,6 +29,17 @@ void SetVGAScreenMode117(uint8_t *framebuffer,int pixelsperrow,int pixelclock);
 
 void SetFrameBuffer(uint8_t *framebuffer);
 
+#ifdef EnableOverclocking
+static inline void SetVGAScreenMode320x240(uint8_t *framebuffer) { SetVGAScreenMode240(framebuffer,320,14); }
+static inline void SetVGAScreenMode320x200_60Hz(uint8_t *framebuffer) { SetVGAScreenMode200_60Hz(framebuffer,320,14); }
+static inline void SetVGAScreenMode320x200(uint8_t *framebuffer) { SetVGAScreenMode200(framebuffer,320,14); }
+static inline void SetVGAScreenMode320x175(uint8_t *framebuffer) { SetVGAScreenMode175(framebuffer,320,14); }
+
+static inline void SetVGAScreenMode212x160(uint8_t *framebuffer) { SetVGAScreenMode160(framebuffer,212,21); }
+static inline void SetVGAScreenMode212x133_60Hz(uint8_t *framebuffer) { SetVGAScreenMode133_60Hz(framebuffer,212,21); }
+static inline void SetVGAScreenMode212x133(uint8_t *framebuffer) { SetVGAScreenMode133(framebuffer,212,21); }
+static inline void SetVGAScreenMode212x175(uint8_t *framebuffer) { SetVGAScreenMode117(framebuffer,212,21); }
+#else
 static inline void SetVGAScreenMode320x240(uint8_t *framebuffer) { SetVGAScreenMode240(framebuffer,320,13); }
 static inline void SetVGAScreenMode320x200_60Hz(uint8_t *framebuffer) { SetVGAScreenMode200_60Hz(framebuffer,320,13); }
 static inline void SetVGAScreenMode320x200(uint8_t *framebuffer) { SetVGAScreenMode200(framebuffer,320,13); }
@@ -38,6 +49,7 @@ static inline void SetVGAScreenMode212x160(uint8_t *framebuffer) { SetVGAScreenM
 static inline void SetVGAScreenMode212x133_60Hz(uint8_t *framebuffer) { SetVGAScreenMode133_60Hz(framebuffer,212,19); }
 static inline void SetVGAScreenMode212x133(uint8_t *framebuffer) { SetVGAScreenMode133(framebuffer,212,19); }
 static inline void SetVGAScreenMode212x175(uint8_t *framebuffer) { SetVGAScreenMode117(framebuffer,212,19); }
+#endif
 
 static inline void WaitVBL()
 {
