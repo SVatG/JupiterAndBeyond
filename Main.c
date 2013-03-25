@@ -49,11 +49,11 @@ int main()
 
 	for(;;)
 	{
+                RasterizeInit();
+                Rasterize();
 		Starfield();
 		IDontEvenKnow();
 		Voxelscape();
-		RasterizeInit();
-		Rasterize();
 		PixelParticles();
 		LogoShow();
 		Pukezoomer();
