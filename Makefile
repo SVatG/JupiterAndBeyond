@@ -4,9 +4,8 @@ CC = arm-none-eabi-gcc
 LD = arm-none-eabi-gcc
 OBJCOPY = arm-none-eabi-objcopy
 
-DEFINES =	-DARM_MATH_CM4 \
-		-DRGB8Pixels \
-		-DEnableOverclocking
+DEFINES = -DRGB8Pixels
+#DEFINES = -DRGB8Pixels -DEnableOverclocking
 
 C_OPTS =	-std=c99 \
 		-mthumb \

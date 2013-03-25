@@ -15,7 +15,7 @@
 #include "Graphics/Bitmap.h"
 #include "Graphics/Drawing.h"
 
-#include <arm_math.h>
+#include <string.h>
 
 static void Rotozoom();
 static void Starfield();
