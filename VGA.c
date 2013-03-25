@@ -56,11 +56,21 @@ void InitializeVGA()
 	TIM2->CCMR2=(6*TIM_CCMR2_OC4M_0)|(7*TIM_CCMR2_OC3M_0);
 	TIM2->CCER=TIM_CCER_CC4E|TIM_CCER_CC4P; // Channel 4 enabled, reversed polarity (active low).
 	TIM2->PSC=0; // Prescaler = 1
+
+	#ifdef EnableOverclocking
+	TIM2->ARR=2796-1; // 88 MHz / 31.46875 kHz = 2796.42502483
+	// On CNT==0: sync pulse start
+	TIM2->CCR4=336; // 88 MHz * 3.813 microseconds = 335.544 - sync pulse end
+	TIM2->CCR3=503-14; // 88 MHz * (3.813 + 1.907) microseconds = 503.36 - back porch end, start pixel clock
+	                   // -14 is a kludge to account for slow start of timer.
+	TIM2->CCR2=503; // 88 MHz * (3.813 + 1.907) microseconds = 503.36 - back porch end, start pixel clock
+	#else
 	TIM2->ARR=2669-1; // 84 MHz / 31.46875 kHz = 2669.31479643
 	// On CNT==0: sync pulse start
 	TIM2->CCR4=320; // 84 MHz * 3.813 microseconds = 320.292 - sync pulse end
 	TIM2->CCR3=480; // 84 MHz * (3.813 + 1.907) microseconds = 480.48 - back porch end, start pixel clock
 	TIM2->CCR2=480; // 84 MHz * (3.813 + 1.907) microseconds = 480.48 - back porch end, start pixel clock
+	#endif
 
 	// Enable HSync timer.
 	TIM2->CNT=-10; // Make sure it hits ARR. 
@@ -121,13 +131,21 @@ void SetVGAHorizontalSync31kHzActiveHigh(InterruptHandler *handler)
 
 void SetVGAHorizontalSync31kHzWithEarlyStart(InterruptHandler *handler,int offset)
 {
+	#ifdef EnableOverclocking
+	TIM2->CCR2=503-offset; // 88 MHz * (3.813 + 1.907) microseconds = 503.36 - back porch end, start pixel clock
+	#else
 	TIM2->CCR2=480-offset; // 84 MHz * (3.813 + 1.907) microseconds = 480.48 - back porch end, start pixel clock
+	#endif
 	SetVGAHorizontalSync31kHzAtInterrupt(handler,TIM_DIER_CC2IE); // Use CC2 interrupt.
 }
 
 void SetVGAHorizontalSync31kHzActiveHighWithEarlyStart(InterruptHandler *handler,int offset)
 {
+	#ifdef EnableOverclocking
+	TIM2->CCR2=503-offset; // 88 MHz * (3.813 + 1.907) microseconds = 503.36 - back porch end, start pixel clock
+	#else
 	TIM2->CCR2=480-offset; // 84 MHz * (3.813 + 1.907) microseconds = 480.48 - back porch end, start pixel clock
+	#endif
 	SetVGAHorizontalSync31kHzActiveHighAtInterrupt(handler,TIM_DIER_CC2IE); // Use CC2 interrupt.
 }
 
