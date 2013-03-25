@@ -28,6 +28,7 @@ C_FILES = Audio.c \
 		HeightMap.c \
 		Jupiter1.c \
 		Jupiter3.c \
+		JupiterCyborg.c \
 		JupiterHands.c \
 		LED.c \
 		LogoShow.c \
@@ -38,6 +39,7 @@ C_FILES = Audio.c \
 		Random.c \
 		Rasterize.c \
 		RayArray.c \
+		Starfield.c \
 		Startup.c \
 		System.c \
 		TestSong.c \

@@ -16,6 +16,7 @@
 #include "PixelParticles.h"
 #include "Pukezoomer.h"
 #include "Rasterize.h"
+#include "Starfield.h"
 #include "Voxelscape.h"
 
 #include <arm_math.h>
@@ -48,6 +49,7 @@ int main()
 
 	for(;;)
 	{
+		Starfield();
 		IDontEvenKnow();
 		Voxelscape();
 		RasterizeInit();

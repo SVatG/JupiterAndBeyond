@@ -5,6 +5,7 @@
 #include "LogoShow.h"
 #include "PixelParticles.h"
 #include "Rasterize.h"
+#include "Starfield.h"
 #include "Voxelscape.h"
 
 #include "Button.h"
@@ -15,6 +16,7 @@ extern union GlobalData
     struct LogoShowData logoshow;
 	struct PixelParticlesData pp;
     struct RasterizeData rasterizer;
+    struct StarfieldData stars;
     struct VoxelscapeData voxel;
 } data;
 
