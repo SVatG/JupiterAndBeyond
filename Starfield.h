@@ -3,7 +3,8 @@
 
 #include <stdint.h>
 
-#define NumberOfStars 4096
+#define SquareRootOfNumberOfStars 64
+#define NumberOfStars (SquareRootOfNumberOfStars*SquareRootOfNumberOfStars)
 
 struct StarfieldData
 {
