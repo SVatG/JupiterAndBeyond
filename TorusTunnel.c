@@ -20,6 +20,18 @@ static inline uint32_t PixelAverage(uint32_t a,uint32_t b)
 	return halfa+halfb+carry;
 }
 
+static uint32_t Hash32(uint32_t val)
+{
+	val^=val>>16;
+	val^=61;
+	val+=val<<3;
+	val^=val>>4;
+	val*=0x27d4eb2d;
+	val^=val>>15;
+	return val;
+}
+
+
 void TorusTunnel()
 {
 	uint8_t *framebuffer1=(uint8_t *)0x20000000;
@@ -42,6 +54,9 @@ void TorusTunnel()
 	InitializeBitmap(&screen,320,200,320,framebuffer2);
 	DrawHorizontalLine(&screen,0,0,320,0xff);
 	DrawHorizontalLine(&screen,0,199,320,0xff);*/
+
+	uint32_t map[64];
+	for(int i=0;i<64;i++) map[i]=RandomInteger();
 
 	int t=0;
 	int32_t tx1=0,ty1=0;
@@ -93,27 +108,41 @@ void TorusTunnel()
 		Bitmap screen;
 		InitializeBitmap(&screen,320,198,320,&destination[320]);
 
+		map[RandomInteger()&63]^=RandomInteger();
+
 		int a0=t*6;
-		for(int i=0;i<32;i++)
+		for(int i=0;i<64;i++)
 		{
-			int a=4096*i/64-a0%(4096/32);
-			int32_t sin_a=isin(a);
-			int32_t cos_a=icos(a);
-			for(int j=0;j<24;j++)
+			int step=a0/(4096/128);
+			int a1=4096*i/128-a0%(4096/128);
+			int a2=4096*(i-1)/128-a0%(4096/128);
+			int32_t sin_a1=isin(a1);
+			int32_t cos_a1=icos(a1);
+			int32_t sin_a2=isin(a2);
+			int32_t cos_a2=icos(a2);
+			for(int j=0;j<48;j++)
 			{
-				int b1=4096*j/24;
-				int b2=4096*(j+1)/24;
+				if((i^j^step)&1) continue;
+
+				int b1=4096*j/48;
+				int b2=4096*(j+1)/48;
 				int32_t sin_b1=isin(b1);
 				int32_t cos_b1=icos(b1);
 				int32_t sin_b2=isin(b2);
 				int32_t cos_b2=icos(b2);
 
 				int x1=imul(Fix(10),cos_b1);
-				int y1=imul(Fix(10),sin_b1)-a*140;
-				int z1=a*100;
+				int y1=imul(Fix(10),sin_b1)-a1*140;
+				int z1=a1*100;
 				int x2=imul(Fix(10),cos_b2);
-				int y2=imul(Fix(10),sin_b2)-a*140;
-				int z2=a*100;
+				int y2=imul(Fix(10),sin_b2)-a1*140;
+				int z2=a1*100;
+				int x3=imul(Fix(10),cos_b1);
+				int y3=imul(Fix(10),sin_b1)-a2*140;
+				int z3=a2*100;
+				int x4=imul(Fix(10),cos_b2);
+				int y4=imul(Fix(10),sin_b2)-a2*140;
+				int z4=a2*100;
 
 				/*int x1=imul(Fix(10),cos_b1);
 				int y1=imul(imul(Fix(10),sin_b1)+Fix(10),cos_a)-Fix(8);
@@ -126,9 +155,26 @@ void TorusTunnel()
 				int sy1=50*y1/z1+99;
 				int sx2=50*x2/z2+159;
 				int sy2=50*y2/z2+99;
+				int sx3=50*x3/z3+159;
+				int sy3=50*y3/z3+99;
+				int sx4=50*x4/z4+159;
+				int sy4=50*y4/z4+99;
 
-				if(z1>0 && z2>0)
-				DrawLine(&screen,sx1,sy1,sx2,sy2,RawRGB(7,7,3));
+				if(z1>0 && z2>0 && z3>0 && z4>0)
+				{
+					uint32_t val=Hash32(i+step+j*1000);
+					uint32_t modifier=map[(val>>16)&63]>>((val>>24)&31);
+					if((val^modifier)&1)
+					{
+						DrawLine(&screen,sx1,sy1,sx2,sy2,RawRGB(7,7,3));
+						DrawLine(&screen,sx3,sy3,sx4,sy4,RawRGB(7,7,3));
+					}
+					else
+					{
+						DrawLine(&screen,sx1,sy1,sx3,sy3,RawRGB(7,7,3));
+						DrawLine(&screen,sx2,sy2,sx4,sy4,RawRGB(7,7,3));
+					}
+				}
 			}
 		}
 
