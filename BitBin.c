@@ -132,7 +132,7 @@ int16_t NextBitBinSample(BitBinSong *self)
 		//self->channels[i].lastamp =(fy);
 		
 		
-		if((self->delaycounter % 8) == 0) {
+		if((self->delaycounter & 7) == 0) {
 			delay_amplitude += input;
 		}
 		
@@ -149,20 +149,20 @@ int16_t NextBitBinSample(BitBinSong *self)
 		
 		delay_amplitude = amplitude;
 		
-	if((self->delaycounter % 8) == 0) {
-		self->delaybuf[self->delaypos] = delay_amplitude/16777216;
+	if((self->delaycounter & 7) == 0) {
+		self->delaybuf[self->delaypos] = delay_amplitude>>24;
 		self->delaypos++;
 		self->delaypos &= 0x3FF;
 	}
 	self->delaycounter++;
 	
-	amplitude += (self->delaybuf[self->delaypos & 0x3FF] *16777216)/2;
+	amplitude += self->delaybuf[self->delaypos & 0x3FF]<<23;
 	
 	
 
 	amplitude>>=12+2;
-	if(amplitude>24576) amplitude = 24576 + (amplitude-24576)/2;
-	if(amplitude<-24576) amplitude = -24576 + (amplitude+24576)/2;
+	if(amplitude>24576) amplitude = 24576 + ((amplitude-24576)>>1);
+	if(amplitude<-24576) amplitude = -24576 + ((amplitude+24576)>>1);
 	
 	if(amplitude>32767) return 32767;
 	else if(amplitude<-32768) return -32768;
@@ -428,22 +428,17 @@ static int32_t ChannelAmplitude(BitBinChannel *channel)
 	int32_t accum=0;
 	if(channel->waveform > 1 && channel->waveform < 5) {
 		for(int i=0;i<8;i++) {
-			channel->phase = channel->unisonphase[i % 4]; 
+			channel->phase = channel->unisonphase[i & 3]; 
 			if(i > 3) channel->phase += 20 + channel->phase;
 			switch(channel->waveform)
 			{
-				case 0: sample=StrSample(channel); break;
-				case 1: sample=SquareWave1_4(channel); break;
 				case 2: sample=SquareWave1_2(channel); break;
 				case 3: sample=SquareWave3_4(channel); break;
 				case 4: sample=TriangleWave(channel); break;
-				case 5: sample=Noise(channel); break;
-				case 6: sample=Drum1(channel); break;
-				case 7: sample=Drum2(channel); break;
 			}
-			if(i >3) accum += sample/8;
+			if(i >3) accum += sample>>3;
 			else
-				accum += sample/2;
+				accum += sample>>1;
 		}
 		sample = accum;
 	}
@@ -452,9 +447,6 @@ static int32_t ChannelAmplitude(BitBinChannel *channel)
 			{
 				case 0: sample=StrSample(channel); break;
 				case 1: sample=SquareWave1_4(channel); break;
-				case 2: sample=SquareWave1_2(channel); break;
-				case 3: sample=SquareWave3_4(channel); break;
-				case 4: sample=TriangleWave(channel); break;
 				case 5: sample=Noise(channel); break;
 				case 6: sample=Drum1(channel); break;
 				case 7: sample=Drum2(channel); break;
@@ -470,7 +462,7 @@ static int32_t ChannelAmplitude(BitBinChannel *channel)
 
 static int32_t SawWave(BitBinChannel *channel)
 {
-	return (channel->phase & 0x7FFFF) / 8 - 32767;
+	return ((channel->phase & 0x7FFFF)>>3) - 32767;
 
 }
 
@@ -604,7 +596,7 @@ static int32_t StrSample(BitBinChannel *channel)
 	
 	uint32_t index=813*(channel->phase/523)>>16 + (channel->phase&1);
 
-	while(index > 16714) index -= (16714 - 1402);
+	if(index > 16714) index=(index-1402)%(16714 - 1402)+1402;
 	
 	if(index & 1) {
 		return (int8_t)(samples[index>>1] & 0xF0) * 0xFF;
