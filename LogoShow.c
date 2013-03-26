@@ -97,7 +97,7 @@ void LogoShow() {
 	}
 
 	int32_t drawc = 0;
-        while(!UserButtonState())
+	while(!UserButtonState())
 	{
 		WaitVBL();
 		Bitmap *currframe;
@@ -113,36 +113,32 @@ void LogoShow() {
 			drawc++;
 		}
 		
-		if((t/10)%400 < 200) {
+		if(t%4000 < 2000) {
                     DrawRLEBitmap(currframe, &Jupiter1, 0, 0);
                 }
                 else {
                     DrawRLEBitmap(currframe, &Jupiter3, 0, 0);
                 }
 		uint8_t* pixels = currframe->pixels;
-                if((t/10)%400 < 100) {
-                    int t1 = (t/10) % 200;
-                    int t2 = (t1) % 100;
-                    t2 = t2 < 50 ? t2 : 50;
-                    DiagonalFadeIn(currframe->pixels, t2, 20, 1);
+                if(t%4000 < 1000) {
+                    int t2 = t % 1000;
+                    t2 = t2 < 500 ? t2 : 500;
+                    DiagonalFadeIn(currframe->pixels, t2, 2, 1);
                 }
-                else if((t/10)%400 < 200) {
-                    int t1 = (t/10) % 200;
-                    int t2 = ((t1) % 100);
-                    t2 = t2 < 50 ? t2 : 50;
-                    DiagonalFadeOut(currframe->pixels, t2, 20, 1);
+                else if(t%4000 < 2000) {
+                    int t2 = t % 1000;
+                    t2 = t2 < 500 ? t2 : 500;
+                    DiagonalFadeOut(currframe->pixels, t2, 2, 1);
                 }
-                else if((t/10)%400 < 300) {
-                    int t1 = (t/10-200) % 200;
-                    int t2 = ((t1) % 100);
-                    t2 = t2 < 50 ? t2 : 50;
-                    CodaFadeIn(currframe->pixels, t2, 20, 1);
+                else if(t%4000 < 3000) {
+                    int t2 = t % 1000;
+                    t2 = t2 < 500 ? t2 : 500;
+                    CodaFadeIn(currframe->pixels, t2, 2, 1);
                 }
                 else {
-                    int t1 = (t/10-200) % 200;
-                    int t2 = ((t1) % 100);
-                    t2 = t2 < 50 ? t2 : 50;
-                    CodaFadeOut(currframe->pixels, t2, 20, 1);
+                    int t2 = t % 1000;
+                    t2 = t2 < 500 ? t2 : 500;
+                    CodaFadeOut(currframe->pixels, t2, 2, 1);
                 }
                 
 		t++;

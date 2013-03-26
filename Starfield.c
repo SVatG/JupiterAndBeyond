@@ -23,9 +23,9 @@ void Starfield()
 
 	for(int i=0;i<NumberOfStars;i++)
 	{
-		data.stars.stars[i].x=RandomInteger()%320-159-6000;
-		data.stars.stars[i].y=RandomInteger()%200-99;
-		data.stars.stars[i].z=3000-RandomInteger()%3000;
+		data.stars.stars[i].x=-32768;
+		data.stars.stars[i].y=0;
+		data.stars.stars[i].z=RandomInteger()%4096;
 	}
 
 	static const uint8_t palette[8][8]={
@@ -108,7 +108,7 @@ void Starfield()
 
 			int depth=data.stars.stars[i].z>>8;
 			if(depth<0) depth=0;
-			if(depth<8 && data.stars.stars[i].z>5) DrawLine(&screen,ox,oy,x,y,palette[depth][i&7]);
+			if(depth<8 && data.stars.stars[i].z>10) DrawLine(&screen,ox,oy,x,y,palette[depth][i&7]);
 
 			if(x>=320 || y<0 || y>=200 || data.stars.stars[i].z<=40)
 			{

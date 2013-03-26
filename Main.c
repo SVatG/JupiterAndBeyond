@@ -17,6 +17,7 @@
 #include "Pukezoomer.h"
 #include "Rasterize.h"
 #include "Starfield.h"
+#include "TorusTunnel.h"
 #include "Voxelscape.h"
 
 #include <string.h>
@@ -49,13 +50,14 @@ int main()
 
 	for(;;)
 	{
-                RasterizeInit();
-                Rasterize();
+		TorusTunnel();
+		LogoShow();
+		RasterizeInit();
+		Rasterize();
 		Starfield();
 		IDontEvenKnow();
 		Voxelscape();
 		PixelParticles();
-		LogoShow();
 		Pukezoomer();
 		Fields();
 	}

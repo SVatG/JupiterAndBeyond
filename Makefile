@@ -29,6 +29,7 @@ C_FILES = Audio.c \
 		Jupiter1.c \
 		Jupiter3.c \
 		JupiterCyborg.c \
+		JupiterCyborg2.c \
 		JupiterHands.c \
 		LED.c \
 		LogoShow.c \
@@ -43,6 +44,7 @@ C_FILES = Audio.c \
 		Startup.c \
 		System.c \
 		TestSong.c \
+		TorusTunnel.c \
 		Utils.c \
 		VGA.c \
 		Voxelscape.c \
