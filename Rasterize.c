@@ -34,6 +34,8 @@
 #include "Rasterize.h"
 #include "Global.h"
 
+#include "CityText.h"
+
 static inline int32_t approxabs(int32_t x) { return x^(x>>31); }
 
 inline static void RasterizeTriangle(uint8_t* image, triangle_t* tri, uint8_t shade) {
@@ -389,7 +391,7 @@ inline static void RasterizeTriangleSingle(uint8_t* image, triangle_t* tri, uint
                             image[x+offset] = RastRGB(
                                 (shade<<1),
                                 (shade<<1),
-                                shade
+                                shade<<1
                             );
                             x++;
                         }
@@ -435,7 +437,7 @@ lower_half_render2:
                             image[x+offset] = RastRGB(
                                 (shade<<1),
                                 (shade<<1),
-                                shade
+                                shade<<1
                             );
                             x++;
                         }
@@ -550,41 +552,15 @@ void RasterizeInit() {
             // Store triangle info
             data.rasterizer.sortedTriangles[i].indices = (flatvert1 << 6) | (flatvert2 << 4) | (thirdvert << 2) | (alignedvert);
         }
-
-        srand(7);
-        for(int U = 0; U < 16; U++) {
-            for(int V = 0; V < 16; V++) {
-                uint8_t hb = U & 1;
-                uint8_t vb = V & 1;
-                uint8_t tb = (hb&&vb);
-                uint8_t l = rand() & 1;
-                
-                data.rasterizer.shadetex0[SHADECOORD(U,V)] = RastRGB(
-                    tb * 7 * (1-l) + (1-tb) * (0<<1),
-                    tb * 6 * (1-l) + (1-tb) * (0<<1),
-                    tb * l * 2 + (1-tb) * 0
-                );
-                data.rasterizer.shadetex1[SHADECOORD(U,V)] = RastRGB(
-                    tb * 7 * (1-l) + (1-tb) * (1<<1),
-                    tb * 6 * (1-l) + (1-tb) * (1<<1),
-                    tb * l * 2 + (1-tb) * 1
-                );
-                data.rasterizer.shadetex2[SHADECOORD(U,V)] = RastRGB(
-                    tb * 7 * (1-l) + (1-tb) * (2<<1),
-                    tb * 6 * (1-l) + (1-tb) * (2<<1),
-                    tb * l * 2 + (1-tb) * 2
-                );
-                data.rasterizer.shadetex3[SHADECOORD(U,V)] = RastRGB(
-                    tb * 7 * (1-l) + (1-tb) * (3<<1),
-                    tb * 6 * (1-l) + (1-tb) * (3<<1),
-                    tb * l * 2 + (1-tb) * 3
-                );
-            }
-        }
+        memcpy(data.rasterizer.shadetex0, citytext1_pixels, 16*16*sizeof(uint8_t));
+        memcpy(data.rasterizer.shadetex1, citytext2_pixels, 16*16*sizeof(uint8_t));
+        memcpy(data.rasterizer.shadetex2, citytext3_pixels, 16*16*sizeof(uint8_t));
+        memcpy(data.rasterizer.shadetex3, citytext4_pixels, 16*16*sizeof(uint8_t));
 }
 
-inline static void RasterizeTest(uint8_t* image) {
-        
+inline static void RasterizeTest(Bitmap* currframe) {
+        uint8_t* image = currframe->pixels;
+    
 	int32_t rotcnt = (VGAFrame - startFrame);
         int32_t rowd = rotcnt;
         
@@ -596,14 +572,72 @@ inline static void RasterizeTest(uint8_t* image) {
 	
 	// Modelview matrix
 	int rotdir = /*(rowd>>4)%2 == 0 ? -1 : */1;
+        ivec3_t eye = ivec3(IntToFixed(5), IntToFixed(-20), IntToFixed(-150)+(rotcnt<<10));
+        ivec3_t look = ivec3(IntToFixed(0), IntToFixed(5), IntToFixed(0));
         imat4x4_t modelview = imat4x4lookat(
-            ivec3(IntToFixed(5), IntToFixed(-20), IntToFixed(-150)+(rotcnt<<10)),
-            ivec3(IntToFixed(0), IntToFixed(5), IntToFixed(0)),
+            eye,
+            look,
             ivec3(IntToFixed(0), IntToFixed(1), IntToFixed(0))
         );
-
+        ivec3_t lookdir = ivec3sub(eye,look);
+        lookdir.y = 0;
+        lookdir = ivec3norm(lookdir);
+        
         // MVP matrix
         imat4x4_t mvp = imat4x4mul(proj, modelview);
+
+        // Horizon
+        ivec3_t hori_pos = ivec3mul(lookdir,F(40));
+        ivec4_t hori = imat4x4transform(mvp, ivec4(hori_pos.x,F(0),hori_pos.z,F(1)));
+        int32_t hori_y = FixedToInt(Viewport(hori.y,hori.w,HEIGHT));
+        hori_y = imin(imax(0, hori_y), HEIGHT-1);
+        memset(&image[0], RastRGB(0,0,1), hori_y*WIDTH);
+        memset(&image[hori_y*WIDTH], RastRGB(1,1,1), (HEIGHT-hori_y)*WIDTH);
+
+        // Starsssssss
+        srand(666);
+        for(int i = 0; i < 300; i++) {
+            ivec3_t star = ivec3mul(ivec3norm(ivec3((rand()%8192)-4096, rand()%4096, (rand()%8192)-4096)),F(200));
+            ivec4_t star4 = imat4x4transform(mvp, ivec4(star.x,star.y,star.z,F(1)));
+            int32_t star_x = FixedToInt(Viewport(star4.x,star4.w,WIDTH));
+            int32_t star_y = FixedToInt(Viewport(star4.y,star4.w,HEIGHT));
+            if(star4.z <= 4096 && star_x >= 0 && star_x < WIDTH && star_y >= 0 && star_y <= hori_y) {
+                image[star_y*WIDTH+star_x] = RastRGB(7,7,3);
+            }
+        }
+
+        // Streets
+        for(int i = 0; i < 50; i++) {
+            ivec3_t streeta = ivec3mul(ivec3norm(ivec3((rand()%8192)-4096, 0, (rand()%8192)-4096)),rand()%(4096*32));
+            ivec3_t streetb = streeta;
+            
+            if(i&1) {
+                if(streetb.x < 0) {
+                    streetb.x += rand()%(4096*32)*2;
+                }
+                else {
+                    streetb.x -= rand()%(4096*32)*2;
+                }
+            }
+            else {
+                if(streetb.z < 0) {
+                    streetb.z += rand()%(4096*32)*2;
+                }
+                else {
+                    streetb.z -= rand()%(4096*32)*2;
+                }
+            }
+            
+            ivec4_t streeta_4 = imat4x4transform(mvp, ivec4(streeta.x,streeta.y,streeta.z,F(1)));
+            ivec4_t streetb_4 = imat4x4transform(mvp, ivec4(streetb.x,streetb.y,streetb.z,F(1)));
+            
+            int32_t ax = FixedToInt(Viewport(streeta_4.x,streeta_4.w,WIDTH));
+            int32_t ay = FixedToInt(Viewport(streeta_4.y,streeta_4.w,HEIGHT));
+            int32_t bx = FixedToInt(Viewport(streetb_4.x,streetb_4.w,WIDTH));
+            int32_t by = FixedToInt(Viewport(streetb_4.y,streetb_4.w,HEIGHT));
+            
+            DrawLine(currframe, ax, ay, bx, by, RastRGB(7,7,3));
+        }
         
 	// Transform
 	vertex_t transformVertex;
@@ -682,10 +716,10 @@ inline static void RasterizeTest(uint8_t* image) {
                 uint8_t shadev = data.rasterizer.sortedTriangles[i].shade;
                 
                 if(tri.v[0].vw == tri.v[1].vw && tri.v[0].vw == tri.v[2].vw) {
-                    RasterizeTriangleSingle(image, &tri, shadev+1);
+                    RasterizeTriangleSingle(image, &tri, shadev);
                 }
                 else {
-                    RasterizeTriangle(image, &tri, shadev+1);
+                    RasterizeTriangle(image, &tri, shadev);
                 }
 	}
 	
@@ -716,20 +750,17 @@ void Rasterize() {
 		if(t&1)
 		{
 			SetFrameBuffer(framebuffer1);
-			ClearBitmap(&frame2);
 			currframe=&frame2;
 		}
 		else
 		{
 			SetFrameBuffer(framebuffer2);
-			ClearBitmap(&frame1);
 			currframe=&frame1;
 		}
 
 		SetLEDs(0);
 
-		uint8_t* pixels = currframe->pixels;
-		RasterizeTest(pixels);
+                RasterizeTest(currframe);
 
 		t++;
 	}

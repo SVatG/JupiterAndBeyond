@@ -46,6 +46,7 @@ C_FILES = Audio.c \
 		Utils.c \
 		VGA.c \
 		Voxelscape.c \
+		CityText.c \
 		Graphics/Bitmap.c \
 		Graphics/DrawingBitmaps.c \
 		Graphics/DrawingLines.c \
