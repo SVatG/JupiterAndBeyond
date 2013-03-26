@@ -58,6 +58,7 @@ void Voxelscape()
 
 	SetVGAScreenMode320x200_60Hz(framebuffer1);
 
+	int frame=0;
 	while(!UserButtonState())
 	{
 		WaitVBL();
@@ -65,7 +66,7 @@ void Voxelscape()
 		int t=VGAFrameCounter();
 
 		uint8_t *destination;
-		if(t&1)
+		if(frame&1)
 		{
 			destination=framebuffer2;
 			SetFrameBuffer(framebuffer1);
@@ -75,6 +76,7 @@ void Voxelscape()
 			destination=framebuffer1;
 			SetFrameBuffer(framebuffer2);
 		}
+		frame^=1;
 
 		uint8_t toppalette[8],bottompalette[8];
 		for(int i=0;i<8;i++)
