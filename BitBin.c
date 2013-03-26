@@ -4,6 +4,8 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "flt.h"
+
 static void InitializeBitBinChannel(BitBinChannel *channel,BitBinNote *notes);
 
 static void MoveSongToNextSample(BitBinSong *self);
@@ -14,6 +16,7 @@ static void UpdateChannelAtRow(BitBinSong *self,BitBinChannel *channel);
 static void UpdateChannelAtNonRowTick(BitBinSong *self,BitBinChannel *channel);
 static void UpdateChannelAtSample(BitBinSong *self,BitBinChannel *channel);
 static int32_t ChannelAmplitude(BitBinChannel *channel);
+static int32_t SawWave(BitBinChannel *channel);
 static int32_t SquareWave1_8(BitBinChannel *channel);
 static int32_t SquareWave1_4(BitBinChannel *channel);
 static int32_t SquareWave1_2(BitBinChannel *channel);
@@ -22,6 +25,7 @@ static int32_t TriangleWave(BitBinChannel *channel);
 static int32_t Noise(BitBinChannel *channel);
 static int32_t Drum1(BitBinChannel *channel);
 static int32_t Drum2(BitBinChannel *channel);
+static int32_t StrSample(BitBinChannel *channel);
 static uint32_t Hash32(uint32_t val);
 
 static uint32_t PhaseVelocityForNote(BitBinSong *self,int note);
@@ -51,6 +55,14 @@ void InitializeBitBinSong(BitBinSong *self,const uint32_t *phasetable,int numcha
 	self->stopped=false;
 
 	self->phasetable=&phasetable[1];
+	
+	SetupFilter(self, 127, 0);
+	
+	
+	
+	self->delaycounter=0;
+	self->delaypos=0;
+	memset(self->delaybuf,0,sizeof(self->delaybuf));
 
 	self->numchannels=numchannels;
 	for(int i=0;i<self->numchannels;i++) InitializeBitBinChannel(&self->channels[i],notes[i]);
@@ -62,18 +74,35 @@ static void InitializeBitBinChannel(BitBinChannel *channel,BitBinNote *notes)
 	channel->waveform=0;
 	channel->effect=0;
 
-	channel->phase=0;
+	channel->phase = 0;
+	channel->unisonphase[0]=0;
+	channel->unisonphase[1]=100;
+	channel->unisonphase[2]=-200;
+	channel->unisonphase[3]=300;
 	channel->phasedelta=0;
 
 	channel->currentvolume=0;
 	channel->requestedvolume=0;
 	channel->mastervolume=64;
-
+	
 	memset(channel->memory,0,sizeof(channel->memory));
 
+	channel->lastamp = channel->lastamp2 = 0;
+	
 	channel->notes=notes;
 }
 
+
+/*int64_t clipfilter(int64_t f) {
+	if(f > 0x20000000) return 0x20000000;
+	if(f < -0x20000000) return -0x20000000;
+	return f;
+}*/
+int64_t clipfilter(int64_t f) {
+	if(f > 0x10000*0x4000) return 0x10000*0x4000;
+	if(f < -0x10000*0x4000) return -0x10000*0x4000;
+	return f;
+}
 
 
 int16_t NextBitBinSample(BitBinSong *self)
@@ -83,12 +112,58 @@ int16_t NextBitBinSample(BitBinSong *self)
 	MoveSongToNextSample(self);
 
 	int32_t amplitude=0;
+	
+	int32_t delay_amplitude = 0;
+	
 	for(int i=0;i<self->numchannels;i++)
 	{
-		amplitude+=ChannelAmplitude(&self->channels[i]);
-	}
+		/*self->nFilter_A0 = 0x7FFF;
+		self->nFilter_B0 = 0;
+		self->nFilter_B1 = 0;*/
 
-	amplitude>>=12+3;
+		int32_t input =ChannelAmplitude(&self->channels[i]);
+		amplitude += input;
+		//int64_t fy = ((int64_t)(ChannelAmplitude(&self->channels[i])) * self->nFilter_A0 + clipfilter(self->channels[i].lastamp>>16) * self->nFilter_B0 + clipfilter(self->channels[i].lastamp2>>16) * self->nFilter_B1)/0x1000000 + (self->channels[i].lastamp2 & 0xFFFF);
+		//float fy = (ChannelAmplitude(&self->channels[i]) * (float)self->nFilter_A0/1073676289.f + self->channels[i].lastamp * (float)self->nFilter_B0/1073676289.f + self->channels[i].lastamp2 * (float)self->nFilter_B1/1073676289.f);
+		
+		//amplitude+=fy;
+		
+		//self->channels[i].lastamp2 = (self->channels[i].lastamp);
+		//self->channels[i].lastamp =(fy);
+		
+		
+		if((self->delaycounter % 8) == 0) {
+			delay_amplitude += input;
+		}
+		
+	
+	}
+	
+		int32_t rc = self->r*self->c>>16;
+		int32_t c = self->c;
+		self->v0 -= (self->v0 >> 16) * rc;
+		self->v0 += (clipfilter(amplitude - self->v1)>>16) * c;
+		self->v1 -= (self->v1 >> 16) * rc;
+		self->v1 += (self->v0 >> 16) * c;
+		amplitude = self->v1;
+		
+		delay_amplitude = amplitude;
+		
+	if((self->delaycounter % 8) == 0) {
+		self->delaybuf[self->delaypos] = delay_amplitude/16777216;
+		self->delaypos++;
+		self->delaypos &= 0x3FF;
+	}
+	self->delaycounter++;
+	
+	amplitude += (self->delaybuf[self->delaypos & 0x3FF] *16777216)/2;
+	
+	
+
+	amplitude>>=12+2;
+	if(amplitude>24576) amplitude = 24576 + (amplitude-24576)/2;
+	if(amplitude<-24576) amplitude = -24576 + (amplitude+24576)/2;
+	
 	if(amplitude>32767) return 32767;
 	else if(amplitude<-32768) return -32768;
 	else return amplitude;
@@ -182,7 +257,7 @@ static void UpdateChannelAtRow(BitBinSong *self,BitBinChannel *channel)
 	}
 
 	// Always reset vibrato if the current effect is not vibrato.
-	if(effect!='H')
+	if(effect!='H'&&effect!='K')
 	{
 		channel->vibrato=0;
 		channel->vibratophase=0;
@@ -218,6 +293,26 @@ static void UpdateChannelAtRow(BitBinSong *self,BitBinChannel *channel)
 			channel->vibratophase+=hi;
 			if(channel->vibratophase>=48) channel->vibratophase-=48;
 		break;
+		
+		case 'K':
+			if(hi==0x0f)
+			{
+				if(lo==0) channel->requestedvolume+=15;
+				else channel->requestedvolume-=lo;
+			}
+			else if(lo==0x0f)
+			{
+				if(hi==0) channel->requestedvolume-=15;
+				else channel->requestedvolume+=hi;
+			}
+
+			if(channel->requestedvolume<0) channel->requestedvolume=0;
+			if(channel->requestedvolume>64) channel->requestedvolume=64;
+		
+			channel->vibrato=(channel->memory['H'-'A']&0x0f)*SineTable[channel->vibratophase]>>6;
+			channel->vibratophase+=(channel->memory['H'-'A']&0xf0)>>4 ;
+			if(channel->vibratophase>=48) channel->vibratophase-=48;
+		break;
 
 		case 'J':
 			channel->vibrato=0;
@@ -226,6 +321,10 @@ static void UpdateChannelAtRow(BitBinSong *self,BitBinChannel *channel)
 
 		case 'M':
 		   channel->mastervolume=parameter;
+		break;
+		
+		case 'Z':
+			SetupFilter(self, parameter, 125);
 		break;
 	}
 
@@ -272,6 +371,18 @@ static void UpdateChannelAtNonRowTick(BitBinSong *self,BitBinChannel *channel)
 			channel->vibratophase+=hi;
 			if(channel->vibratophase>=48) channel->vibratophase-=48;
 		break;
+		
+		case 'K':
+			if(hi==0) channel->requestedvolume-=lo;
+			else if(lo==0) channel->requestedvolume+=hi;
+
+			if(channel->requestedvolume<0) channel->requestedvolume=0;
+			if(channel->requestedvolume>64) channel->requestedvolume=64;
+		
+			channel->vibrato=(channel->memory['H'-'A']&0x0f)*SineTable[channel->vibratophase]>>6;
+			channel->vibratophase+=(channel->memory['H'-'A']&0xf0)>>4 ;
+			if(channel->vibratophase>=48) channel->vibratophase-=48;
+		break;
 
 		case 'J':
 			switch(channel->vibratophase%3)
@@ -281,6 +392,12 @@ static void UpdateChannelAtNonRowTick(BitBinSong *self,BitBinChannel *channel)
 				case 2: channel->vibrato=lo<<4; break;
 			}
 			channel->vibratophase++;
+		break;
+		
+		case 'S':
+			//if( (parameter & 0xF0) == 0xC0 && (parameter & 0x0F) == self->nextrow - self->ticksperrow - self->currenttick ) {
+				channel->requestedvolume=0;
+			//}
 		break;
 	}
 
@@ -296,6 +413,10 @@ static void UpdateChannelAtSample(BitBinSong *self,BitBinChannel *channel)
 	}
 
 	channel->phase+=channel->phasedelta;
+	channel->unisonphase[0]+=channel->phasedelta;
+	channel->unisonphase[1]+=channel->phasedelta+10;
+	channel->unisonphase[2]+=channel->phasedelta-20;
+	channel->unisonphase[3]+=channel->phasedelta+30;
 }
 
 static int32_t ChannelAmplitude(BitBinChannel *channel)
@@ -304,19 +425,53 @@ static int32_t ChannelAmplitude(BitBinChannel *channel)
 	if(channel->mastervolume==0) return 0;
 
 	int32_t sample=0;
-	switch(channel->waveform)
-	{
-		case 0: sample=SquareWave1_8(channel); break;
-		case 1: sample=SquareWave1_4(channel); break;
-		case 2: sample=SquareWave1_2(channel); break;
-		case 3: sample=SquareWave3_4(channel); break;
-		case 4: sample=TriangleWave(channel); break;
-		case 5: sample=Noise(channel); break;
-		case 6: sample=Drum1(channel); break;
-		case 7: sample=Drum2(channel); break;
+	int32_t accum=0;
+	if(channel->waveform > 1 && channel->waveform < 5) {
+		for(int i=0;i<8;i++) {
+			channel->phase = channel->unisonphase[i % 4]; 
+			if(i > 3) channel->phase += 20 + channel->phase;
+			switch(channel->waveform)
+			{
+				case 0: sample=StrSample(channel); break;
+				case 1: sample=SquareWave1_4(channel); break;
+				case 2: sample=SquareWave1_2(channel); break;
+				case 3: sample=SquareWave3_4(channel); break;
+				case 4: sample=TriangleWave(channel); break;
+				case 5: sample=Noise(channel); break;
+				case 6: sample=Drum1(channel); break;
+				case 7: sample=Drum2(channel); break;
+			}
+			if(i >3) accum += sample/8;
+			else
+				accum += sample/2;
+		}
+		sample = accum;
 	}
+	else {
+			switch(channel->waveform)
+			{
+				case 0: sample=StrSample(channel); break;
+				case 1: sample=SquareWave1_4(channel); break;
+				case 2: sample=SquareWave1_2(channel); break;
+				case 3: sample=SquareWave3_4(channel); break;
+				case 4: sample=TriangleWave(channel); break;
+				case 5: sample=Noise(channel); break;
+				case 6: sample=Drum1(channel); break;
+				case 7: sample=Drum2(channel); break;
+			}
+			//sample = 0;
+	}
+	
+
 
 	return sample*channel->currentvolume*channel->mastervolume;
+}
+
+
+static int32_t SawWave(BitBinChannel *channel)
+{
+	return (channel->phase & 0x7FFFF) / 8 - 32767;
+
 }
 
 static int32_t SquareWave1_8(BitBinChannel *channel)
@@ -438,6 +593,25 @@ static int32_t Drum2(BitBinChannel *channel)
 
 	if(index>=sizeof(samples)/sizeof(samples[0])) return 0;
 	else return samples[index]*2;
+}
+
+static int32_t StrSample(BitBinChannel *channel)
+{
+	static const int8_t samples[]=
+	{
+#include "fltgen/str.inc"
+	};
+	
+	uint32_t index=813*(channel->phase/523)>>16 + (channel->phase&1);
+
+	while(index > 16714) index -= (16714 - 1402);
+	
+	if(index & 1) {
+		return (int8_t)(samples[index>>1] & 0xF0) * 0xFF;
+	}
+	else {
+		return (int8_t)( (samples[index>>1] & 0x0F) << 4) * 0xFF;
+	}
 }
 
 static uint32_t Hash32(uint32_t val)

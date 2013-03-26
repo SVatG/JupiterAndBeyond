@@ -23,11 +23,16 @@ typedef struct BitBinChannel
 	int currentvolume,requestedvolume,mastervolume;
 
 	uint32_t phase,phasedelta;
+	uint32_t unisonphase[4];
 
 	int vibrato,vibratophase;
 	int portadest;
 
-	uint8_t memory[13];
+	uint8_t memory[26];
+
+	
+	int64_t lastamp2;
+	int64_t lastamp;
 
 	BitBinNote *notes;
 } BitBinChannel;
@@ -42,6 +47,14 @@ typedef struct BitBinSong
 
 	const uint32_t *phasetable;
 
+	int32_t nFilter_A0,nFilter_B0,nFilter_B1;
+	
+	int32_t r,c,v0,v1;
+	
+	int16_t delaybuf[1024];
+	int delaycounter;
+	int delaypos;
+	
 	int numchannels;
 	BitBinChannel channels[MaximumBitBinChannels];
 } BitBinSong;
@@ -57,7 +70,6 @@ static inline bool IsBitBinSongStopped(BitBinSong *self) { return self->stopped;
 static inline bool SetBitBinSongStopped(BitBinSong *self,bool stopped) { self->stopped=stopped; }
 
 static inline int CurrentBitBinRow(BitBinSong *self) { return self->currentrow; }
-static inline int CurrentBitBinTick(BitBinSong *self) { return self->currenttick; }
 
 static inline BitBinNote BitBinNoteAtRow(BitBinSong *self,int channel,int row)
 {

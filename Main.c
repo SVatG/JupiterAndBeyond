@@ -40,10 +40,11 @@ int main()
 	InitializeUserButton();
 
 	BitBinSong song;
-	InitializeBitBinSong(&song,BitBin22kTable,8,128,channels);
+	InitializeBitBinSong(&song,BitBin22kTable,8,1952,channels);
 	SetBitBinSongLoops(&song,true);
 
 	InitializeAudio(Audio22050HzSettings);
+//	InitializeAudio(Audio44100HzSettings);
 	PlayAudioWithCallback(AudioCallback,&song);
 
 	InitializeVGA();
