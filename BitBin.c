@@ -132,7 +132,7 @@ int16_t NextBitBinSample(BitBinSong *self)
 		//self->channels[i].lastamp =(fy);
 		
 		
-		if((self->delaycounter & 7) == 0) {
+		if((self->delaycounter & 3) == 0) {
 			delay_amplitude += input;
 		}
 		
@@ -149,7 +149,7 @@ int16_t NextBitBinSample(BitBinSong *self)
 		
 		delay_amplitude = amplitude;
 		
-	if((self->delaycounter & 7) == 0) {
+	if((self->delaycounter & 3) == 0) {
 		self->delaybuf[self->delaypos] = delay_amplitude>>24;
 		self->delaypos++;
 		self->delaypos &= 0x3FF;
@@ -589,21 +589,16 @@ static int32_t Drum2(BitBinChannel *channel)
 
 static int32_t StrSample(BitBinChannel *channel)
 {
-	static const int8_t samples[]=
+	static const int16_t samples[]=
 	{
 #include "fltgen/str.inc"
 	};
 	
-	uint32_t index=813*(channel->phase/523)>>16 + (channel->phase&1);
+	uint32_t index=channel->phase>>16;
 
-	if(index > 16714) index=(index-1402)%(16714 - 1402)+1402;
-	
-	if(index & 1) {
-		return (int8_t)(samples[index>>1] & 0xF0) * 0xFF;
-	}
-	else {
-		return (int8_t)( (samples[index>>1] & 0x0F) << 4) * 0xFF;
-	}
+	if(index > 10750) index=(index-901)%(10750-901)+901;
+
+	return samples[index];
 }
 
 static uint32_t Hash32(uint32_t val)
