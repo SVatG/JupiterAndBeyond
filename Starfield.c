@@ -28,9 +28,15 @@ void Starfield()
 		data.stars.stars[i].z=3000-RandomInteger()%3000;
 	}
 
-	uint8_t palette[8]={
-		RawRGB(7,7,3),RawRGB(7,7,3),RawRGB(7,7,3),RawRGB(7,7,3),
-		RawRGB(6,6,3),RawRGB(6,6,3),RawRGB(5,5,3),RawRGB(5,5,3),
+	static const uint8_t palette[8][8]={
+		{ RawRGB(7,7,3),RawRGB(7,7,3),RawRGB(7,7,3),RawRGB(7,7,3),RawRGB(6,6,3),RawRGB(6,6,3),RawRGB(5,5,3),RawRGB(5,5,3) },
+		{ RawRGB(7,7,3),RawRGB(7,7,3),RawRGB(7,7,3),RawRGB(7,7,3),RawRGB(6,6,3),RawRGB(6,6,3),RawRGB(5,5,3),RawRGB(5,5,3) },
+		{ RawRGB(6,6,3),RawRGB(6,6,3),RawRGB(6,6,3),RawRGB(6,6,3),RawRGB(5,5,3),RawRGB(5,5,3),RawRGB(4,4,3),RawRGB(4,4,3) },
+		{ RawRGB(5,5,2),RawRGB(5,5,2),RawRGB(5,5,2),RawRGB(5,5,2),RawRGB(4,4,2),RawRGB(4,4,2),RawRGB(3,3,2),RawRGB(3,3,2) },
+		{ RawRGB(4,4,2),RawRGB(4,4,2),RawRGB(4,4,2),RawRGB(4,4,2),RawRGB(3,3,2),RawRGB(3,3,2),RawRGB(3,3,2),RawRGB(3,3,2) },
+		{ RawRGB(3,3,1),RawRGB(3,3,1),RawRGB(3,3,1),RawRGB(3,3,1),RawRGB(3,3,1),RawRGB(3,3,1),RawRGB(2,2,1),RawRGB(2,2,1) },
+		{ RawRGB(2,2,1),RawRGB(2,2,1),RawRGB(2,2,1),RawRGB(2,2,1),RawRGB(2,2,1),RawRGB(2,2,1),RawRGB(1,1,1),RawRGB(1,1,1) },
+		{ RawRGB(1,1,0),RawRGB(1,1,0),RawRGB(1,1,0),RawRGB(1,1,0),RawRGB(1,1,0),RawRGB(1,1,0),RawRGB(1,1,0),RawRGB(1,1,0) },
 	};
 
 	int t=0;
@@ -88,7 +94,7 @@ void Starfield()
 		Bitmap screen;
 		InitializeBitmap(&screen,320,200,320,destination);
 
-		for(int i=0;i<NumberOfStars;i++)
+		for(int i=NumberOfStars-1;i>=0;i--)
 		{
 			int ox=100*data.stars.stars[i].x/data.stars.stars[i].z+159;
 			int oy=100*data.stars.stars[i].y/data.stars.stars[i].z+99;
@@ -100,14 +106,16 @@ void Starfield()
 			int x=100*data.stars.stars[i].x/data.stars.stars[i].z+159;
 			int y=100*data.stars.stars[i].y/data.stars.stars[i].z+99;
 
-			DrawLine(&screen,ox,oy,x,y,palette[i&7]);
+			int depth=data.stars.stars[i].z>>8;
+			if(depth<0) depth=0;
+			if(depth<8 && data.stars.stars[i].z>5) DrawLine(&screen,ox,oy,x,y,palette[depth][i&7]);
 
 			if(x>=320 || y<0 || y>=200 || data.stars.stars[i].z<=40)
 			{
-				int z=RandomInteger()%2000+40;
+				int z=10*sqrti(i*400*400+40*40)/SquareRootOfNumberOfStars;
 				int y=RandomInteger()%2000;
 				data.stars.stars[i].x=(0-159)*z/100;
-				data.stars.stars[i].y=(y-990)*z/100/10;
+				data.stars.stars[i].y=(y-999)*z/100/10;
 				data.stars.stars[i].z=z;
 			}
 		}

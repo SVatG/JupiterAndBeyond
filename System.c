@@ -2,7 +2,11 @@
 
 // PLL_VCO = (HSE_VALUE or HSI_VALUE / PLL_M) * PLL_N
 #define PLL_M 8
+#ifndef EnableOverclocking
 #define PLL_N 336
+#else
+#define PLL_N 352
+#endif
 
 // SYSCLK = PLL_VCO / PLL_P
 #define PLL_P 2

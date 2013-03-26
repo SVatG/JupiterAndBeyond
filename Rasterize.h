@@ -27,9 +27,12 @@ typedef struct {
 typedef struct {
 	int16_t v[4];
         uint8_t indices;
+        uint8_t shade;
 } index_triangle_t;
 
 typedef ivec3_t init_vertex_t;
+
+#define SHADECOORD(u,v) ((v)*16+(u))
 
 #include "Cityscape.h"
 
@@ -37,6 +40,10 @@ typedef ivec3_t init_vertex_t;
 struct RasterizeData {
 	ss_vertex_t transformedVertices[numVertices];
 	index_triangle_t sortedTriangles[numFaces];
+        uint8_t shadetex0[16*16];
+        uint8_t shadetex1[16*16];
+        uint8_t shadetex2[16*16];
+        uint8_t shadetex3[16*16];
 };
 
 

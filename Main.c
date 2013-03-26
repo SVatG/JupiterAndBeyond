@@ -19,7 +19,7 @@
 #include "Starfield.h"
 #include "Voxelscape.h"
 
-#include <arm_math.h>
+#include <string.h>
 
 static void AudioCallback(void *context,int buffer);
 int16_t *buffers[2]={ (int16_t *)0x2001fa00,(int16_t *)0x2001fc00 };
