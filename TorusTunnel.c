@@ -199,8 +199,16 @@ void TorusTunnel()
 		int angle=t*16;
 		angle&=1023;
 
-		DrawTriangleAtAngle(&screen,angle);
-		DrawTriangleAtAngle(&screen,angle-1024);
+		if(angle>512)
+		{
+			DrawTriangleAtAngle(&screen,angle);
+			DrawTriangleAtAngle(&screen,angle-1024);
+		}
+		else
+		{
+			DrawTriangleAtAngle(&screen,angle-1024);
+			DrawTriangleAtAngle(&screen,angle);
+		}
 
 
 /*int diff1=line2-line1;
@@ -241,7 +249,6 @@ static void DrawTriangleAtAngle(Bitmap *screen,int angle)
 	int32_t px2=idiv(project*x2,distance-z2)+centerx;
 	int32_t py2=idiv(project*y,distance-z2)+centery;
 
-	if(px2>px1)
 	RasterizeTriangle(screen->pixels,
 	(t_vertex_t){ .p=ivec3(Fix(160),Fix(13),0), .uw=Fix(160.5-32), .vw=Fix(13.5-9) },
 	(t_vertex_t){ .p=ivec3(px1,py1,0), .uw=Fix(29.5-32), .vw=Fix(189.5-9) },
