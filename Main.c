@@ -43,18 +43,20 @@ int main()
 	InitializeBitBinSong(&song,BitBin22kTable,8,1952,channels);
 	SetBitBinSongLoops(&song,true);
 
+        
 	InitializeAudio(Audio22050HzSettings);
 //	InitializeAudio(Audio44100HzSettings);
+        SetAudioVolume(0xAA);
 	PlayAudioWithCallback(AudioCallback,&song);
 
 	InitializeVGA();
 
 	for(;;)
 	{
+                RasterizeInit();
+                Rasterize();
 		TorusTunnel();
 		LogoShow();
-		RasterizeInit();
-		Rasterize();
 		Starfield();
 		IDontEvenKnow();
 		Voxelscape();
