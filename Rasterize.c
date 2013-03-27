@@ -28,6 +28,7 @@
 #define V(x,y,z) {F(x),F(y),F(z),F(1)}
 
 #define Viewport(x,w,s) (imul(idiv((x),(w))+IntToFixed(1),IntToFixed((s)/2)))
+#define ViewportNoDiv(x,s) (imul((x)+IntToFixed(1),IntToFixed((s)/2)))
 
 #define MAP_W 50
 
@@ -587,7 +588,7 @@ inline static void RasterizeTest(Bitmap* currframe) {
         imat4x4_t mvp = imat4x4mul(proj, modelview);
 
         // Horizon
-        ivec3_t hori_pos = ivec3mul(lookdir,F(40));
+        ivec3_t hori_pos = ivec3mul(lookdir,F(64));
         ivec4_t hori = imat4x4transform(mvp, ivec4(hori_pos.x,F(0),hori_pos.z,F(1)));
         int32_t hori_y = FixedToInt(Viewport(hori.y,hori.w,HEIGHT));
         hori_y = imin(imax(0, hori_y), HEIGHT-1);
@@ -630,13 +631,31 @@ inline static void RasterizeTest(Bitmap* currframe) {
             
             ivec4_t streeta_4 = imat4x4transform(mvp, ivec4(streeta.x,streeta.y,streeta.z,F(1)));
             ivec4_t streetb_4 = imat4x4transform(mvp, ivec4(streetb.x,streetb.y,streetb.z,F(1)));
-            
-            int32_t ax = FixedToInt(Viewport(streeta_4.x,streeta_4.w,WIDTH));
-            int32_t ay = FixedToInt(Viewport(streeta_4.y,streeta_4.w,HEIGHT));
-            int32_t bx = FixedToInt(Viewport(streetb_4.x,streetb_4.w,WIDTH));
-            int32_t by = FixedToInt(Viewport(streetb_4.y,streetb_4.w,HEIGHT));
-            
-            DrawLine(currframe, ax, ay, bx, by, RastRGB(7,7,3));
+            streeta_4 = ivec4div(streeta_4, streeta_4.w);
+            streetb_4 = ivec4div(streetb_4, streetb_4.w);
+
+            // I have no idea why this works
+            if(streetb_4.z < 4096) {
+                streetb_4 = ivec4add(streetb_4, ivec4mul(ivec4sub(streeta_4, streetb_4), F(1.5)));
+            }
+            if(streeta_4.z < 4096) {
+                streeta_4 = ivec4add(streeta_4, ivec4mul(ivec4sub(streetb_4, streeta_4), F(1.5)));
+            }
+
+            int32_t ax = FixedToInt(ViewportNoDiv(streeta_4.x,WIDTH));
+            int32_t ay = FixedToInt(ViewportNoDiv(streeta_4.y,HEIGHT));
+            int32_t bx = FixedToInt(ViewportNoDiv(streetb_4.x,WIDTH));
+            int32_t by = FixedToInt(ViewportNoDiv(streetb_4.y,HEIGHT));
+
+            if(streeta_4.z  < 4096) {
+                DrawLine(currframe, ax, ay, bx, by, RastRGB(7,0,3));
+            }
+            else if(streetb_4.z < 4096) {
+                DrawLine(currframe, ax, ay, bx, by, RastRGB(0,7,3));
+            }
+            else {
+                DrawLine(currframe, ax, ay, bx, by, RastRGB(7,7,3));
+            }
         }
         
 	// Transform
