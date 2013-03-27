@@ -23,6 +23,7 @@ BUILD_DIR = Build
 C_FILES = Audio.c \
 		BitBin.c \
 		Button.c \
+		CityText.c \
 		Cityscape.c \
 		Fields.c \
 		HeightMap.c \
@@ -30,6 +31,7 @@ C_FILES = Audio.c \
 		Jupiter3.c \
 		JupiterCyborg.c \
 		JupiterCyborg2.c \
+		JupiterCyborg2Texture.c \
 		JupiterHands.c \
 		LED.c \
 		LogoShow.c \
