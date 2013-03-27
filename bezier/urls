@@ -1,0 +1,3 @@
+hg pull: http://us.c3.cx:8080/~dag/Code/stm32f4-demo/
+processor: http://www.st.com/internet/mcu/product/252140.jsp
+http://halcy.de:8000/stm32f4-vga/

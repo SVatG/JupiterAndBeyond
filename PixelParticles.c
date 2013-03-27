@@ -4,6 +4,8 @@
 #include "Utils.h"
 #include "Global.h"
 
+#include "Profiling.h"
+
 #include "Graphics/Bitmap.h"
 #include "Graphics/Drawing.h"
 
@@ -50,6 +52,7 @@ void PixelParticles()
 	while(!UserButtonState())
 	{
 		WaitVBL();
+//        profiling_startframe();
 
 		uint8_t *source,*destination;
 		if(t&1)
@@ -129,6 +132,7 @@ DrawHorizontalLine(&screen,0,0,diff1,RGB(0,255,0));
 DrawHorizontalLine(&screen,0,199,diff2,RGB(0,255,0));*/
 
 		t++;
+//        profiling_endframe(destination+(320*199));
 	}
 
 	while(UserButtonState());

@@ -16,6 +16,8 @@
 #include "Graphics/Bitmap.h"
 #include "Graphics/Drawing.h"
 
+#include "Profiling.h"
+
 #define WIDTH 320
 #define HEIGHT 200
 
@@ -774,6 +776,7 @@ void Rasterize() {
         while(!UserButtonState())
 	{
 		WaitVBL();
+//        profiling_startframe();
 
 		Bitmap *currframe;
 		if(t&1)
@@ -792,6 +795,7 @@ void Rasterize() {
                 RasterizeTest(currframe);
 
 		t++;
+//        profiling_endframe(pixels+(320*199));
 	}
 
 	while(UserButtonState());

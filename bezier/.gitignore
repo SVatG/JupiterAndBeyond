@@ -1,0 +1,6 @@
+*.o
+*.swp
+*.swo
+fonttest
+#font_enri.c
+#revision_logo.c
