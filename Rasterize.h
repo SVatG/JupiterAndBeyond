@@ -44,6 +44,9 @@ struct RasterizeData {
         uint8_t shadetex1[16*16];
         uint8_t shadetex2[16*16];
         uint8_t shadetex3[16*16];
+        ivec3_t star[300];
+        ivec3_t streeta[50];
+        ivec3_t streetb[50];
 };
 
 

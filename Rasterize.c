@@ -557,6 +557,33 @@ void RasterizeInit() {
         memcpy(data.rasterizer.shadetex1, citytext2_pixels, 16*16*sizeof(uint8_t));
         memcpy(data.rasterizer.shadetex2, citytext3_pixels, 16*16*sizeof(uint8_t));
         memcpy(data.rasterizer.shadetex3, citytext4_pixels, 16*16*sizeof(uint8_t));
+
+        // Streets & Stars
+        srand(666);
+        for(int i = 0; i < 50; i++) {
+            data.rasterizer.streeta[i] = ivec3mul(ivec3norm(ivec3((rand()%8192)-4096, 0, (rand()%8192)-4096)),rand()%(4096*32));
+            data.rasterizer.streetb[i] = data.rasterizer.streeta[i];
+
+            if(i&1) {
+                if(data.rasterizer.streetb[i].x < 0) {
+                    data.rasterizer.streetb[i].x += rand()%(4096*32)*2;
+                }
+                else {
+                    data.rasterizer.streetb[i].x -= rand()%(4096*32)*2;
+                }
+            }
+            else {
+                if(data.rasterizer.streetb[i].z < 0) {
+                    data.rasterizer.streetb[i].z += rand()%(4096*32)*2;
+                }
+                else {
+                    data.rasterizer.streetb[i].z -= rand()%(4096*32)*2;
+                }
+            }
+        }
+        for(int i = 0; i < 300; i++) {
+            data.rasterizer.star[i] = ivec3mul(ivec3norm(ivec3((rand()%8192)-4096, rand()%4096, (rand()%8192)-4096)),F(200));
+        }
 }
 
 inline static void RasterizeTest(Bitmap* currframe) {
@@ -598,7 +625,7 @@ inline static void RasterizeTest(Bitmap* currframe) {
         // Starsssssss
         srand(666);
         for(int i = 0; i < 300; i++) {
-            ivec3_t star = ivec3mul(ivec3norm(ivec3((rand()%8192)-4096, rand()%4096, (rand()%8192)-4096)),F(200));
+            ivec3_t star = data.rasterizer.star[i];
             ivec4_t star4 = imat4x4transform(mvp, ivec4(star.x,star.y,star.z,F(1)));
             int32_t star_x = FixedToInt(Viewport(star4.x,star4.w,WIDTH));
             int32_t star_y = FixedToInt(Viewport(star4.y,star4.w,HEIGHT));
@@ -609,25 +636,8 @@ inline static void RasterizeTest(Bitmap* currframe) {
 
         // Streets
         for(int i = 0; i < 50; i++) {
-            ivec3_t streeta = ivec3mul(ivec3norm(ivec3((rand()%8192)-4096, 0, (rand()%8192)-4096)),rand()%(4096*32));
-            ivec3_t streetb = streeta;
-            
-            if(i&1) {
-                if(streetb.x < 0) {
-                    streetb.x += rand()%(4096*32)*2;
-                }
-                else {
-                    streetb.x -= rand()%(4096*32)*2;
-                }
-            }
-            else {
-                if(streetb.z < 0) {
-                    streetb.z += rand()%(4096*32)*2;
-                }
-                else {
-                    streetb.z -= rand()%(4096*32)*2;
-                }
-            }
+            ivec3_t streeta = data.rasterizer.streeta[i];
+            ivec3_t streetb = data.rasterizer.streetb[i];
             
             ivec4_t streeta_4 = imat4x4transform(mvp, ivec4(streeta.x,streeta.y,streeta.z,F(1)));
             ivec4_t streetb_4 = imat4x4transform(mvp, ivec4(streetb.x,streetb.y,streetb.z,F(1)));
@@ -724,7 +734,7 @@ inline static void RasterizeTest(Bitmap* currframe) {
                 
                 // Texturize
                 tri.v[flatvert1].uw = 0;
-                tri.v[flatvert2].uw = 7;
+                tri.v[flatvert2].uw = 16;
                 tri.v[thirdvert].uw = tri.v[alignedvert].uw;
 
                 tri.v[0].vw = vertices[data.rasterizer.sortedTriangles[i].v[0]].y >> 10;
