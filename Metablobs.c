@@ -78,7 +78,7 @@ void Metablobs()
         for(int i = 0; i < 300; i++) {
             int32_t rv = rand();
             data.metablobs.stars[i] = ivec3(imul(isin(rv),rand()%F(2)), imul(icos(rv),rand()%F(2)), F(20));
-            star_waitstates[i] = iabs(rand() % 1000);
+            star_waitstates[i] = iabs(rand() % 300)+50;
         }
         
 	while(CurrentBitBinRow(songp) < 1856)
