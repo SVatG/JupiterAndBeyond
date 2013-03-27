@@ -48,6 +48,12 @@ C_FILES = Audio.c \
 		Utils.c \
 		VGA.c \
 		Voxelscape.c \
+		Profiling.c \
+		bezier.c \
+		Credits.c \
+		warpfunc.c \
+		greetstars.c \
+		font.c \
 		Graphics/Bitmap.c \
 		Graphics/DrawingBitmaps.c \
 		Graphics/DrawingLines.c \
@@ -57,6 +63,15 @@ C_FILES = Audio.c \
 		Graphics/DrawingStraightLines.c \
 		VectorLibrary/VectorFixed.c \
 		VectorLibrary/MatrixFixed.c \
+
+FONT_FILES = \
+		bezier/font_enri.c \
+		bezier/font_geo.c \
+		bezier/font_led.c \
+		bezier/revision_logo.c \
+		bezier/rocket.c \
+
+C_FILES += $(FONT_FILES)
 			
 S_FILES = 
 
@@ -77,6 +92,9 @@ upload: $(NAME).bin
 	-c init -c "reset halt" -c "stm32f2x mass_erase 0" \
 	-c "flash write_bank 0 $(NAME).bin 0" \
 	-c "reset run" -c shutdown
+
+$(FONT_FILES): bezier/fontToBezier.py
+	cd bezier; python fontToBezier.py
 
 debug:
 	arm-eabi-gdb $(NAME).elf \

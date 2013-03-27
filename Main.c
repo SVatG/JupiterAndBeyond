@@ -19,6 +19,8 @@
 #include "Starfield.h"
 #include "TorusTunnel.h"
 #include "Voxelscape.h"
+#include "Greets.h"
+#include "Credits.h"
 
 #include <string.h>
 
@@ -44,6 +46,7 @@ int main()
 	SetBitBinSongLoops(&song,true);
 
 	InitializeAudio(Audio22050HzSettings);
+    SetAudioVolume(0xAA);
 //	InitializeAudio(Audio44100HzSettings);
 	PlayAudioWithCallback(AudioCallback,&song);
 
@@ -51,11 +54,14 @@ int main()
 
 	for(;;)
 	{
+        Credits();
+		Starfield();
+//        Beziertest();
 		TorusTunnel();
 		LogoShow();
 		RasterizeInit();
 		Rasterize();
-		Starfield();
+//        Greets();
 		IDontEvenKnow();
 		Voxelscape();
 		PixelParticles();

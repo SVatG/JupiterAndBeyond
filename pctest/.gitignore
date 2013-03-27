@@ -1,0 +1,9 @@
+*.c
+*.h
+!main.*
+*.d
+*.o
+Graphics
+Libraries
+bezier
+test

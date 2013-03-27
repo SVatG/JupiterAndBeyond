@@ -1,0 +1,18 @@
+- we have about 2M cycles/frame (with 60fps)
+- a transition between two short words is about 100-300 bezier curves, hence
+    around 20k pixel-draws with current settings. But only 1k distinct pixels.
+- screen has 64k pixels
+
+- laufzeit, ca. 15sec
+
+
+bezier-koordinaten-gedanken:
+point_t mit 16bit-coordinaten
+max koordinaten screen: 0 0 640 400
+max koordinaten welt: -2k -2k 2k 2k
+subpixel: 4bit, 16 werte
+
+werte werden als int16_t behandelt.
+Mit uint16_t bräuchts es keine Befehle um das Vorzeichen auf 32bit zu erweitern, allerding ist die skalierung dann deutlich schwieriger.
+
+Gespeicherte bezierkurven: normhöhe: screenspace 128, absolut: 1024

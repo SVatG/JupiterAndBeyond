@@ -1,0 +1,38 @@
+I WANT NAO:
+- colour!!!
+
+
+REQUESTS:
+- varying warping effects for the greets
+- starfield or something behind the greets
+- exact synchro to beat
+fade
+
+ADDITIONAL EFFECT COMPONENTS:
+- point warping before bezier render
+- font rotation and movement
+- something behind the font
+- coming in from somehwere, flying out
+(-) unsharpen
+
+
+EFFECT IMPROVEMENTS:
+- equal-speed bezier paths
+- have the tails darken out, the heads in a special colour
+- transition with more, randomly placed, intermediate points
+- better matching between transition points
+
+GENERAL IMPROVEMENTS:
+- optimize bezier routine some more
+- optimize pixel drawing routine
+
+CODE IMPROVEMENTS:
+- better build in demo-tree. include python in makefile, somehow include the code from fonttest.c
+
+BUGS:
+- missing pixel in transition line
+
+
+PERHAPS LATER:
+- underclock a tiny bit to get exact vga timings
+- fix dma trouble
