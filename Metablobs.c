@@ -51,7 +51,7 @@ void Metablobs()
 	InitializeBitmap(&frame1,320,200,320,framebuffer1);
 	InitializeBitmap(&frame2,320,200,320,framebuffer2);
 
-	SetVGAScreenMode320x200(framebuffer1);
+        SetVGAScreenMode320x200_60Hz(framebuffer1);
 	
 	int frame=0;
 
@@ -81,7 +81,7 @@ void Metablobs()
             star_waitstates[i] = iabs(rand() % 300)+50;
         }
         
-	while(CurrentBitBinRow(songp) < 1856)
+        while(CurrentBitBinRow(songp) < 256)
 	{
 		WaitVBL();
                 
@@ -196,16 +196,6 @@ void Metablobs()
                 }
 		
 		frame++;
-	}
-
-// 	// Hang
-// 	while(1) {
-// 		WaitVBL();
-// 	}
-
-	// End of demo. Wait -> loop.
-	for(int i = 0; i < 200; i++) {
-		WaitVBL();
 	}
 }
 

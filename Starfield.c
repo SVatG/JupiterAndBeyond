@@ -61,7 +61,7 @@ void Starfield()
 
     Starfield_init();
 
-	while(!UserButtonState())
+        while(CurrentBitBinRow(songp) < 1568)
 	{
 		WaitVBL();
 

@@ -22,7 +22,7 @@ void IDontEvenKnow()
 	SetVGAScreenMode320x200_60Hz(framebuffer1);
 
 	int t=0;
-	while(!UserButtonState())
+        while(CurrentBitBinRow(songp) < 1952)
 	{
 		WaitVBL();
 
@@ -90,5 +90,10 @@ void IDontEvenKnow()
 	}
 
 	while(UserButtonState());
+
+        // End of demo. Wait -> loop.
+        for(int i = 0; i < 300; i++) {
+                WaitVBL();
+        }
 }
 

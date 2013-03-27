@@ -77,7 +77,7 @@ void TorusTunnel()
 	int32_t s1=Fix(0.5);
 	int32_t s2=Fix(1);
 	int32_t s3=Fix(2);
-	while(!UserButtonState())
+        while(CurrentBitBinRow(songp) < 800)
 	{
 		WaitVBL();
 

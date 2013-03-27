@@ -97,7 +97,7 @@ void LogoShow() {
 	}
 
 	int32_t drawc = 0;
-	while(!UserButtonState())
+        while(CurrentBitBinRow(songp) < 512)
 	{
 		WaitVBL();
 		Bitmap *currframe;

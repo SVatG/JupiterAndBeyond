@@ -59,7 +59,7 @@ void Voxelscape()
 	SetVGAScreenMode320x200_60Hz(framebuffer1);
 
 	int frame=0;
-	while(!UserButtonState())
+        while(CurrentBitBinRow(songp) < 928)
 	{
 		WaitVBL();
 

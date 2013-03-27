@@ -54,20 +54,45 @@ int main()
 
 	InitializeVGA();
 
+//         Part                    Length          Effect                                  Next Row total
+//         --------------------------------------------------------------------------------------------------
+//         INTRO
+//         256             Metablobs() -> STARFIELD                256
+//         128             Pukezoomer(), Fadeout                   384
+//         128             LogoShow() Titlecard                    512
+//         160             Reflector() -> add sync!!               672
+//         Ticking
+//         128             TorusTunnel()                           800
+//         Happy
+//         128             Voxelscape() -> OVERLAY                 928
+//         128             Rasterize() -> OVERLAY                  1056
+//         128             Fields() -> OVERLAY                     1184
+//         Bubbly
+//         117             PixelParticles() -> add sync?           1301
+//         Mystery
+//         240             Starfield();                            1541
+//         128             Credits();                              1669
+//         256             IDontEvenKnow();                        1925
+        
+        
+        
+        
+        
 	for(;;)
 	{
                 Metablobs();
+                Pukezoomer();
+                LogoShow();
+                //Reflector();
+                TorusTunnel();
+                Voxelscape();
+                RasterizeInit();
+                Rasterize();
+                Fields();
+                PixelParticles();
+                Starfield();
                 Credits();
-		Starfield();
-		TorusTunnel();
-		LogoShow();
-		RasterizeInit();
-		Rasterize();
-		IDontEvenKnow();
-		Voxelscape();
-		PixelParticles();
-		Pukezoomer();
-		Fields();
+                IDontEvenKnow();
 	}
 }
 

@@ -30,7 +30,7 @@ void Credits()
 
     Starfield_init();
 
-	while(!UserButtonState())
+        while(CurrentBitBinRow(songp) < 1696)
 	{
 		WaitVBL();
         SetFrameBuffer(lastframe->pixels);

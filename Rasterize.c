@@ -773,7 +773,7 @@ void Rasterize() {
 
 	RasterizeInit();
 
-        while(!UserButtonState())
+        while(CurrentBitBinRow(songp) < 1056)
 	{
 		WaitVBL();
 //        profiling_startframe();

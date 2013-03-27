@@ -35,9 +35,8 @@ void Fields()
 	SetVGAScreenMode212x133_60Hz(framebuffer1);
 
 	int frame=0;
-	for(;;)
+        while(CurrentBitBinRow(songp) < 1184)
 	{
-		if(UserButtonState()) break;
 		int t=VGAFrameCounter();
 
 		SetLEDs(t>>3);

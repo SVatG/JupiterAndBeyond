@@ -33,7 +33,7 @@ void Pukezoomer()
 	uint32_t colour=(uint32_t)RawRGB(0x6,0x6,0x3)*0x01010101;
 
 	int t=0;
-	while(!UserButtonState())
+        while(CurrentBitBinRow(songp) < 384)
 	{
 		WaitVBL();
 
