@@ -27,6 +27,7 @@
 static void AudioCallback(void *context,int buffer);
 int16_t *buffers[2]={ (int16_t *)0x2001fa00,(int16_t *)0x2001fc00 };
 extern BitBinNote *channels[8];
+BitBinSong* songp;
 
 union GlobalData data;
 
@@ -44,9 +45,10 @@ int main()
 	BitBinSong song;
 	InitializeBitBinSong(&song,BitBin22kTable,8,1952,channels);
 	SetBitBinSongLoops(&song,true);
-
+        songp = &song;
+        
 	InitializeAudio(Audio22050HzSettings);
-    SetAudioVolume(0xAA);
+        SetAudioVolume(0xAA);
 //	InitializeAudio(Audio44100HzSettings);
 	PlayAudioWithCallback(AudioCallback,&song);
 
@@ -54,14 +56,13 @@ int main()
 
 	for(;;)
 	{
-        Credits();
+                Metablobs();
+                Credits();
 		Starfield();
-//        Beziertest();
 		TorusTunnel();
 		LogoShow();
 		RasterizeInit();
 		Rasterize();
-//        Greets();
 		IDontEvenKnow();
 		Voxelscape();
 		PixelParticles();

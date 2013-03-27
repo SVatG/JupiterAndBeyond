@@ -56,6 +56,8 @@ C_FILES = Audio.c \
 		warpfunc.c \
 		greetstars.c \
 		font.c \
+		Metablobs.c \
+		Blobs.c \
 		Graphics/Bitmap.c \
 		Graphics/DrawingBitmaps.c \
 		Graphics/DrawingLines.c \
