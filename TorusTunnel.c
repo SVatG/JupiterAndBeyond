@@ -16,7 +16,8 @@ static inline uint32_t PixelAverage(uint32_t a,uint32_t b)
 {
 	uint32_t halfa=(a>>1)&(PixelAllButHighBits*0x01010101);
 	uint32_t halfb=(b>>1)&(PixelAllButHighBits*0x01010101);
-	uint32_t carry=a&b&(PixelLowBits*0x01010101);
+//	uint32_t carry=a&b&(PixelLowBits*0x01010101);
+	uint32_t carry=a&b&(0x21*0x01010101);
 	return halfa+halfb+carry;
 }
 
@@ -116,32 +117,28 @@ void TorusTunnel()
 			int step=a0/(4096/128);
 			int a1=4096*i/128-a0%(4096/128);
 			int a2=4096*(i-1)/128-a0%(4096/128);
-			int32_t sin_a1=isin(a1);
-			int32_t cos_a1=icos(a1);
-			int32_t sin_a2=isin(a2);
-			int32_t cos_a2=icos(a2);
 			for(int j=0;j<48;j++)
 			{
 				if((i^j^step)&1) continue;
 
-				int b1=4096*j/48;
-				int b2=4096*(j+1)/48;
+				int b1=4096*j/48+4096/96;
+				int b2=4096*(j+1)/48+4096/96;
 				int32_t sin_b1=isin(b1);
 				int32_t cos_b1=icos(b1);
 				int32_t sin_b2=isin(b2);
 				int32_t cos_b2=icos(b2);
 
-				int x1=imul(Fix(10),cos_b1);
-				int y1=imul(Fix(10),sin_b1)-a1*140;
+				int x1=10*cos_b1;
+				int y1=10*sin_b1-a1*140;
 				int z1=a1*100;
-				int x2=imul(Fix(10),cos_b2);
-				int y2=imul(Fix(10),sin_b2)-a1*140;
+				int x2=10*cos_b2;
+				int y2=10*sin_b2-a1*140;
 				int z2=a1*100;
-				int x3=imul(Fix(10),cos_b1);
-				int y3=imul(Fix(10),sin_b1)-a2*140;
+				int x3=10*cos_b1;
+				int y3=10*sin_b1-a2*140;
 				int z3=a2*100;
-				int x4=imul(Fix(10),cos_b2);
-				int y4=imul(Fix(10),sin_b2)-a2*140;
+				int x4=10*cos_b2;
+				int y4=10*sin_b2-a2*140;
 				int z4=a2*100;
 
 				/*int x1=imul(Fix(10),cos_b1);
@@ -162,7 +159,7 @@ void TorusTunnel()
 
 				if(z1>0 && z2>0 && z3>0 && z4>0)
 				{
-					uint32_t val=Hash32(i+step+j*1000);
+					uint32_t val=Hash32(i+step+j*1024);
 					uint32_t modifier=map[(val>>16)&63]>>((val>>24)&31);
 					if((val^modifier)&1)
 					{
