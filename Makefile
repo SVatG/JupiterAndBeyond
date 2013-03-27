@@ -30,6 +30,7 @@ C_FILES = Audio.c \
 		Jupiter3.c \
 		JupiterCyborg.c \
 		JupiterCyborg2.c \
+		JupiterCyborg2Texture.c \
 		JupiterHands.c \
 		LED.c \
 		LogoShow.c \

@@ -11,13 +11,24 @@
 #include <string.h>
 
 extern RLEBitmap JupiterCyborg2;
+extern Bitmap JupiterCyborg2Texture;
+
+typedef struct {
+	ivec3_t p;
+	uint8_t clip;
+	int32_t uw;
+	int32_t vw;
+} t_vertex_t;
+
+static void DrawTriangleAtAngle(Bitmap *screen,int angle);
+inline static void RasterizeTriangle(uint8_t *image,t_vertex_t v1,t_vertex_t v2,t_vertex_t v3);
 
 static inline uint32_t PixelAverage(uint32_t a,uint32_t b)
 {
 	uint32_t halfa=(a>>1)&(PixelAllButHighBits*0x01010101);
 	uint32_t halfb=(b>>1)&(PixelAllButHighBits*0x01010101);
-//	uint32_t carry=a&b&(PixelLowBits*0x01010101);
-	uint32_t carry=a&b&(0x21*0x01010101);
+	uint32_t carry=a&b&(PixelLowBits*0x01010101);
+//	uint32_t carry=a&b&(0x21*0x01010101);
 	return halfa+halfb+carry;
 }
 
@@ -177,7 +188,20 @@ void TorusTunnel()
 
 		uint32_t line3=VGALine;
 
+/*		if(t&32)
 		DrawRLEBitmap(&screen,&JupiterCyborg2,0,0);
+		else
+		RasterizeTriangle(screen.pixels,
+		(t_vertex_t){ .p=ivec3(Fix(160),Fix(13),0), .uw=Fix(160.5-32), .vw=Fix(13.5-9) },
+		(t_vertex_t){ .p=ivec3(Fix(29),Fix(189),0), .uw=Fix(29.5-32), .vw=Fix(189.5-9) },
+		(t_vertex_t){ .p=ivec3(Fix(291),Fix(189),0), .uw=Fix(291.5-32), .vw=Fix(189.5-9) });*/
+
+		int angle=t*16;
+		angle&=1023;
+
+		DrawTriangleAtAngle(&screen,angle);
+		DrawTriangleAtAngle(&screen,angle-1024);
+
 
 /*int diff1=line2-line1;
 if(diff1<0) diff1+=480;
@@ -193,3 +217,266 @@ DrawHorizontalLine(&screen,0,199,diff2,RGB(0,255,0));*/
 	while(UserButtonState());
 }
 
+static void DrawTriangleAtAngle(Bitmap *screen,int angle)
+{
+	int32_t centerx=Fix(160);
+	int32_t centery=Fix(120);
+
+	int32_t project=200;
+	int32_t distance=Fix(4000);
+	int32_t sx=Fix(291)-centerx;
+	int32_t sy=Fix(189)-centery;
+
+	int32_t x=idiv(imul(distance,sx),Fix(project)+sx);
+	int32_t y=imul(sy,distance-x)/project;
+	int32_t z=x;
+
+	int32_t x1=imul(icos(angle),-x)+imul(isin(angle),z);
+	int32_t z1=-imul(isin(angle),-x)+imul(icos(angle),z);
+	int32_t x2=imul(icos(angle),x)+imul(isin(angle),z);
+	int32_t z2=-imul(isin(angle),x)+imul(icos(angle),z);
+
+	int32_t px1=idiv(project*x1,distance-z1)+centerx;
+	int32_t py1=idiv(project*y,distance-z1)+centery;
+	int32_t px2=idiv(project*x2,distance-z2)+centerx;
+	int32_t py2=idiv(project*y,distance-z2)+centery;
+
+	if(px2>px1)
+	RasterizeTriangle(screen->pixels,
+	(t_vertex_t){ .p=ivec3(Fix(160),Fix(13),0), .uw=Fix(160.5-32), .vw=Fix(13.5-9) },
+	(t_vertex_t){ .p=ivec3(px1,py1,0), .uw=Fix(29.5-32), .vw=Fix(189.5-9) },
+	(t_vertex_t){ .p=ivec3(px2,py2,0), .uw=Fix(291.5-32), .vw=Fix(189.5-9) });
+}
+
+
+
+#define WIDTH 320
+#define HEIGHT 199
+
+inline static void RasterizeTriangle(uint8_t *image,t_vertex_t v1,t_vertex_t v2,t_vertex_t v3)
+{
+     uint8_t *shadetex=JupiterCyborg2Texture.pixels;
+        
+	// Vertex sorting
+	t_vertex_t upperVertex;
+	t_vertex_t centerVertex;
+	t_vertex_t lowerVertex;
+
+	if(v1.p.y < v2.p.y) {
+		upperVertex = v1;
+		lowerVertex = v2;
+	}
+	else {
+		upperVertex = v2;
+		lowerVertex = v1;
+	}
+
+	if(v3.p.y < upperVertex.p.y) {
+		centerVertex = upperVertex;
+		upperVertex = v3;
+	}
+	else {
+		if(v3.p.y > lowerVertex.p.y) {
+			centerVertex = lowerVertex;
+			lowerVertex = v3;
+		}
+		else {
+			centerVertex = v3;
+		}
+	}
+
+	// scanline counters
+	int32_t scanline;
+	int32_t scanlineMax;
+
+	// left / right x and deltas
+	int32_t leftX;
+	int32_t leftXd;
+	int32_t rightX;
+	int32_t rightXd;
+
+	// left color and color delta
+	int32_t leftU;
+	int32_t leftV;
+	int32_t leftUd;
+	int32_t leftVd;
+
+	// color and color x deltas
+	int32_t U;
+	int32_t V;
+	int32_t UdX;
+	int32_t VdX;
+
+	// calculate y differences
+	int32_t upperDiff = upperVertex.p.y - centerVertex.p.y;
+	int32_t lowerDiff = upperVertex.p.y - lowerVertex.p.y;
+
+
+	// deltas
+	int32_t upperCenter;
+	int32_t upperLower;
+
+	// check if we have a triangle at all (Special case A)
+	if(lowerDiff == 0 && upperDiff == 0) {
+		return;
+	}
+
+	// calculate whole-triangle deltas
+	int32_t temp = idiv(centerVertex.p.y-upperVertex.p.y,lowerVertex.p.y-upperVertex.p.y);
+	int32_t width = imul(temp, (lowerVertex.p.x-upperVertex.p.x)) + (upperVertex.p.x-centerVertex.p.x);
+	if(width == 0) {
+		return;
+	}
+	UdX = idiv(imul(temp, lowerVertex.uw-upperVertex.uw) + upperVertex.uw-centerVertex.uw,width);
+        VdX = idiv(imul(temp, lowerVertex.vw-upperVertex.vw) + upperVertex.vw-centerVertex.vw,width);
+	
+	// guard against special case B: flat upper edge
+	if(upperDiff == 0 ) {
+
+		if(upperVertex.p.x < centerVertex.p.x) {
+			leftX = upperVertex.p.x;
+            leftU = upperVertex.uw;
+            leftV = upperVertex.vw;
+			rightX = centerVertex.p.x;
+
+			leftXd = idiv(upperVertex.p.x - lowerVertex.p.x, lowerDiff);
+			rightXd = idiv(centerVertex.p.x - lowerVertex.p.x, lowerDiff);
+		}
+		else {
+			leftX = centerVertex.p.x;
+			leftU = centerVertex.uw;
+            leftV = centerVertex.vw;
+			rightX = upperVertex.p.x;
+
+			leftXd = idiv(centerVertex.p.x - lowerVertex.p.x, lowerDiff);
+			rightXd = idiv(upperVertex.p.x - lowerVertex.p.x, lowerDiff);
+		}
+
+		leftUd = idiv(leftU - lowerVertex.uw, lowerDiff);
+                leftVd = idiv(leftV - lowerVertex.vw, lowerDiff);
+
+		goto lower_half_render;
+	}
+
+	// calculate deltas
+	upperCenter = idiv(upperVertex.p.x - centerVertex.p.x, upperDiff);
+	upperLower = idiv(upperVertex.p.x - lowerVertex.p.x, lowerDiff);
+
+	// upper triangle half
+	leftX = rightX = upperVertex.p.x;
+
+	leftU = upperVertex.uw;
+	leftV = upperVertex.vw;
+
+	if(upperCenter < upperLower) {
+		leftXd = upperCenter;
+		rightXd = upperLower;
+
+		leftUd = idiv(leftU - centerVertex.uw, upperDiff);
+		leftVd = idiv(leftV - centerVertex.vw, upperDiff);
+	}
+	else {
+		leftXd = upperLower;
+		rightXd = upperCenter;
+
+		leftUd = idiv(leftU - lowerVertex.uw, lowerDiff);
+		leftVd = idiv(leftV - lowerVertex.vw, lowerDiff);
+	}
+
+	U = leftU;
+	V = leftV;
+	
+        scanlineMax = imin(FixedToRoundedInt(centerVertex.p.y), HEIGHT-1);
+	for(scanline = FixedToRoundedInt(upperVertex.p.y); scanline < scanlineMax; scanline++ ) {
+                if(scanline >= 0) {
+                    int32_t xMax = imin(FixedToRoundedInt(rightX), WIDTH-1);
+                    if(xMax >= 0) {
+                        int32_t offset = scanline*WIDTH;
+                        int32_t x = FixedToRoundedInt(leftX);
+        
+                        while(x <= -1) {
+                            U += UdX;
+                            V += VdX;
+                            x++;
+                        }
+                        while(x <= xMax) {
+                            int32_t hb = U>>12&0xff;
+                            int32_t vb = (V>>4)&0xff00;
+                            image[x+offset] = shadetex[hb|vb];
+                            x++;
+                            U += UdX;
+                            V += VdX;
+                        }
+                    }
+                }
+
+                leftX += leftXd;
+                rightX += rightXd;
+                leftU += leftUd;
+                leftV += leftVd;
+
+                U = leftU;
+                V = leftV;
+	}
+        
+	// Guard against special case C: flat lower edge
+	int32_t centerDiff = centerVertex.p.y - lowerVertex.p.y;
+	if(centerDiff == 0) {
+		return;
+	}
+
+	// calculate lower triangle half deltas
+	if(upperCenter < upperLower) {
+		leftX = centerVertex.p.x;
+		leftXd = idiv(centerVertex.p.x - lowerVertex.p.x, centerDiff);
+
+		leftU = centerVertex.uw;
+		leftV = centerVertex.vw;
+
+		leftUd = idiv(leftU - lowerVertex.uw, centerDiff);
+		leftVd = idiv(leftV - lowerVertex.vw, centerDiff);
+	}
+	else {
+		rightX = centerVertex.p.x;
+		rightXd = idiv(centerVertex.p.x - lowerVertex.p.x, centerDiff);
+	}
+
+lower_half_render:
+
+	// lower triangle half
+	scanlineMax = imin(FixedToRoundedInt(lowerVertex.p.y), HEIGHT-1);
+        
+	U = leftU;
+	V = leftV;
+
+	for(scanline = FixedToRoundedInt(centerVertex.p.y); scanline < scanlineMax; scanline++ ) {
+                if(scanline >= 0) {
+                    int32_t xMax = imin(FixedToRoundedInt(rightX), WIDTH-1);
+                    if(xMax >= 0) {
+                        int32_t offset = scanline*WIDTH;
+                        int32_t x = FixedToRoundedInt(leftX);
+
+                        while(x <= -1) {
+                            U += UdX;
+                            V += VdX;
+                            x++;
+                        }
+                        while(x <= xMax) {
+                            int32_t hb = U>>12&0xff;
+                            int32_t vb = (V>>4)&0xff00;
+                            image[x+offset] = shadetex[hb|vb];
+                            x++;
+                            U += UdX;
+                            V += VdX;
+                        }
+                    }
+                }
+                
+		leftX += leftXd;
+		rightX += rightXd;
+		leftU += leftUd;
+		U = leftU;
+		leftV += leftVd;
+		V = leftV;
+	}
+}

@@ -53,9 +53,9 @@ int main()
 
 	for(;;)
 	{
+		TorusTunnel();
                 RasterizeInit();
                 Rasterize();
-		TorusTunnel();
 		LogoShow();
 		Starfield();
 		IDontEvenKnow();
