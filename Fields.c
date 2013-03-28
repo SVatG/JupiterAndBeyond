@@ -60,7 +60,7 @@ void Fields()
 		}
 
                 if(CurrentBitBinRow(songp) - 1056 < 64) {
-                    DrawField(framebuffer,t+300);
+                    DrawField(framebuffer,t-100);
                 }
                 else if(CurrentBitBinRow(songp) - 1056 < (64+32)) {
                     DrawField2(framebuffer,t);

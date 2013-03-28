@@ -89,7 +89,7 @@ void LogoShow() {
                     DiagonalFadeIn(currframe->pixels, t-50, 2, 1);
                 }
                 else {
-                    DiagonalFadeOut(currframe->pixels, t-340, 2, 1);
+                    DiagonalFadeOut(currframe->pixels, t-355, 2, 1);
                 }
 //                 }
 //                 else {

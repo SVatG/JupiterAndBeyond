@@ -15,6 +15,12 @@ static Pixel AddRed(Pixel a,Pixel b)
 	else return a+0x20;
 }
 
+static Pixel AddBlue(Pixel a,Pixel b)
+{
+    if(a>=0x3) return a;
+    else return a+0x1;
+}
+
 static Pixel SubRed(Pixel a,Pixel b)
 {
 	if(a<0x20) return a;

@@ -284,7 +284,18 @@ void Starfield_inner(uint8_t* source, uint8_t* destination)
     render_text_partial_warped(&screen, "Foobar", pos2, 15,  font_geo_glyph, baz, warp_perspective_starfield, bar);
 
 */
-    DrawRLEBitmap(&screen,&JupiterCyborg,0,0);
+    if(t < 60) {
+        DrawRLEBitmap(&screen,&JupiterCyborg,120-t,0);
+    }
+    else if(t < 540) {
+        DrawRLEBitmap(&screen,&JupiterCyborg, 60-((t-60)/8),0);
+    }
+    else if(t < 1180) {
+        DrawRLEBitmap(&screen,&JupiterCyborg, 120,0);
+    }
+    else {
+        DrawRLEBitmap(&screen,&JupiterCyborg,120-(1300-t),0);
+    }
     t++;
 }
 //		uint32_t line3=VGALine;

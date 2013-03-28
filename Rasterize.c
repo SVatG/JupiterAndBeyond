@@ -607,16 +607,16 @@ inline static void RasterizeTest(Bitmap* currframe) {
         ivec3_t eye;
         ivec3_t look;
         if(CurrentBitBinRow(songp) - 928 < 64) {
-            eye = ivec3(IntToFixed(5), IntToFixed(-20), IntToFixed(-65)+(rotcnt<<10));
+            eye = ivec3(IntToFixed(6), IntToFixed(-20), IntToFixed(-105)+(rotcnt<<10));
             look = ivec3(IntToFixed(0), IntToFixed(5), IntToFixed(0));
         }
         else {
-            if(CurrentBitBinRow(songp) == 64) {
+            if(CurrentBitBinRow(songp) - 928 == 64) {
                 startFrame = VGAFrame;
                 rotcnt = (VGAFrame - startFrame);
             }
-            eye = ivec3(IntToFixed(-9)-(rotcnt<<4), IntToFixed(-8), IntToFixed(30)+(rotcnt<<10));
-            look = ivec3(IntToFixed(0), IntToFixed(5), IntToFixed(0));
+            eye = ivec3(IntToFixed(-7)-(rotcnt<<4), IntToFixed(-32), IntToFixed(40)-(rotcnt<<9));
+            look = ivec3add(eye,ivec3(IntToFixed(1), IntToFixed(3), IntToFixed(-1)));
         }
         imat4x4_t modelview = imat4x4lookat(
             eye,

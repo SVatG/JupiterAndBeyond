@@ -100,27 +100,81 @@ void PixelParticles()
 		tx3+=icos(-t*2);
 		ty3+=isin(-t*2);
 
-		for(int i=0;i<NumberOfPixelParticles;i++)
-		{
-			int32_t x=data.pp.particles[i].x;
-			int32_t y=data.pp.particles[i].y;
-			int32_t newx=x;
-			int32_t newy=y;
-			newx+=isin((y+ty1)>>6)>>1;
-			newx-=icos((x+tx1)>>6)>>1;
-			newx+=isin((y+ty2)>>7);
-			newy-=icos((x+tx2)>>7);
-			newx+=isin((y+ty3)>>8)<<1;
-			newy-=icos((x+tx3)>>8)<<1;
-			if(newx<0 || newx>=Fix(320) || newy<0 || newy>=Fix(200))
-			{
-				newx=RandomInteger()%Fix(320);
-				newy=RandomInteger()%Fix(200);
-			}
-			data.pp.particles[i].x=newx;
-			data.pp.particles[i].y=newy;
-			DrawPixelNoClip(&screen,FixedToInt(newx),FixedToInt(newy),RawRGB(7,6,3));
-		}
+                if(
+                   CurrentBitBinRow(songp) - 1184 == 84 ||
+                   CurrentBitBinRow(songp) - 1184 == 90 ||
+                   CurrentBitBinRow(songp) - 1184 == 96
+                ) {
+                    for(int i=0;i<3*(NumberOfPixelParticles/10);i++)
+                    {
+                        int32_t x=data.pp.particles[i].x;
+                        int32_t y=data.pp.particles[i].y;
+                        int32_t newx=x;
+                        int32_t newy=y;
+                        newx+=isin((y+ty1)>>6)>>1;
+                        newx-=icos((x+tx1)>>6)>>1;
+                        newx+=isin((y+ty2)>>7);
+                        newy-=icos((x+tx2)>>7);
+                        newx+=isin((y+ty3)>>8)<<1;
+                        newy-=icos((x+tx3)>>8)<<1;
+                        if(newx<0 || newx>=Fix(320) || newy<0 || newy>=Fix(200))
+                        {
+                            newx=RandomInteger()%Fix(320);
+                            newy=RandomInteger()%Fix(200);
+                        }
+                        data.pp.particles[i].x=newx;
+                        data.pp.particles[i].y=newy;
+                        
+                        DrawPixelNoClip(&screen,FixedToInt(newx),FixedToInt(newy),RawRGB(7,2,2));
+                    }
+
+                    for(int i=3*(NumberOfPixelParticles/10);i<NumberOfPixelParticles;i++)
+                    {
+                        int32_t x=data.pp.particles[i].x;
+                        int32_t y=data.pp.particles[i].y;
+                        int32_t newx=x;
+                        int32_t newy=y;
+                        newx+=isin((y+ty1)>>6)>>1;
+                        newx-=icos((x+tx1)>>6)>>1;
+                        newx+=isin((y+ty2)>>7);
+                        newy-=icos((x+tx2)>>7);
+                        newx+=isin((y+ty3)>>8)<<1;
+                        newy-=icos((x+tx3)>>8)<<1;
+                        if(newx<0 || newx>=Fix(320) || newy<0 || newy>=Fix(200))
+                        {
+                            newx=RandomInteger()%Fix(320);
+                            newy=RandomInteger()%Fix(200);
+                        }
+                        data.pp.particles[i].x=newx;
+                        data.pp.particles[i].y=newy;
+
+                        DrawPixelNoClip(&screen,FixedToInt(newx),FixedToInt(newy),RawRGB(7,6,3));
+                    }
+                }
+                else {
+                    for(int i=0;i<NumberOfPixelParticles;i++)
+                    {
+                            int32_t x=data.pp.particles[i].x;
+                            int32_t y=data.pp.particles[i].y;
+                            int32_t newx=x;
+                            int32_t newy=y;
+                            newx+=isin((y+ty1)>>6)>>1;
+                            newx-=icos((x+tx1)>>6)>>1;
+                            newx+=isin((y+ty2)>>7);
+                            newy-=icos((x+tx2)>>7);
+                            newx+=isin((y+ty3)>>8)<<1;
+                            newy-=icos((x+tx3)>>8)<<1;
+                            if(newx<0 || newx>=Fix(320) || newy<0 || newy>=Fix(200))
+                            {
+                                    newx=RandomInteger()%Fix(320);
+                                    newy=RandomInteger()%Fix(200);
+                            }
+                            data.pp.particles[i].x=newx;
+                            data.pp.particles[i].y=newy;
+
+                            DrawPixelNoClip(&screen,FixedToInt(newx),FixedToInt(newy),RawRGB(7,6,3));
+                    }
+                }
 		uint32_t line3=VGALine;
 
 /*int diff1=line2-line1;
