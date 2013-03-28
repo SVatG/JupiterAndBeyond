@@ -163,7 +163,10 @@ void Metablobs()
                 if(rotcnt < 130) {
                     dist = 130 - rotcnt;
                 }
-                else if(CurrentBitBinRow(songp) < 250) {
+                else if(CurrentBitBinRow(songp) > 248) {
+                    dist = (CurrentBitBinRow(songp)-255);
+                }
+                else {
                     dist = 0;
                 }
                 
