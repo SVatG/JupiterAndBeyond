@@ -298,14 +298,17 @@ void Starfield_inner(uint8_t* source, uint8_t* destination)
     if(t < 60) {
         DrawRLEBitmap(&screen,&JupiterCyborg,120-t,0);
     }
-    else if(t < 540) {
-        DrawRLEBitmap(&screen,&JupiterCyborg, 60-((t-60)/8),0);
+    else if(t < 180) {
+        DrawRLEBitmap(&screen,&JupiterCyborg, 60-((t-60)/2),0);
     }
-    else if(t < 1180) {
-        DrawRLEBitmap(&screen,&JupiterCyborg, 120,0);
+    else if(t < 1200) {
+        DrawRLEBitmap(&screen,&JupiterCyborg, 0,0);
+    }
+    else if(t<1320) {
+        DrawRLEBitmap(&screen,&JupiterCyborg,120-(1320-t),0);
     }
     else {
-        DrawRLEBitmap(&screen,&JupiterCyborg,120-(1300-t),0);
+        DrawRLEBitmap(&screen,&JupiterCyborg,120,0);
     }
     t++;
 }
