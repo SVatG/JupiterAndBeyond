@@ -59,13 +59,16 @@ void Fields()
 			frame=1;
 		}
 
-		switch((t>>8)&3)
-		{
-			case 0: DrawField(framebuffer,t); break;
-			case 1: DrawField2(framebuffer,t); break;
-			case 2: DrawField3(framebuffer,t); break;
-			case 3: DrawField4(framebuffer,t); break;
-		}
+                if(CurrentBitBinRow(songp) - 1056 < 64) {
+                    DrawField(framebuffer,t+300);
+                }
+                else if(CurrentBitBinRow(songp) - 1056 < (64+32)) {
+                    DrawField2(framebuffer,t);
+                }
+                else {
+                    DrawField4(framebuffer,t);
+                }
+// 			case 3: DrawField3(framebuffer,t); break;
 	}
 
 	while(UserButtonState());

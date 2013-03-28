@@ -31,7 +31,7 @@ void Credits()
 	Bitmap *currframe = &frame1;
 	Bitmap *lastframe = &frame2;
 
-    Starfield_init();
+        credits_init();
 
         while(CurrentBitBinRow(songp) < 1696)
 	{
@@ -104,7 +104,7 @@ extern bool done;
 void credits_inner(Bitmap* screen)
 {
     t++;
-    profiling_startframe();
+//     profiling_startframe();
     DrawRLEBitmap(screen,&Jupiter3,0,0);
 //    render_text_warped_colored(screen, "Foobar!", pos, 30, font_led_glyph, warp_goggles, 0, RawRGB(0,3,0));//, RawRGB(0,7,0));
 //    point_t pos2 = {20, 110};
@@ -118,7 +118,7 @@ void credits_inner(Bitmap* screen)
 
     //char* rawtext = "Code:  WAHa_O6x36  halcy  ryx    Graphics:  Forcer^TRSi    Music:  coda";
     //char* rawtext = "WAHa_O6x36  halcy  ryx  Forcer^TRSi  coda";
-    char* rawtext = "WAHa_O6x36  halcy  ryx  Forcer  coda";
+    char* rawtext = "    WAHa_O6x36   halcy   ryx   Forcer   coda";
     char textbuf[sizeof(rawtext)+1000]; 
     strcpy(textbuf, rawtext);
     char* text = &textbuf[0];
@@ -128,7 +128,7 @@ void credits_inner(Bitmap* screen)
     
     render_text_warped_floodfilled(screen, text, pos, 25, font_led_glyph, warp_goggles, 0, RawRGB(4,1,0), RawRGB(6,3,0));//, RawRGB(0,7,0));
     
-    profiling_endframe(&(screen->pixels[199*320]));
+    // profiling_endframe(&(screen->pixels[199*320]));
 #ifdef TESTING
     if(*(text+1)==0) {done=true;}
 #endif

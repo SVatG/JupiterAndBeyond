@@ -181,7 +181,7 @@ void TorusTunnel()
 		(t_vertex_t){ .p=ivec3(Fix(29),Fix(189),0), .uw=Fix(29.5-32), .vw=Fix(189.5-9) },
 		(t_vertex_t){ .p=ivec3(Fix(291),Fix(189),0), .uw=Fix(291.5-32), .vw=Fix(189.5-9) });*/
 
-		int angle=t*16;
+		int angle=t*21;
 		angle&=1023;
 
 		if(angle>512)

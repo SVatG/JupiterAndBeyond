@@ -106,7 +106,7 @@ void Metablobs()
                 }
                 else {
                     for(int i = 0; i < 256; i++) {
-                        int ei = i + (VGAFrame - outframe);
+                        int ei = i + (VGAFrame - outframe)*5;
                         ei = ei > 255 ? 255 : ei;
                         
                         if(ei < 64) {
@@ -187,11 +187,11 @@ void Metablobs()
                 if(rotcnt < 130) {
                     dist = 130 - rotcnt;
                 }
-                else if(CurrentBitBinRow(songp) >= 250) {
-                    dist = (250 - CurrentBitBinRow(songp));
+                else if(CurrentBitBinRow(songp) < 250) {
+                    dist = 0;
                 }
                 else {
-                    dist = -(VGAFrame - outframe)*16;
+                    dist = -(VGAFrame - outframe)/3;
                 }
                 
                 // Modelview matrix

@@ -23,6 +23,38 @@ typedef struct {
 
 inline static void RasterizeTriangle(uint8_t *image,e_vertex_t v1,e_vertex_t v2,e_vertex_t v3);
 
+void CodaFadeOut(uint8_t* pixels, int t, int speedmul, int speeddiv) {
+    float a = (((float)((t*speedmul)/speeddiv))/50.0f)*1.4f;
+    int32_t palsub_r = (int32_t)(((181.0f*a)/255.0f)*7.0f+0.5f);
+    int32_t palsub_g = (int32_t)(((235.0f*a)/255.0f)*7.0f+0.5f);
+    int32_t palsub_b = (int32_t)(((145.0f*a)/255.0f)*3.0f+0.5f);
+    for(int32_t y = 0; y < 200; y++ ) {
+        for(int32_t x = 0; x < 320; x++) {
+            int32_t pos = x+y*320;
+            
+            uint8_t pixel = pixels[pos];
+            int32_t r = (pixel&(7<<5))>>5;
+            int32_t g = (pixel&(7<<2))>>2;
+            int32_t b = (pixel&(3));
+            
+            r = r - palsub_r;
+            r = r > 0 ? r : 0;
+            g = g - palsub_g;
+            g = g > 0 ? g : 0;
+            b = b - palsub_b;
+            b = b > 0 ? b : 0;
+            
+            pixels[pos] = (uint8_t)(r<<5)|(g<<2)|b;
+        }
+    }
+}
+
+void CodaFadeIn(uint8_t* pixels, int t, int speedmul, int speeddiv) {
+    int t1 = 50-t;
+    t1 = t1 > 0 ? t1 : 0;
+    CodaFadeOut(pixels, t1, speedmul, speeddiv);
+}
+
 void Environment()
 {
 	uint8_t *framebuffer1=(uint8_t *)0x20000000;
@@ -54,7 +86,7 @@ void Environment()
 		}
 		frame^=1;
 
-                int t=VGAFrameCounter()-180-VGAStart;
+                int t=VGAFrameCounter()-50-VGAStart;
 
 		SetFrameBuffer(source);
 
@@ -72,11 +104,11 @@ void Environment()
 
 		int32_t ytarget;
 
-		if(t<0) ytarget=Fix(10);
+		if(t<0) ytarget=Fix(13);
 		else ytarget=Fix(0);
 
 		int32_t yacc=(ytarget-ypos)/16;
-		if(t>240) yacc=Fix(0.1);
+		if(t>480) yacc=Fix(0.1);
 		yspeed+=yacc;
 		yspeed-=yspeed/8;
 		ypos+=yspeed;
@@ -151,6 +183,13 @@ void Environment()
 				}
 			}
 		}
+
+                if(t<500) {
+                    CodaFadeIn(destination, t+50, 2, 1);
+                }
+                else {
+                    CodaFadeOut(destination, t+50-550, 2, 1);
+                }
 	}
 
 	while(UserButtonState());

@@ -69,11 +69,11 @@ int main()
 //         128             Rasterize() -> OVERLAY                  1056
 //         128             Fields() -> OVERLAY                     1184
 //         Bubbly
-//         117             PixelParticles() -> add sync?           1301
+//         128             PixelParticles() -> add sync?           1312
 //         Mystery
-//         240             Starfield();                            1541
-//         128             Credits();                              1669
-//         256             IDontEvenKnow();                        1925
+//         256             Starfield();                            1568
+//         128             Credits();                              1696
+//         256             IDontEvenKnow();                        1940
         
         
         

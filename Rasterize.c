@@ -604,8 +604,20 @@ inline static void RasterizeTest(Bitmap* currframe) {
 	
 	// Modelview matrix
 	int rotdir = /*(rowd>>4)%2 == 0 ? -1 : */1;
-        ivec3_t eye = ivec3(IntToFixed(5), IntToFixed(-20), IntToFixed(-150)+(rotcnt<<10));
-        ivec3_t look = ivec3(IntToFixed(0), IntToFixed(5), IntToFixed(0));
+        ivec3_t eye;
+        ivec3_t look;
+        if(CurrentBitBinRow(songp) - 928 < 64) {
+            eye = ivec3(IntToFixed(5), IntToFixed(-20), IntToFixed(-65)+(rotcnt<<10));
+            look = ivec3(IntToFixed(0), IntToFixed(5), IntToFixed(0));
+        }
+        else {
+            if(CurrentBitBinRow(songp) == 64) {
+                startFrame = VGAFrame;
+                rotcnt = (VGAFrame - startFrame);
+            }
+            eye = ivec3(IntToFixed(-9)-(rotcnt<<4), IntToFixed(-8), IntToFixed(30)+(rotcnt<<10));
+            look = ivec3(IntToFixed(0), IntToFixed(5), IntToFixed(0));
+        }
         imat4x4_t modelview = imat4x4lookat(
             eye,
             look,

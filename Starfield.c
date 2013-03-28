@@ -48,7 +48,12 @@ const greets_t greets[] = {
     { "ARM",            770, 20, 16, 17, 80, 60},
     { "farbrausch",     840, 55, 16, 12, 60, 60},
     { "Royal Forces",   900, 35, 16, 12, 58, 60}
-    //K2
+    // k2
+    // 3State
+    // Andromeda
+    // DC5
+    // Madwizards
+    // Approximate
 };
 
 void Starfield()
