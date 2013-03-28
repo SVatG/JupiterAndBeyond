@@ -129,8 +129,8 @@ void display() {
 
     //    greets_inner(currframe);
 //        logo_inner(currframe);
-//        Starfield_inner(lastframe->pixels, currframe->pixels);
-        credits_inner(currframe);
+        Starfield_inner(lastframe->pixels, currframe->pixels);
+//        credits_inner(currframe);
   /*      static int tick=0;
         tick++;
         point_t p = {20, 20};
@@ -207,7 +207,7 @@ int main(int argc, char** argv) {
     //logo_init();
     //greets_init();
     Starfield_init();
-    credits_init();
+    //credits_init();
     done=false;
 //    slow=true;
     if(argc==1){ // no parameters: display

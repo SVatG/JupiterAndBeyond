@@ -35,6 +35,7 @@ typedef struct{
 
 const greets_t greets[] = {
     // text             time y speed siz frt frl 
+//    { "We greet:",      40, 80, 20, 12, 50, 80},
     { "Mercury",        100, 40, 16, 15, 70, 60},
     { "#mod_shrine",    170, 60, 16, 11, 60, 60},
     { "RNO",            250, 30, 24, 25, 60, 60},
@@ -47,7 +48,14 @@ const greets_t greets[] = {
     { "lft",            710, 60, 16, 19, 70, 60},
     { "ARM",            770, 20, 16, 17, 80, 60},
     { "farbrausch",     840, 55, 16, 12, 60, 60},
-    { "Royal Forces",   900, 35, 16, 12, 58, 60}
+    { "Royal Forces",   900, 35, 16, 12, 58, 60},
+    { "k2",             960, 75, 19, 18, 65, 45},
+    { "3State",         990, 42, 16, 15, 65, 50},
+    { "Andromeda",      1020, 23, 22, 12, 50, 50},
+    { "DC5",            1080, 56, 20, 19, 65, 50},
+    { "Madwizards",     1130, 30, 18, 12, 55, 45},
+    { "Approximate",    1150, 70, 24, 11, 40, 45}
+
     // k2
     // 3State
     // Andromeda
@@ -66,8 +74,11 @@ void Starfield()
 	SetVGAScreenMode320x200_60Hz(framebuffer1);
 
     Starfield_init();
-
+#ifndef TESTING
         while(CurrentBitBinRow(songp) < 1568)
+#else 
+    while(1)
+#endif
 	{
 		WaitVBL();
 
@@ -272,7 +283,7 @@ void Starfield_inner(uint8_t* source, uint8_t* destination)
         //old: progress = dt * greets[i].speed / 16;
         render_text_partial_warped(&screen, greets[i].text, pos, greets[i].size,  font_geo_glyph, progress, warp_perspective_starfield, dt);
     }
-    if(t>1200) t=0;
+    if(t>1300) t=0;
 
 /*
 

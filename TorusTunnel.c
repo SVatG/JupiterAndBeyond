@@ -56,6 +56,7 @@ void TorusTunnel()
 	for(int i=0;i<64;i++) map[i]=RandomInteger();
 
 	int t=0;
+    int rotate = 0; // total amount of rotation
 	int32_t tx1=0,ty1=0;
 	int32_t tx2=0,ty2=0;
 	int32_t tx3=0,ty3=0;
@@ -108,6 +109,10 @@ void TorusTunnel()
 		map[RandomInteger()&63]^=RandomInteger();
 
 		int a0=t*6;
+        if(CurrentBitBinRow(songp)>714)
+        {
+            rotate += 6;
+        }
 		for(int i=0;i<64;i++)
 		{
 			int step=a0/(4096/128);
@@ -119,6 +124,9 @@ void TorusTunnel()
 
 				int b1=4096*j/48+4096/96;
 				int b2=4096*(j+1)/48+4096/96;
+                // make rotate later --ryx
+                b1 += rotate;
+                b2 += rotate;
 				int32_t sin_b1=isin(b1);
 				int32_t cos_b1=icos(b1);
 				int32_t sin_b2=isin(b2);
