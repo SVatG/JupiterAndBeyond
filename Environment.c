@@ -96,8 +96,8 @@ void Environment()
 		InitializeBitmap(&screen,320,200,320,destination);
 
 		imat3x3_t m=imat3x3mul(
-			imat3x3rotatex(t*4),
-			imat3x3rotatey(t*7)
+			imat3x3rotatex((t+250)*4),
+			imat3x3rotatey((t+250)*7)
 		);
 
 		imat3x3_t mn=m;
