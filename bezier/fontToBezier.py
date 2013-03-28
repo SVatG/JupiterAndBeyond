@@ -172,13 +172,13 @@ def convert_svg_font(filename, varbase="font_foo", whichchars=None, scale=1.0, o
         c = g.get("unicode")
         if not c:
             continue
-        if (not whichchars) or (c in whichchars):
+        if 0x20<=ord(c)<0x80:  #(not whichchars) or (c in whichchars):
             h=g.get("horiz-adv-x")
             if not h:
                 h=default_horiz_adv # yes, it does occur
             horiz_advs.append(int(h))
             d = g.get("d")
-            if d:
+            if d and (c in whichchars):
                 bezierdata.append(makebezier(d))
             else:
                 bezierdata.append([]) # handle empty glyphs (like " ")
@@ -396,9 +396,10 @@ if __name__=="__main__":
 #    print s
 
     chars = "".join(map(chr, range(0x20,0x80)))
+    chars_ledfont = "".join(set("Code:  WAHa_O6x36  halcy  ryx    Graphics:  Forcer^TRSi    Music:  coda"))
     convert_svg_font("Enriqueta-Regular.svg", "font_enri", chars, 0.2)
     convert_svg_font("Geo-Oblique.svg", "font_geo", chars, 0.2)
-    convert_svg_font("progbot.svg", "font_led", chars, 0.2)
+    convert_svg_font("progbot.svg", "font_led", chars_ledfont, 0.2)
     convert_svg("revision_logo_lines.svg", "revision_logo", 20, 0.1,(0,0))
     convert_svg("rocket.svg", "rocket", 20, 1,(-93,-400))
 #    convert_svg("forcer1.svg", "monkey", 20, flip=True)

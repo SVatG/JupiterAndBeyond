@@ -87,6 +87,37 @@ void bezier_draw(Bitmap *dest, bezier_t bez){
 //    bezier_setpixel(dest, bez.p[2],255);
 }
 
+void bezier_draw_colored(Bitmap *dest, bezier_t bez, uint8_t color){
+    static bezier_t stack[15];
+    int stackpos = 0;
+    stack[0] = bez;
+    //TODO: draw last point of curve
+
+    while(stackpos >=0){
+        bezier_t *b = &stack[stackpos--];
+        int len = plen(b->p[0],b->p[1])+plen(b->p[1],b->p[2]);
+        if(len>BEZ_SCALEDOWN*2){
+            point_t p1, p2, pm, bp2;
+            p1 = pavg(b->p[0], b->p[1]);
+            p2 = pavg(b->p[1], b->p[2]);
+            pm = pavg(p1,p2);
+            bezier_t *t;
+            t = &stack[++stackpos];
+            t->p[0] = b->p[0];
+            t->p[1] = p1;
+            bp2 = b->p[2]; // rescue value before writing there
+            t->p[2] = pm;
+            t = &stack[++stackpos];
+            t->p[0] = pm;
+            t->p[1] = p2;
+            t->p[2] = bp2;
+        } else {
+            bezier_setpixel(dest, b->p[0], color);
+            bezier_setpixel(dest, b->p[1], color);
+        }
+    }
+}
+
 
 void bezier_setpixel(Bitmap *dest, point_t p, uint8_t colour){
     int x,y, distance;
@@ -137,7 +168,7 @@ void bezier_setpixel(Bitmap *dest, point_t p, uint8_t colour){
 
 
 
-fillpixel_t* bezier_fill_writepixels(Bitmap *dest, bezier_t bez, fillpixel_t* pixelptr ){
+fillpixel_t* bezier_fill_writepixels(Bitmap *dest, bezier_t bez, fillpixel_t* pixelptr, uint8_t color){
     // TODO: maxpixels
     static bezier_t stack[15];
     int stackpos = 0;
@@ -175,13 +206,12 @@ fillpixel_t* bezier_fill_writepixels(Bitmap *dest, bezier_t bez, fillpixel_t* pi
                 }
                 pixelptr->y = y; 
                 pixelptr->x = x; 
-                pixelptr->fillcolor = 0x03;
-                pixelptr->pixelcolor = 0xff;
                 pixelptr->action = rising ? 0 : 1;
                 pixelptr++;
             }
-            //bezier_setpixel(dest, b->p[0], 255);
-            //bezier_setpixel(dest, b->p[1], 255);
+            // paint border pixels
+            bezier_setpixel(dest, b->p[0], color);
+            bezier_setpixel(dest, b->p[1], color);
         }
     }
     return pixelptr;
@@ -193,7 +223,7 @@ static int cmp_fillpixel(const void* p1, const void* p2){
     return ((fp1->y*65536 + fp1->x - 2*fp1->action) - (fp2->y*65536 + fp2->x - 2*fp2->action));
 }
 
-void floodfill(Bitmap *dest, fillpixel_t* start, fillpixel_t* end){
+void floodfill(Bitmap *dest, fillpixel_t* start, fillpixel_t* end, uint8_t color){
     
     // sort
     qsort(start, end-start, sizeof(fillpixel_t), cmp_fillpixel);
@@ -205,23 +235,20 @@ void floodfill(Bitmap *dest, fillpixel_t* start, fillpixel_t* end){
 
     fillpixel_t* pptr = start;
     while((pptr)!=end){
-        dest->pixels[pptr->x+(HEIGHT-pptr->y-1)*WIDTH] = pptr->pixelcolor; // draw this pixel first
         // require a start followed by end, on the same line
         if( (pptr->action != 0) || ((pptr+1)->action != 1) || (pptr->y != (pptr+1)->y) ){ 
             pptr++;
             continue;
         }
-        int xstart = pptr->x + 1;
+        int xstart = pptr->x + 1; // xstart indexes the first pixel to be touched
         int y = pptr->y;
-        uint8_t fillcolor = pptr->fillcolor;
         pptr++;
-        int xend = pptr->x;
-        memset(dest->pixels+xstart+(HEIGHT-y-1)*WIDTH, fillcolor, xend-xstart+1);
+        int xend = pptr->x; // the pixel pointed to by xend will not be touched
+        memset(dest->pixels+xstart+(HEIGHT-y-1)*WIDTH, color, xend-xstart);
 /*        for(int i=xstart; i<xend; i++){
             dest->pixels[i+(HEIGHT-y-1)*WIDTH] = fillcolor; // do floodfill
         }*/
-        dest->pixels[pptr->x+(HEIGHT-pptr->y-1)*WIDTH] = pptr->pixelcolor; // draw ending pixel
-        pptr++;
+        pptr++; 
     }
 }
             

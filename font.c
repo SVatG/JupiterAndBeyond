@@ -9,7 +9,56 @@
 #include <stdio.h>
 #endif
 
+void clip_text(char** text, point_t *pos, int size, const glyph_t* font, int xmin, int xmax)
+{
+    int x = pos->x * BEZ_SCALEDOWN;
+    char* curtext = *text;
+    int i=0;
+    while(*curtext!= 0){
+        const glyph_t* g = &font[((*curtext)-0x20)];
+        if(x  + ((g->width*size)>>FONT_SIZE_LOG2) < xmin) // glyph too far left
+        {
+            // move pos and text
+            pos->x = x/BEZ_SCALEDOWN;
+            *text = curtext;
+        }
+        if(x > xmax) // too far right
+        {
+            *curtext = 0; // terminating zero
+            return;
+        }
+        x += (g->width*size)>>FONT_SIZE_LOG2;
+        curtext++;
+        i++;
+    }
+    return;
+}
+
+
 void render_text(Bitmap *dest, char* text, point_t pos, int size, const glyph_t* font){
+    pos = pscale(pos, BEZ_SCALEDOWN, 0); // scale pos to bezier coordinates
+    while(*text != 0){
+        glyph_t g = font[((*text)-0x20)];
+        for(int i=0; i<g.datalen; ++i){
+            bezier_t b = g.data[i];
+            // transform b
+            for(int j=0; j<3; ++j){
+                point_t t;
+                t = b.p[j];
+                t = pscale(t, size, FONT_SIZE_LOG2); // scale
+                t = padd(t, pos); // position
+                b.p[j]=t;
+            }
+            bezier_draw(dest, b);
+            
+        }
+        pos.x += (g.width*size)>>FONT_SIZE_LOG2;
+
+        text++;
+    }
+}
+
+void render_text_floodfilled(Bitmap *dest, char* text, point_t pos, int size, const glyph_t* font, uint8_t color_border, uint8_t color_fill){
     fillpixel_t* pixptr = data.greets.fillpixels;
     pos = pscale(pos, BEZ_SCALEDOWN, 0); // scale pos to bezier coordinates
     while(*text != 0){
@@ -25,15 +74,17 @@ void render_text(Bitmap *dest, char* text, point_t pos, int size, const glyph_t*
                 b.p[j]=t;
             }
             bezier_draw(dest, b);
-//            pixptr = bezier_fill_writepixels(dest, b, pixptr);
+            pixptr = bezier_fill_writepixels(dest, b, pixptr, color_border);
             
         }
+        // fill every letter separately
+        floodfill(dest, data.greets.fillpixels, pixptr, color_fill);
+        pixptr = data.greets.fillpixels; // reset floodfill-stored-pixels-ptr to beginning
         pos.x += (g.width*size)>>FONT_SIZE_LOG2;
 
+        // next letter
         text++;
     }
-    // fill
-//    floodfill(dest, data.greets.fillpixels, pixptr);
 }
 
 int render_text_getbeziers(bezier_t *dest, int destsize, char* text, point_t pos, int size, const glyph_t* font){
@@ -82,6 +133,30 @@ void render_text_warped(Bitmap *dest, char* text, point_t pos, int size, const g
                 b.p[j]=p;
             }
             bezier_draw(dest, b);
+        }
+        pos.x += (g.width*size)>>FONT_SIZE_LOG2;
+
+        text++;
+    }
+}
+
+void render_text_warped_colored(Bitmap *dest, char* text, point_t pos, int size, const glyph_t* font, warpfunc_t warpfunc, int t, uint8_t color)
+{
+    pos = pscale(pos, BEZ_SCALEDOWN, 0); // scale pos to bezier coordinates
+    while(*text != 0){
+        glyph_t g = font[((*text)-0x20)];
+        for(int i=0; i<g.datalen; ++i){
+            bezier_t b = g.data[i];
+            // transform b
+            for(int j=0; j<3; ++j){
+                point_t p;
+                p = b.p[j];
+                p = pscale(p, size, FONT_SIZE_LOG2); // scale
+                p = padd(p, pos); // position
+                p = warpfunc(p,t);
+                b.p[j]=p;
+            }
+            bezier_draw_colored(dest, b, color);
         }
         pos.x += (g.width*size)>>FONT_SIZE_LOG2;
 

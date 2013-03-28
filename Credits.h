@@ -5,6 +5,7 @@
 #include "Graphics/Bitmap.h"
 
 void Credits();
+void credits_init();
 void credits_inner(Bitmap* screen);
 
 
