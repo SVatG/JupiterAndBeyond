@@ -33,6 +33,32 @@ typedef struct{
     int16_t freezelen;
 } greets_t;
 
+void CodaFadeOut2(uint8_t* pixels, int t, int speedmul, int speeddiv) {
+    float a = (((float)((t*speedmul)/speeddiv))/50.0f)*1.4f;
+    int32_t palsub_r = (int32_t)(((181.0f*a)/255.0f)*7.0f+0.5f);
+    int32_t palsub_g = (int32_t)(((235.0f*a)/255.0f)*7.0f+0.5f);
+    int32_t palsub_b = (int32_t)(((145.0f*a)/255.0f)*3.0f+0.5f);
+    for(int32_t y = 0; y < 200; y++ ) {
+        for(int32_t x = 0; x < 320; x++) {
+            int32_t pos = x+y*320;
+            
+            uint8_t pixel = pixels[pos];
+            int32_t r = (pixel&(7<<5))>>5;
+            int32_t g = (pixel&(7<<2))>>2;
+            int32_t b = (pixel&(3));
+            
+            r = r - palsub_r;
+            r = r > 0 ? r : 0;
+            g = g - palsub_g;
+            g = g > 0 ? g : 0;
+            b = b - palsub_b;
+            b = b > 0 ? b : 0;
+            
+            pixels[pos] = (uint8_t)(r<<5)|(g<<2)|b;
+        }
+    }
+}
+
 const greets_t greets[] = {
     // text             time y speed siz frt frl 
 //    { "We greet:",      40, 80, 20, 12, 50, 80},
@@ -311,6 +337,10 @@ void Starfield_inner(uint8_t* source, uint8_t* destination)
         DrawRLEBitmap(&screen,&JupiterCyborg,120,0);
     }
     t++;
+
+    if(t > 1320-50) {
+        CodaFadeOut2(destination, 1320-50, 2, 1);
+    }
 }
 //		uint32_t line3=VGALine;
 
