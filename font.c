@@ -87,6 +87,36 @@ void render_text_floodfilled(Bitmap *dest, char* text, point_t pos, int size, co
     }
 }
 
+void render_text_warped_floodfilled(Bitmap *dest, char* text, point_t pos, int size, const glyph_t* font, warpfunc_t warpfunc, int t, uint8_t color_border, uint8_t color_fill){
+    fillpixel_t* pixptr = data.greets.fillpixels;
+    pos = pscale(pos, BEZ_SCALEDOWN, 0); // scale pos to bezier coordinates
+    while(*text != 0){
+        glyph_t g = font[((*text)-0x20)];
+        for(int i=0; i<g.datalen; ++i){
+            bezier_t b = g.data[i];
+            // transform b
+            for(int j=0; j<3; ++j){
+                point_t p;
+                p = b.p[j];
+                p = pscale(p, size, FONT_SIZE_LOG2); // scale
+                p = padd(p, pos); // position
+                p = warpfunc(p,t);
+                b.p[j]=p;
+            }
+            pixptr = bezier_fill_writepixels(dest, b, pixptr, color_border);
+            
+        }
+        // fill every letter separately
+        floodfill(dest, data.greets.fillpixels, pixptr, color_fill);
+//        printf("%i\n",pixptr-data.greets.fillpixels);
+        pixptr = data.greets.fillpixels; // reset floodfill-stored-pixels-ptr to beginning
+        pos.x += (g.width*size)>>FONT_SIZE_LOG2;
+
+        // next letter
+        text++;
+    }
+}
+
 int render_text_getbeziers(bezier_t *dest, int destsize, char* text, point_t pos, int size, const glyph_t* font){
     pos = pscale(pos, BEZ_SCALEDOWN, 0); // scale pos to bezier coordinates
     int count = 0;

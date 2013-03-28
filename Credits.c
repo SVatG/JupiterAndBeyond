@@ -13,6 +13,7 @@
 extern glyph_t font_led_glyph[];
 
 static int t;
+static int startframe;
 
 void Credits()
 {
@@ -35,6 +36,9 @@ void Credits()
 	while(!UserButtonState())
 	{
 		WaitVBL();
+        if(VGAFrame&1){
+            WaitVBL();
+        }
         SetFrameBuffer(lastframe->pixels);
         
 		credits_inner(currframe);
@@ -51,6 +55,9 @@ void Credits()
 void credits_init()
 {
     t=0;
+#ifndef TESTING
+    startframe = VGAFrame;
+#endif
 }
 
 // input coordinates:
@@ -90,7 +97,9 @@ point_t warp_goggles(point_t a, int t){
     return r;
 }
 
-//extern bool done;
+#ifdef TESTING
+extern bool done;
+#endif
 
 void credits_inner(Bitmap* screen)
 {
@@ -101,8 +110,15 @@ void credits_inner(Bitmap* screen)
 //    point_t pos2 = {20, 110};
 //    render_text_warped_colored(screen, "WAHa_O6x36", pos2, 25, font_led_glyph, warp_goggles, 0, RawRGB(0,3,0));//, RawRGB(0,7,0));
     
-    point_t pos = {-t*2, -22};
-    char* rawtext = "Code:  WAHa_O6x36  halcy  ryx    Graphics:  Forcer^TRSi    Music:  coda";
+#ifdef TESTING
+    point_t pos = {-(t)*3+100, -22};
+#else
+    point_t pos = {-((VGAFrame-startframe))*3+100, -22};
+#endif
+
+    //char* rawtext = "Code:  WAHa_O6x36  halcy  ryx    Graphics:  Forcer^TRSi    Music:  coda";
+    //char* rawtext = "WAHa_O6x36  halcy  ryx  Forcer^TRSi  coda";
+    char* rawtext = "WAHa_O6x36  halcy  ryx  Forcer  coda";
     char textbuf[sizeof(rawtext)+1000]; 
     strcpy(textbuf, rawtext);
     char* text = &textbuf[0];
@@ -110,10 +126,12 @@ void credits_inner(Bitmap* screen)
     clip_text(&text, &pos, 25, font_led_glyph, -1760, 1760);
 //    printf("%4i %s\n",pos.x, text);
     
-    render_text_warped_colored(screen, text, pos, 25, font_led_glyph, warp_goggles, 0, RawRGB(1,5,1));//, RawRGB(0,7,0));
+    render_text_warped_floodfilled(screen, text, pos, 25, font_led_glyph, warp_goggles, 0, RawRGB(4,1,0), RawRGB(6,3,0));//, RawRGB(0,7,0));
     
     profiling_endframe(&(screen->pixels[199*320]));
- //   if(t==100) {done=true;}
+#ifdef TESTING
+    if(*(text+1)==0) {done=true;}
+#endif
 }
     
 

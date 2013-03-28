@@ -32,7 +32,7 @@ typedef union {
 
 typedef struct {
     int16_t x;
-    int8_t y;
+    uint8_t y;
     int8_t action;
 } fillpixel_t;
 /*
