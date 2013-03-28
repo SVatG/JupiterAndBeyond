@@ -7,6 +7,8 @@
 #include "Graphics/Bitmap.h"
 #include "Graphics/Drawing.h"
 
+#include "Cockpit.h"
+
 #include <string.h>
 
 extern uint8_t HeightMap[256*256];
@@ -58,6 +60,11 @@ void Voxelscape()
 
 	SetVGAScreenMode320x200_60Hz(framebuffer1);
 
+
+        Bitmap frame1,frame2;
+        InitializeBitmap(&frame1,320,200,320,framebuffer1);
+        InitializeBitmap(&frame2,320,200,320,framebuffer2);
+        
 	int frame=0;
         while(CurrentBitBinRow(songp) < 928)
 	{
@@ -66,15 +73,18 @@ void Voxelscape()
 		int t=VGAFrameCounter();
 
 		uint8_t *destination;
+                Bitmap* currframe;
 		if(frame&1)
 		{
 			destination=framebuffer2;
 			SetFrameBuffer(framebuffer1);
+                        currframe=&frame2;
 		}
 		else
 		{
 			destination=framebuffer1;
 			SetFrameBuffer(framebuffer2);
+                        currframe=&frame1;
 		}
 		frame^=1;
 
@@ -196,6 +206,8 @@ void Voxelscape()
 				data.voxel.bottomlimity[x]-data.voxel.toplimity[x]-1,0);
 			}
 		}
+                
+		DrawRLEBitmap(currframe, &cockpit, 0, 0);
 	}
 
 	while(UserButtonState());

@@ -58,6 +58,8 @@ C_FILES = Audio.c \
 		font.c \
 		Metablobs.c \
 		Blobs.c \
+		Cockpit.c \
+		CockpitSmall.c \
 		Graphics/Bitmap.c \
 		Graphics/DrawingBitmaps.c \
 		Graphics/DrawingLines.c \

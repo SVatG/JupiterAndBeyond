@@ -5,6 +5,8 @@
 #include "Global.h"
 #include "LED.h"
 
+#include "Cockpit.h"
+
 #include "Graphics/Bitmap.h"
 
 #include <stdint.h>
@@ -123,10 +125,17 @@ static void DrawField(uint8_t *pixels,int tv)
 	{
 		for(int x=0;x<Width;x++)
 		{
+                        
 			int32_t dx=*rays++;
 			int32_t dy=*rays++;
 			int32_t dz=*rays++;
 
+                        if(cockpitsmall.pixels[x+212*y] != RGBA(0x24,0xb6,0xaa,0x00)) {
+                            *pixels=cockpitsmall.pixels[x+212*y];
+                            pixels++;
+                            continue;
+                        }
+                        
 			int32_t t=(dx*cos_a+dz*sin_a)>>12;
 			dz=(-dx*sin_a+dz*cos_a)>>12;
 			dx=t;
@@ -269,6 +278,12 @@ static void DrawField2(uint8_t *pixels,int t)
 			int32_t dz=*rays++;
 			int32_t dx=*rays++;
 
+                        if(cockpitsmall.pixels[x+212*y] != RGBA(0x24,0xb6,0xaa,0x00)) {
+                            *pixels=cockpitsmall.pixels[x+212*y];
+                            pixels++;
+                            continue;
+                        }
+                        
 			int32_t t=(dy*cos_a+dz*sin_a)>>12;
 			dz=(-dy*sin_a+dz*cos_a)>>12;
 			dy=t;
@@ -318,6 +333,12 @@ static void DrawField3(uint8_t *pixels,int t)
 			int32_t dy=*rays++;
 			int32_t dz=*rays++;
 
+                        if(cockpitsmall.pixels[x+212*y] != RGBA(0x24,0xb6,0xaa,0x00)) {
+                            *pixels=cockpitsmall.pixels[x+212*y];
+                            pixels++;
+                            continue;
+                        }
+                        
 			int32_t t=(dx*cos_a+dz*sin_a)>>12;
 			dz=(-dx*sin_a+dz*cos_a)>>12;
 			dx=t;
@@ -367,6 +388,12 @@ static void DrawField4(uint8_t *pixels,int t)
 			int32_t dy=*rays++;
 			int32_t dz=*rays++;
 
+                        if(cockpitsmall.pixels[x+212*y] != RGBA(0x24,0xb6,0xaa,0x00)) {
+                            *pixels=cockpitsmall.pixels[x+212*y];
+                            pixels++;
+                            continue;
+                        }
+                        
 			int32_t t=(dy*cos_a+dz*sin_a)>>12;
 			dz=(-dy*sin_a+dz*cos_a)>>12;
 			dy=t;

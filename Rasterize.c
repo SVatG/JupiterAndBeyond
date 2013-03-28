@@ -39,6 +39,8 @@
 
 #include "CityText.h"
 
+#include "Cockpit.h"
+
 static inline int32_t approxabs(int32_t x) { return x^(x>>31); }
 
 inline static void RasterizeTriangle(uint8_t* image, triangle_t* tri, uint8_t shade) {
@@ -793,7 +795,8 @@ void Rasterize() {
 		SetLEDs(0);
 
                 RasterizeTest(currframe);
-
+                DrawRLEBitmap(currframe, &cockpit, 0, 0);
+                
 		t++;
 //        profiling_endframe(pixels+(320*199));
 	}
