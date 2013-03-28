@@ -21,17 +21,29 @@ static Pixel SubRed(Pixel a,Pixel b)
 	else return a-0x20;
 }
 
+static Pixel SubGreen(Pixel a,Pixel b)
+{
+    if(a<(1<<3)) return a;
+    else return a-(1<<3);
+}
+
+static Pixel AddBlue(Pixel a,Pixel b)
+{
+    if(a>=(1<<3)) return a;
+    else return a+1;
+}
+
 void Pukezoomer()
 {
 	uint8_t *framebuffer1=(uint8_t *)0x20000000;
 	uint8_t *framebuffer2=(uint8_t *)0x20010000;
-	memset(framebuffer1,0,320*200);
-	memset(framebuffer2,0,320*200);
+	memset(framebuffer1,255,320*200);
+	memset(framebuffer2,255,320*200);
 
 	SetVGAScreenMode320x200_60Hz(framebuffer1);
 
 	uint32_t colour=(uint32_t)RawRGB(0x6,0x6,0x3)*0x01010101;
-        
+
 	int t=0;
         while(CurrentBitBinRow(songp) < 384)
 	{
@@ -70,7 +82,7 @@ void Pukezoomer()
 		int xcenter=320/2;//+isin(t*20)/500;
 		int ycenter=200/2;//+icos(t*20)/500;
 
-		source[xcenter/Ratio*Ratio+ycenter/Ratio*Ratio*320]=0;
+		source[xcenter/Ratio*Ratio+ycenter/Ratio*Ratio*320]=0xff;
 
 		Bitmap screen;
 		InitializeBitmap(&screen,320,200,320,source);
@@ -81,7 +93,7 @@ void Pukezoomer()
 		ycenter/Ratio*Ratio+FixedToInt(2*isin(t*2*(i+1))),
 		xcenter/Ratio*Ratio+FixedToInt(100*icos(t*2*(i+1))),
 		ycenter/Ratio*Ratio+FixedToInt(100*isin(t*2*(i+1))),
-		0,AddRed);
+		0,AddBlue);
 
 		for(int i=0;i<6;i++)
 		CompositeLine(&screen,
@@ -89,7 +101,7 @@ void Pukezoomer()
 		ycenter/Ratio*Ratio+FixedToInt(2*isin(t*(2*(i+1)+1))),
 		xcenter/Ratio*Ratio+FixedToInt(100*icos(t*(2*(i+1)+1))),
 		ycenter/Ratio*Ratio+FixedToInt(100*isin(t*(2*(i+1)+1))),
-		0,SubRed);
+		0,SubGreen);
 
 		int sourcerow=ycenter/Ratio;
 
@@ -111,21 +123,18 @@ void Pukezoomer()
 				{
 					xskipptr++;
 
-					uint8_t p1=sourceptr[-1];
-					uint8_t p2=sourceptr[0];
+					uint8_t p1=sourceptr[-1]^0xffffffff;
+					uint8_t p2=sourceptr[0]^0xffffffff;
 					uint8_t halfp1=(p1>>1)&PixelAllButHighBits;
 					uint8_t halfp2=(p2>>1)&PixelAllButHighBits;
-                                        uint8_t carry=p1&p2&PixelLowBits;
+                	uint8_t carry=p1&p2&PixelLowBits;
 					uint32_t r=RandomInteger();
 					r&=r>>16;
 					r&=r>>8;
 					r&=RandomInteger();
 					r&=0xe0e0e0e0;
 					r|=(r>>3)|((r>>6)&0x03030303);
-                                        *destination=*destination^0xff;
-					*destination=(halfp1+halfp2+carry)|(r&colour);
-                                        *destination=*destination^0xff;
-                                        destination++;
+					*destination++=((halfp1+halfp2+carry)|(r&colour))^0xffffffff;
 				}
 			}
 
@@ -143,8 +152,8 @@ void Pukezoomer()
 
 			for(int i=0;i<320/4;i++)
 			{
-				uint32_t p1=*sourceptr1++;
-				uint32_t p2=*sourceptr2++;
+				uint32_t p1=*sourceptr1++^0xffffffff;
+				uint32_t p2=*sourceptr2++^0xffffffff;
 				uint32_t halfp1=(p1>>1)&((uint32_t)PixelAllButHighBits*0x01010101);
 				uint32_t halfp2=(p2>>1)&((uint32_t)PixelAllButHighBits*0x01010101);
 				uint32_t carry=p1&p2&(PixelLowBits*0x01010101);
@@ -154,10 +163,7 @@ void Pukezoomer()
 				r&=RandomInteger();
 				r&=0xe0e0e0e0;
 				r|=(r>>3)|((r>>6)&0x03030303);
-                                *destination32=*destination32^0xffffffff;
-				*destination32=(halfp1+halfp2+carry)|(r&colour);
-                                *destination32=*destination32^0xffffffff;
-                                destination32++;
+				*destination32++=((halfp1+halfp2+carry)|(r&colour))^0xffffffff;
 			}
 		}
 

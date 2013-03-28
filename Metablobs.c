@@ -65,6 +65,7 @@ void Metablobs()
             star_waitstates[i] = iabs(rand() % 200)+27;
         }
         int32_t startframe = VGAFrame;
+        int32_t outframe = 0;
         while(CurrentBitBinRow(songp) < 256)
 	{
                 int32_t rotcnt = VGAFrame - startframe;
@@ -87,7 +88,7 @@ void Metablobs()
                         }
                     }
                 }
-                else {
+                else if(outframe == 0) {
                     for(int i = 0; i < 256; i++) {
                         if(i < 64) {
                             ballpal[i] = RawRGB(0,i/16,i/16);
@@ -100,6 +101,25 @@ void Metablobs()
                         }
                         else {
                             ballpal[i] = RawRGB((i-128)/16,(i-192)/8,3);
+                        }
+                    }
+                }
+                else {
+                    for(int i = 0; i < 256; i++) {
+                        int ei = i + (VGAFrame - outframe);
+                        ei = ei > 255 ? 255 : ei;
+                        
+                        if(ei < 64) {
+                            ballpal[i] = RawRGB(0,ei/16,ei/16);
+                        }
+                        else if(ei < 128) {
+                            ballpal[i] = RawRGB(0,(128-ei)/16,(128-ei)/16);
+                        }
+                        else if(ei < 192) {
+                            ballpal[i] = RawRGB((ei-128)/16,0,(ei-128)/32);
+                        }
+                        else {
+                            ballpal[i] = RawRGB((ei-128)/16,(ei-192)/8,3);
                         }
                     }
                 }
@@ -160,14 +180,18 @@ void Metablobs()
                 
 
                 int32_t dist;
+                if(CurrentBitBinRow(songp) == 250 && outframe == 0) {
+                    outframe = VGAFrame;
+                }
+                
                 if(rotcnt < 130) {
                     dist = 130 - rotcnt;
                 }
-                else if(CurrentBitBinRow(songp) > 248) {
-                    dist = (CurrentBitBinRow(songp)-255);
+                else if(CurrentBitBinRow(songp) >= 250) {
+                    dist = (250 - CurrentBitBinRow(songp));
                 }
                 else {
-                    dist = 0;
+                    dist = -(VGAFrame - outframe)*16;
                 }
                 
                 // Modelview matrix
