@@ -167,6 +167,18 @@ void bezier_setpixel(Bitmap *dest, point_t p, uint8_t colour){
 }*/
 
 
+inline void bezier_setpixel_additive(Bitmap* dest, int x, int y, int color)
+{
+    uint8_t a = dest->pixels[x+(HEIGHT-y-1)*WIDTH];
+    uint8_t b = color;
+    // add
+	uint8_t halfa=(a>>1)&(PixelAllButHighBits);
+    uint8_t halfb=(b>>1)&(PixelAllButHighBits);
+	uint8_t carry=a&b&(PixelLowBits);
+	dest->pixels[x+(HEIGHT-y-1)*WIDTH] = halfa+halfb+carry + RawRGB(0,0,0);
+}    
+
+
 
 fillpixel_t* bezier_fill_writepixels(Bitmap *dest, bezier_t bez, fillpixel_t* pixelptr, uint8_t color){
     // TODO: maxpixels
@@ -194,6 +206,7 @@ fillpixel_t* bezier_fill_writepixels(Bitmap *dest, bezier_t bez, fillpixel_t* pi
             t->p[1] = p2;
             t->p[2] = bp2;
         } else {
+            static int lastx, lasty;
             bool rising = ( b->p[2].y > (b->p[0].y));
             for(int i=0; i<2; ++i){                
                 int x = b->p[i].x / BEZ_SCALEDOWN;
@@ -204,14 +217,25 @@ fillpixel_t* bezier_fill_writepixels(Bitmap *dest, bezier_t bez, fillpixel_t* pi
                 if(y>=HEIGHT|| y<0){
                     continue;
                 }
+                if(x==lastx && y==lasty){
+                    continue;
+                }
+                lastx = x;  lasty = y;
                 pixelptr->y = y; 
                 pixelptr->x = x; 
                 pixelptr->action = rising ? 0 : 1;
                 pixelptr++;
+                // paint border pixels
+                //bezier_setpixel(dest, b->p[i], color);
+                
+                bezier_setpixel_additive(dest, x, y, color);
+                //dest->pixels[x+(HEIGHT-y-1)*WIDTH] = color;
+                if(len<BEZ_SCALEDOWN){
+                    break; // don't draw second pixel when bezier is tiny.
+                }
             }
-            // paint border pixels
-            bezier_setpixel(dest, b->p[0], color);
-            bezier_setpixel(dest, b->p[1], color);
+//            bezier_setpixel(dest, b->p[0], color);
+//            bezier_setpixel(dest, b->p[1], color);
         }
     }
     return pixelptr;
@@ -220,7 +244,11 @@ fillpixel_t* bezier_fill_writepixels(Bitmap *dest, bezier_t bez, fillpixel_t* pi
 static int cmp_fillpixel(const void* p1, const void* p2){
     fillpixel_t* fp1 = (fillpixel_t*)p1;
     fillpixel_t* fp2 = (fillpixel_t*)p2;
-    return ((fp1->y*65536 + fp1->x - 2*fp1->action) - (fp2->y*65536 + fp2->x - 2*fp2->action));
+    //return ((fp1->y*65536 + fp1->x - 2*fp1->action) - (fp2->y*65536 + fp2->x - 2*fp2->action));
+    return ((fp1->y*65536 | fp1->x*4) - 1*fp1->action) - (((fp2->y*65536 | fp2->x*4) - 1*fp2->action));
+//    return ((fp1->y*65536 | fp1->x)) - (((fp2->y*65536 | fp2->x)));
+
+//    return *((int32_t*)p1) -  *((int32_t*)p2);
 }
 
 void floodfill(Bitmap *dest, fillpixel_t* start, fillpixel_t* end, uint8_t color){
@@ -234,7 +262,7 @@ void floodfill(Bitmap *dest, fillpixel_t* start, fillpixel_t* end, uint8_t color
     end->action=1; // (the loop will stop/iterate on every endpixel, but not on every startpixel)
 
     fillpixel_t* pptr = start;
-    while((pptr)!=end){
+    while((pptr)<=end){
         // require a start followed by end, on the same line
         if( (pptr->action != 0) || ((pptr+1)->action != 1) || (pptr->y != (pptr+1)->y) ){ 
             pptr++;
@@ -244,10 +272,19 @@ void floodfill(Bitmap *dest, fillpixel_t* start, fillpixel_t* end, uint8_t color
         int y = pptr->y;
         pptr++;
         int xend = pptr->x; // the pixel pointed to by xend will not be touched
-        memset(dest->pixels+xstart+(HEIGHT-y-1)*WIDTH, color, xend-xstart);
-/*        for(int i=xstart; i<xend; i++){
-            dest->pixels[i+(HEIGHT-y-1)*WIDTH] = fillcolor; // do floodfill
-        }*/
+//        memset(dest->pixels+xstart+(HEIGHT-y-1)*WIDTH, color, xend-xstart);
+        if(xend-xstart >= 10){ // quick-and-dirty hack for greet floodfill
+            pptr++;
+            continue;
+        }
+        for(int i=xstart; i<xend; i++){
+            bezier_setpixel_additive(dest, i, y, color);
+   //         dest->pixels[i+(HEIGHT-y-1)*WIDTH] = color; // do floodfill
+        }
+        if(xend-xstart > 10)
+        {
+            printf("%i %i %i\n",xstart, xend, y);
+        }
         pptr++; 
     }
 }

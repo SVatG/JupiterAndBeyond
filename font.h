@@ -20,6 +20,7 @@ void get_text_points(point_t *dest, int *destsize, char* text, point_t pos, int 
 void render_text_partial_warped(Bitmap *dest, char* text, point_t pos, int size, const glyph_t* font, int percent, warpfunc_t warpfunc, int time);
 
 void render_text_warped(Bitmap *dest, char* text, point_t pos, int size, const glyph_t* font, warpfunc_t warpfunc, int t);
+void render_text_warped_floodfilled(Bitmap *dest, char* text, point_t pos, int size, const glyph_t* font, warpfunc_t warpfunc, int t, uint8_t color_border, uint8_t color_fill);
 
 void render_text_warped_colored(Bitmap *dest, char* text, point_t pos, int size, const glyph_t* font, warpfunc_t warpfunc, int t, uint8_t color);
 
