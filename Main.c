@@ -81,6 +81,7 @@ int main()
         
 	for(;;)
 	{
+                Pukezoomer();
 		Environment();
                 Metablobs();
                 Pukezoomer();

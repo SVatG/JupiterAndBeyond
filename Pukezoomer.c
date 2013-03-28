@@ -33,7 +33,8 @@ void Pukezoomer()
 	uint32_t colour=(uint32_t)RawRGB(0x6,0x6,0x3)*0x01010101;
 
 	int t=0;
-        while(CurrentBitBinRow(songp) < 384)
+        //while(CurrentBitBinRow(songp) < 384)
+	for(;;)
 	{
 		WaitVBL();
 
@@ -70,7 +71,7 @@ void Pukezoomer()
 		int xcenter=320/2;//+isin(t*20)/500;
 		int ycenter=200/2;//+icos(t*20)/500;
 
-		source[xcenter/Ratio*Ratio+ycenter/Ratio*Ratio*320]=0;
+		source[xcenter/Ratio*Ratio+ycenter/Ratio*Ratio*320]=0xff;
 
 		Bitmap screen;
 		InitializeBitmap(&screen,320,200,320,source);
@@ -111,8 +112,8 @@ void Pukezoomer()
 				{
 					xskipptr++;
 
-					uint8_t p1=sourceptr[-1];
-					uint8_t p2=sourceptr[0];
+					uint8_t p1=sourceptr[-1]^0xffffffff;
+					uint8_t p2=sourceptr[0]^0xffffffff;
 					uint8_t halfp1=(p1>>1)&PixelAllButHighBits;
 					uint8_t halfp2=(p2>>1)&PixelAllButHighBits;
                 	uint8_t carry=p1&p2&PixelLowBits;
@@ -122,7 +123,7 @@ void Pukezoomer()
 					r&=RandomInteger();
 					r&=0xe0e0e0e0;
 					r|=(r>>3)|((r>>6)&0x03030303);
-					*destination++=(halfp1+halfp2+carry)|(r&colour);
+					*destination++=((halfp1+halfp2+carry)|(r&colour))^0xffffffff;
 				}
 			}
 
@@ -140,8 +141,8 @@ void Pukezoomer()
 
 			for(int i=0;i<320/4;i++)
 			{
-				uint32_t p1=*sourceptr1++;
-				uint32_t p2=*sourceptr2++;
+				uint32_t p1=*sourceptr1++^0xffffffff;
+				uint32_t p2=*sourceptr2++^0xffffffff;
 				uint32_t halfp1=(p1>>1)&((uint32_t)PixelAllButHighBits*0x01010101);
 				uint32_t halfp2=(p2>>1)&((uint32_t)PixelAllButHighBits*0x01010101);
 				uint32_t carry=p1&p2&(PixelLowBits*0x01010101);
@@ -151,7 +152,7 @@ void Pukezoomer()
 				r&=RandomInteger();
 				r&=0xe0e0e0e0;
 				r|=(r>>3)|((r>>6)&0x03030303);
-				*destination32++=(halfp1+halfp2+carry)|(r&colour);
+				*destination32++=((halfp1+halfp2+carry)|(r&colour))^0xffffffff;
 			}
 		}
 
