@@ -9,7 +9,7 @@ COMPILE = $(CC) $(CFLAGS) $(DEFINES) $(AUTODEPENDENCY_CFLAGS)
 LIBS = -lm -lglut -lGL -lrt
 
 APP_OBJ = main.o bezier.o font.o Random.o bezier/font_geo.o\
-		  warpfunc.o  greetstars.o Starfield.o\
+		  warpfunc.o  Starfield.o\
 		  JupiterCyborg.o  Jupiter3.o bezier/font_led.o\
 		  	Utils.o \
 			Graphics/Bitmap.o \

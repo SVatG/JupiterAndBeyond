@@ -59,7 +59,7 @@ void render_text(Bitmap *dest, char* text, point_t pos, int size, const glyph_t*
 }
 
 void render_text_floodfilled(Bitmap *dest, char* text, point_t pos, int size, const glyph_t* font, uint8_t color_border, uint8_t color_fill){
-    fillpixel_t* pixptr = data.greets.fillpixels;
+    fillpixel_t* pixptr = data.credits.fillpixels;
     pos = pscale(pos, BEZ_SCALEDOWN, 0); // scale pos to bezier coordinates
     while(*text != 0){
         glyph_t g = font[((*text)-0x20)];
@@ -78,8 +78,8 @@ void render_text_floodfilled(Bitmap *dest, char* text, point_t pos, int size, co
             
         }
         // fill every letter separately
-        floodfill(dest, data.greets.fillpixels, pixptr, color_fill);
-        pixptr = data.greets.fillpixels; // reset floodfill-stored-pixels-ptr to beginning
+        floodfill(dest, data.credits.fillpixels, pixptr, color_fill);
+        pixptr = data.credits.fillpixels; // reset floodfill-stored-pixels-ptr to beginning
         pos.x += (g.width*size)>>FONT_SIZE_LOG2;
 
         // next letter
@@ -88,7 +88,7 @@ void render_text_floodfilled(Bitmap *dest, char* text, point_t pos, int size, co
 }
 
 void render_text_warped_floodfilled(Bitmap *dest, char* text, point_t pos, int size, const glyph_t* font, warpfunc_t warpfunc, int t, uint8_t color_border, uint8_t color_fill){
-    fillpixel_t* pixptr = data.greets.fillpixels;
+    fillpixel_t* pixptr = data.credits.fillpixels;
     pos = pscale(pos, BEZ_SCALEDOWN, 0); // scale pos to bezier coordinates
     while(*text != 0){
         glyph_t g = font[((*text)-0x20)];
@@ -107,9 +107,9 @@ void render_text_warped_floodfilled(Bitmap *dest, char* text, point_t pos, int s
             
         }
         // fill every letter separately
-        floodfill(dest, data.greets.fillpixels, pixptr, color_fill);
+        floodfill(dest, data.credits.fillpixels, pixptr, color_fill);
 //        printf("%i\n",pixptr-data.greets.fillpixels);
-        pixptr = data.greets.fillpixels; // reset floodfill-stored-pixels-ptr to beginning
+        pixptr = data.credits.fillpixels; // reset floodfill-stored-pixels-ptr to beginning
         pos.x += (g.width*size)>>FONT_SIZE_LOG2;
 
         // next letter

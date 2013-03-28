@@ -7,7 +7,7 @@
 #include "Rasterize.h"
 #include "Starfield.h"
 #include "Voxelscape.h"
-#include "Greets.h"
+#include "Credits.h"
 #include "Metablobs.h"
 #include "Environment.h"
 
@@ -25,9 +25,9 @@ extern union GlobalData
     struct RasterizeData rasterizer;
     struct StarfieldData stars;
     struct VoxelscapeData voxel;
-    struct GreetsData greets;
     struct MetablobsData metablobs;
     struct EnvironmentData env;
+    struct CreditsData credits;
 } data;
 
 #endif

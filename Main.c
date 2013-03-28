@@ -19,7 +19,6 @@
 #include "Starfield.h"
 #include "TorusTunnel.h"
 #include "Voxelscape.h"
-#include "Greets.h"
 #include "Credits.h"
 #include "Environment.h"
 

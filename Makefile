@@ -56,7 +56,6 @@ C_FILES = Audio.c \
 		bezier.c \
 		Credits.c \
 		warpfunc.c \
-		greetstars.c \
 		font.c \
 		Metablobs.c \
 		Blobs.c \
