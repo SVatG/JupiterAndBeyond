@@ -9,6 +9,7 @@
 #include "Voxelscape.h"
 #include "Greets.h"
 #include "Metablobs.h"
+#include "Environment.h"
 
 #include "BitBin.h"
 
@@ -26,6 +27,7 @@ extern union GlobalData
     struct VoxelscapeData voxel;
     struct GreetsData greets;
     struct MetablobsData metablobs;
+    struct EnvironmentData env;
 } data;
 
 #endif

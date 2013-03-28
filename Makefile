@@ -25,6 +25,7 @@ C_FILES = Audio.c \
 		Button.c \
 		CityText.c \
 		Cityscape.c \
+		Environment.c \
 		Fields.c \
 		HeightMap.c \
 		Jupiter1.c \
