@@ -32,6 +32,9 @@ void Environment()
 
 	SetVGAScreenMode320x200_60Hz(framebuffer1);
 
+	int32_t ypos=Fix(10);
+	int32_t yspeed=0;
+
 	int frame=0;
 	while(!UserButtonState())
 	{
@@ -66,10 +69,16 @@ void Environment()
 
 		imat3x3_t mn=m;
 
-		int32_t yoffs=0;
-		if(t<0) continue;
-		else if(t>240) yoffs=0;
-		else yoffs=150*imul(icos(t*150),isq(isq(Fix(1)-Fix(t)/240)));
+		int32_t ytarget;
+
+		if(t<0) ytarget=Fix(10);
+		else ytarget=Fix(0);
+
+		int32_t yacc=(ytarget-ypos)/16;
+		if(t>240) yacc=Fix(0.1);
+		yspeed+=yacc;
+		yspeed-=yspeed/8;
+		ypos+=yspeed;
 
 		for(int i=0;i<NumberOfSegments;i++)
 		{
@@ -100,7 +109,7 @@ void Environment()
 				n=imat3x3transform(mn,n);
 
 				data.env.p[i][j].x=130*idiv(p.x,p.z+Fix(7))+Fix(159);
-				data.env.p[i][j].y=130*idiv(p.y+yoffs,p.z+Fix(7))+Fix(99);
+				data.env.p[i][j].y=130*idiv(p.y+ypos,p.z+Fix(7))+Fix(99);
 				data.env.t[i][j]=ivec2(128*n.x+Fix(128),128*n.y+Fix(128));
 			}
 		}
@@ -183,6 +192,9 @@ inline static void RasterizeTriangle(uint8_t *image,e_vertex_t v1,e_vertex_t v2,
 			centerVertex = v3;
 		}
 	}
+
+	if(upperVertex.p.y>=Fix(200)) return;
+	if(lowerVertex.p.y<=Fix(0)) return;
 
 	// scanline counters
 	int32_t scanline;
