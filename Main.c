@@ -45,13 +45,13 @@ int main()
 
 	BitBinSong song;
 	InitializeBitBinSong(&song,BitBin22kTable,8,1952,channels);
-	SetBitBinSongLoops(&song,true);
+	// SetBitBinSongLoops(&song,true);
         songp = &song;
         
 	InitializeAudio(Audio22050HzSettings);
         SetAudioVolume(0xAA);
 //	InitializeAudio(Audio44100HzSettings);
-	PlayAudioWithCallback(AudioCallback,&song);
+	//PlayAudioWithCallback(AudioCallback,&song);
 
 	InitializeVGA();
 
@@ -81,6 +81,18 @@ int main()
         
 	for(;;)
 	{
+                uint8_t *framebuffer1=(uint8_t *)0x20000000;
+                uint8_t *framebuffer2=(uint8_t *)0x20010000;
+                memset(framebuffer1,0,320*200);
+                memset(framebuffer2,0,320*200);
+                SetVGAScreenMode320x200_60Hz(framebuffer1);
+                for(int i = 0; i < 200; i++) {
+                    if(i&1) { SetFrameBuffer(framebuffer1); }
+                    else { SetFrameBuffer(framebuffer2); }
+                    WaitVBL();
+                }
+                
+                PlayAudioWithCallback(AudioCallback,&song);
                 Metablobs();
                 Pukezoomer();
                 LogoShow();

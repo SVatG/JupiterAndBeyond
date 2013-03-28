@@ -36,6 +36,7 @@ void Environment()
 	int32_t yspeed=0;
 
 	int frame=0;
+        int VGAStart = VGAFrameCounter();
         while(CurrentBitBinRow(songp) < 672)
 	{
 		WaitVBL();
@@ -53,7 +54,7 @@ void Environment()
 		}
 		frame^=1;
 
-		int t=VGAFrameCounter()-180;
+                int t=VGAFrameCounter()-180-VGAStart;
 
 		SetFrameBuffer(source);
 

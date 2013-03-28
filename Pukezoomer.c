@@ -31,7 +31,7 @@ void Pukezoomer()
 	SetVGAScreenMode320x200_60Hz(framebuffer1);
 
 	uint32_t colour=(uint32_t)RawRGB(0x6,0x6,0x3)*0x01010101;
-
+        
 	int t=0;
         while(CurrentBitBinRow(songp) < 384)
 	{
@@ -115,14 +115,17 @@ void Pukezoomer()
 					uint8_t p2=sourceptr[0];
 					uint8_t halfp1=(p1>>1)&PixelAllButHighBits;
 					uint8_t halfp2=(p2>>1)&PixelAllButHighBits;
-                	uint8_t carry=p1&p2&PixelLowBits;
+                                        uint8_t carry=p1&p2&PixelLowBits;
 					uint32_t r=RandomInteger();
 					r&=r>>16;
 					r&=r>>8;
 					r&=RandomInteger();
 					r&=0xe0e0e0e0;
 					r|=(r>>3)|((r>>6)&0x03030303);
-					*destination++=(halfp1+halfp2+carry)|(r&colour);
+                                        *destination=*destination^0xff;
+					*destination=(halfp1+halfp2+carry)|(r&colour);
+                                        *destination=*destination^0xff;
+                                        destination++;
 				}
 			}
 
@@ -151,7 +154,10 @@ void Pukezoomer()
 				r&=RandomInteger();
 				r&=0xe0e0e0e0;
 				r|=(r>>3)|((r>>6)&0x03030303);
-				*destination32++=(halfp1+halfp2+carry)|(r&colour);
+                                *destination32=*destination32^0xffffffff;
+				*destination32=(halfp1+halfp2+carry)|(r&colour);
+                                *destination32=*destination32^0xffffffff;
+                                destination32++;
 			}
 		}
 

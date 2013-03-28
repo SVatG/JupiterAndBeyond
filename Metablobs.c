@@ -58,34 +58,52 @@ void Metablobs()
         srand(999);
         ivec3_t blobs[4];
 
-        uint8_t ballpal[255];
-        for(int i = 0; i < 256; i++) {
-            if(i < 64) {
-                ballpal[i] = RawRGB(0,0,i/16);
-            }
-            else if(i < 128) {
-                ballpal[i] = RawRGB(0,0,(128-i)/16);
-            }
-            else if(i < 192) {
-                ballpal[i] = RawRGB((i-128)/16,0,(i-128)/32);
-            }
-            else {
-                ballpal[i] = RawRGB((i-128)/16,(i-192)/8,3);
-            }
-        }
-
         int32_t star_waitstates[300];
         for(int i = 0; i < 300; i++) {
             int32_t rv = rand();
             data.metablobs.stars[i] = ivec3(imul(isin(rv),rand()%F(2)), imul(icos(rv),rand()%F(2)), F(20));
-            star_waitstates[i] = iabs(rand() % 300)+50;
+            star_waitstates[i] = iabs(rand() % 200)+27;
         }
-        
+        int32_t startframe = VGAFrame;
         while(CurrentBitBinRow(songp) < 256)
 	{
+                int32_t rotcnt = VGAFrame - startframe;
+        
+                uint8_t ballpal[255];
+                if(rotcnt < 50) {
+                    int32_t divider = (8-(rotcnt/8));
+                    for(int i = 0; i < 256; i++) {
+                        if(i < 64) {
+                            ballpal[i] = RawRGB(0,(i/16)/divider,(i/16)/divider);
+                        }
+                        else if(i < 128) {
+                            ballpal[i] = RawRGB(0,((128-i)/16)/divider,((128-i)/16)/(divider/2));
+                        }
+                        else if(i < 192) {
+                            ballpal[i] = RawRGB(((i-128)/16)/divider,0,((i-128)/32)/(divider/2));
+                        }
+                        else {
+                            ballpal[i] = RawRGB(((i-128)/16)/divider,((i-192)/8)/divider,3/(divider/2));
+                        }
+                    }
+                }
+                else {
+                    for(int i = 0; i < 256; i++) {
+                        if(i < 64) {
+                            ballpal[i] = RawRGB(0,i/16,i/16);
+                        }
+                        else if(i < 128) {
+                            ballpal[i] = RawRGB(0,(128-i)/16,(128-i)/16);
+                        }
+                        else if(i < 192) {
+                            ballpal[i] = RawRGB((i-128)/16,0,(i-128)/32);
+                        }
+                        else {
+                            ballpal[i] = RawRGB((i-128)/16,(i-192)/8,3);
+                        }
+                    }
+                }
 		WaitVBL();
-                
-                int32_t rotcnt = VGAFrame;
                 
 		Bitmap *currframe;
 		if(frame&1) { currframe=&frame2; SetFrameBuffer(framebuffer1); }
@@ -97,10 +115,27 @@ void Metablobs()
                 // Projection matrix
                 imat4x4_t proj = imat4x4diagonalperspective(IntToFixed(45),idiv(IntToFixed(320),IntToFixed(200)),4096,IntToFixed(400));
 
+//                 // Background background
+//                 for(int i = -20; i < 20; i++) {
+//                     DrawLine(currframe, 0, (600/10)*i, 320/2-5, (60/10)*i + 70, 40);
+//                     DrawLine(currframe, 319, (600/10)*i, 320/2+5, (60/10)*i + 70, 40);
+//                 }
+//                 int idiff = 0;
+//                 for(int i = 0; i < 10; i++) {
+//                     idiff += i*7;
+//                     DrawLine(currframe, 320/2+5+idiff, 0, 320/2+5+idiff, 199, 40);
+//                     DrawLine(currframe, 320/2-5-idiff, 0, 320/2-5-idiff, 199, 40);
+//                 }
+                
                 // Background
                 for(int i = 0; i < 300; i++) {
                     if(star_waitstates[i] < 0) {
-                        data.metablobs.stars[i].z -= F(0.3);
+                        if(rotcnt < 130) {
+                            data.metablobs.stars[i].z -= F(0.9);
+                        }
+                        else {
+                            data.metablobs.stars[i].z -= F(0.4);                
+                        }
                         if(data.metablobs.stars[i].z <= F(1)) {
                             int32_t rv = rand();
                             data.metablobs.stars[i] = ivec3(imul(isin(rv),rand()%F(2)), imul(icos(rv),rand()%F(2)), F(20));
@@ -121,12 +156,22 @@ void Metablobs()
                         star_waitstates[i]--;
                     }
                 }
+
+                
+
+                int32_t dist;
+                if(rotcnt < 130) {
+                    dist = 130 - rotcnt;
+                }
+                else if(CurrentBitBinRow(songp) < 250) {
+                    dist = 0;
+                }
                 
                 // Modelview matrix
                 ivec3_t eye = ivec3(
-                    imul(isin(rotcnt<<4),IntToFixed(30)),
-                    imul(icos(rotcnt<<2),IntToFixed(30)),
-                    imul(icos(rotcnt<<4),IntToFixed(30))
+                    imul(isin(rotcnt<<4),IntToFixed(30+3*dist)),
+                    imul(icos(rotcnt<<2),IntToFixed(30+3*dist)),
+                    imul(icos(rotcnt<<4),IntToFixed(30+3*dist))
                 );
                 ivec3_t look = ivec3(IntToFixed(0), IntToFixed(0), IntToFixed(0));
                 imat4x4_t modelview = imat4x4lookat(

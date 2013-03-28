@@ -22,7 +22,7 @@ void IDontEvenKnow()
 	SetVGAScreenMode320x200_60Hz(framebuffer1);
 
 	int t=0;
-        while(CurrentBitBinRow(songp) < 1952)
+        while(CurrentBitBinRow(songp) < 1950)
 	{
 		WaitVBL();
 

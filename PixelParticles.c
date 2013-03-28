@@ -23,8 +23,8 @@ void PixelParticles()
 {
 	uint8_t *framebuffer1=(uint8_t *)0x20000000;
 	uint8_t *framebuffer2=(uint8_t *)0x20010000;
-	memset(framebuffer1,RawRGB(0,0,0),320*200);
-	memset(framebuffer2,RawRGB(0,0,0),320*200);
+// 	memset(framebuffer1,RawRGB(0,0,0),320*200);
+// 	memset(framebuffer2,RawRGB(0,0,0),320*200);
 
 	SetVGAScreenMode320x200_60Hz(framebuffer1);
 

@@ -1,6 +1,6 @@
 #include "Graphics/Bitmap.h"
 
-static const Pixel cockpit_pixels[NumberOfPixelsForWidthAndHeight(212,133)]=
+static const Pixel cockpitsmall_pixels[NumberOfPixelsForWidthAndHeight(212,133)]=
 {
 	StartIntializingBitmapRow(0,212)
 	RGB(0xff,0xff,0x00),RGB(0xff,0xff,0x00),RGB(0xff,0xff,0x00),RGB(0xff,0xff,0x00),
@@ -7185,4 +7185,4 @@ static const Pixel cockpit_pixels[NumberOfPixelsForWidthAndHeight(212,133)]=
 	RGB(0x48,0x6d,0x55),RGB(0x00,0x00,0x55),RGB(0x00,0x24,0xaa),RGB(0x48,0x6d,0xaa),
 	RGB(0xb6,0xb6,0xaa),RGB(0x00,0x00,0x00),RGB(0x24,0x24,0x55),RGB(0x6d,0xb6,0xff),
 };
-const Bitmap cockpit={ 212,133,BytesPerRowForWidth(133),(Pixel *)cockpit_pixels };
+const Bitmap cockpitsmall={ 212,133,BytesPerRowForWidth(133),(Pixel *)cockpitsmall_pixels };
