@@ -207,6 +207,7 @@ int main(int argc, char** argv) {
     //logo_init();
     //greets_init();
     Starfield_init();
+    credits_init();
     done=false;
 //    slow=true;
     if(argc==1){ // no parameters: display

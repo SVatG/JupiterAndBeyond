@@ -2,6 +2,13 @@
 #include "warpfunc.h"
 #include "2dvector.h"
 
+
+
+point_t warp_nop(point_t a, int t)
+{   // no transformation
+    return a;
+}
+
 point_t warp_up_away(point_t a, int t){
     int x = a.x;
     int y = a.y;

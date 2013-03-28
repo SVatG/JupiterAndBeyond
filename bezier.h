@@ -19,8 +19,9 @@ void bezier_draw(Bitmap *dest, bezier_t bez);
 void bezier_draw_partial(Bitmap *dest, bezier_t bez, int percent);
 
 void bezier_setpixel(Bitmap *dest, point_t p, uint8_t colour);
+void bezier_draw_colored(Bitmap *dest, bezier_t bez, uint8_t color);
 
-fillpixel_t* bezier_fill_writepixels(Bitmap *dest, bezier_t bez, fillpixel_t* pixelptr );
-void floodfill(Bitmap *dest, fillpixel_t* start, fillpixel_t* end);
+fillpixel_t* bezier_fill_writepixels(Bitmap *dest, bezier_t bez, fillpixel_t* pixelptr, uint8_t color);
+void floodfill(Bitmap *dest, fillpixel_t* start, fillpixel_t* end, uint8_t color);
 
 #endif // __BEZIER_H_
