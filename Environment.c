@@ -1,4 +1,4 @@
-#include "TorusTunnel.h"
+#include "Environment.h"
 #include "VGA.h"
 #include "Random.h"
 #include "Utils.h"
@@ -8,42 +8,22 @@
 #include "Graphics/RLEBitmap.h"
 #include "Graphics/Drawing.h"
 
+#include "VectorLibrary/MatrixFixed.h"
+
 #include <string.h>
 
-extern RLEBitmap JupiterCyborg2;
+//extern RLEBitmap JupiterCyborg2;
 extern Bitmap JupiterCyborg2Texture;
 
 typedef struct {
-	ivec3_t p;
+	ivec2_t p;
 	int32_t uw;
 	int32_t vw;
-} t_vertex_t;
+} e_vertex_t;
 
-static void DrawTriangleAtAngle(Bitmap *screen,int angle);
-inline static void RasterizeTriangle(uint8_t *image,t_vertex_t v1,t_vertex_t v2,t_vertex_t v3);
+inline static void RasterizeTriangle(uint8_t *image,e_vertex_t v1,e_vertex_t v2,e_vertex_t v3);
 
-static inline uint32_t PixelAverage(uint32_t a,uint32_t b)
-{
-	uint32_t halfa=(a>>1)&(PixelAllButHighBits*0x01010101);
-	uint32_t halfb=(b>>1)&(PixelAllButHighBits*0x01010101);
-	uint32_t carry=a&b&(PixelLowBits*0x01010101);
-//	uint32_t carry=a&b&(0x21*0x01010101);
-	return halfa+halfb+carry;
-}
-
-static uint32_t Hash32(uint32_t val)
-{
-	val^=val>>16;
-	val^=61;
-	val+=val<<3;
-	val^=val>>4;
-	val*=0x27d4eb2d;
-	val^=val>>15;
-	return val;
-}
-
-
-void TorusTunnel()
+void Environment()
 {
 	uint8_t *framebuffer1=(uint8_t *)0x20000000;
 	uint8_t *framebuffer2=(uint8_t *)0x20010000;
@@ -52,22 +32,13 @@ void TorusTunnel()
 
 	SetVGAScreenMode320x200_60Hz(framebuffer1);
 
-	uint32_t map[64];
-	for(int i=0;i<64;i++) map[i]=RandomInteger();
-
-	int t=0;
-	int32_t tx1=0,ty1=0;
-	int32_t tx2=0,ty2=0;
-	int32_t tx3=0,ty3=0;
-	int32_t s1=Fix(0.5);
-	int32_t s2=Fix(1);
-	int32_t s3=Fix(2);
+	int frame=0;
 	while(!UserButtonState())
 	{
 		WaitVBL();
 
 		uint8_t *source,*destination;
-		if(t&1)
+		if(frame&1)
 		{
 			source=framebuffer1;
 			destination=framebuffer2;
@@ -77,182 +48,113 @@ void TorusTunnel()
 			source=framebuffer2;
 			destination=framebuffer1;
 		}
+		frame^=1;
+
+		int t=VGAFrameCounter();
+
 		SetFrameBuffer(source);
 
-		uint32_t line1=VGALine;
+		memset(destination,0,320*200);
 
-		uint32_t *sourceptr=(uint32_t *)&source[320];
-		uint32_t *destinationptr=(uint32_t *)&destination[320];
-		uint32_t previous=RawRGB(0,0,0)*0x01010101;
-		uint32_t current=*sourceptr++;
-		for(int y=1;y<199;y++)
+		Bitmap screen;
+		InitializeBitmap(&screen,320,200,320,destination);
+
+		imat3x3_t m=imat3x3mul(
+			imat3x3rotatex(t*4),
+			imat3x3rotatey(t*7)
+		);
+
+		imat3x3_t mn=m;
+
+		for(int i=0;i<NumberOfSegments;i++)
 		{
-			for(int x=0;x<320/4;x++)
+			int a=2048*i/(NumberOfSegments-1);
+			int32_t sin_a=isin(a);
+			int32_t cos_a=icos(a);
+			int32_t R=imul(sin_a,isin(3*a+t*16))+Fix(3);
+			int32_t dRda=imul(cos_a,isin(3*a+t*16))+imul(sin_a,3*icos(3*a+t*16));
+
+			int32_t r=imul(sin_a,R);
+			int32_t z=imul(cos_a,R);
+			int32_t nr=r-imul(cos_a,dRda); // dz/da
+			int32_t nz=z+imul(sin_a,dRda); // dr/da
+			int32_t n=inorm(nr,nz);
+			nr=idiv(nr,n);
+			nz=idiv(nz,n);
+
+			for(int j=0;j<NumberOfSectors;j++)
 			{
-				uint32_t sum1=PixelAverage(sourceptr[-320/4-1],sourceptr[320/4-1]);
-				uint32_t next=*sourceptr++;
-				uint32_t sum2=PixelAverage((current<<8)|(previous>>24),(current>>8)|(next<<24));
-				uint32_t sum3=PixelAverage(sum1,sum2);
-				uint32_t sum4=PixelAverage(sum3,current);
-				*destinationptr++=sum4;
-				previous=current;
-				current=next;
+				int b=4096*j/NumberOfSectors;
+				int32_t sin_b=isin(b);
+				int32_t cos_b=icos(b);
+
+				ivec3_t p=ivec3(imul(r,cos_b),imul(r,sin_b),z);
+				ivec3_t n=ivec3(imul(nr,cos_b),imul(nr,sin_b),nz);
+
+				p=imat3x3transform(m,p);
+				n=imat3x3transform(mn,n);
+
+				data.env.p[i][j].x=100*idiv(p.x,p.z+Fix(7))+Fix(159);
+				data.env.p[i][j].y=100*idiv(p.y,p.z+Fix(7))+Fix(99);
+				data.env.t[i][j]=ivec2(128*n.x+Fix(128),128*n.y+Fix(128));
 			}
 		}
 
-		uint32_t line2=VGALine;
-
-		Bitmap screen;
-		InitializeBitmap(&screen,320,198,320,&destination[320]);
-
-		map[RandomInteger()&63]^=RandomInteger();
-
-		int a0=t*6;
-		for(int i=0;i<64;i++)
+		if(imat3x3_z(m).z>0)
 		{
-			int step=a0/(4096/128);
-			int a1=4096*i/128-a0%(4096/128);
-			int a2=4096*(i-1)/128-a0%(4096/128);
-			for(int j=0;j<48;j++)
+			for(int i=0;i<NumberOfSegments-1;i++)
 			{
-				if((i^j^step)&1) continue;
-
-				int b1=4096*j/48+4096/96;
-				int b2=4096*(j+1)/48+4096/96;
-				int32_t sin_b1=isin(b1);
-				int32_t cos_b1=icos(b1);
-				int32_t sin_b2=isin(b2);
-				int32_t cos_b2=icos(b2);
-
-				int x1=10*cos_b1;
-				int y1=10*sin_b1-a1*140;
-				int z1=a1*100;
-				int x2=10*cos_b2;
-				int y2=10*sin_b2-a1*140;
-				int z2=a1*100;
-				int x3=10*cos_b1;
-				int y3=10*sin_b1-a2*140;
-				int z3=a2*100;
-				int x4=10*cos_b2;
-				int y4=10*sin_b2-a2*140;
-				int z4=a2*100;
-
-				/*int x1=imul(Fix(10),cos_b1);
-				int y1=imul(imul(Fix(10),sin_b1)+Fix(10),cos_a)-Fix(8);
-				int z1=imul(imul(Fix(10),sin_b1)+Fix(10),sin_a)+Fix(4);
-				int x2=imul(Fix(10),cos_b2);
-				int y2=imul(imul(Fix(10),sin_b2)+Fix(10),cos_a)-Fix(8);
-				int z2=imul(imul(Fix(10),sin_b2)+Fix(10),sin_a)+Fix(4);*/
-
-				int sx1=50*x1/z1+159;
-				int sy1=50*y1/z1+99;
-				int sx2=50*x2/z2+159;
-				int sy2=50*y2/z2+99;
-				int sx3=50*x3/z3+159;
-				int sy3=50*y3/z3+99;
-				int sx4=50*x4/z4+159;
-				int sy4=50*y4/z4+99;
-
-				if(z1>0 && z2>0 && z3>0 && z4>0)
+				for(int j=0;j<NumberOfSectors;j++)
 				{
-					uint32_t val=Hash32(i+step+j*1024);
-					uint32_t modifier=map[(val>>16)&63]>>((val>>24)&31);
-					if((val^modifier)&1)
-					{
-						DrawLine(&screen,sx1,sy1,sx2,sy2,RawRGB(7,7,3));
-						DrawLine(&screen,sx3,sy3,sx4,sy4,RawRGB(7,7,3));
-					}
-					else
-					{
-						DrawLine(&screen,sx1,sy1,sx3,sy3,RawRGB(7,7,3));
-						DrawLine(&screen,sx2,sy2,sx4,sy4,RawRGB(7,7,3));
-					}
+					int j2=(j+1)%NumberOfSectors;
+					RasterizeTriangle(destination,
+					(e_vertex_t){ .p=data.env.p[i][j], .uw=data.env.t[i][j].x, .vw=data.env.t[i][j].y },
+					(e_vertex_t){ .p=data.env.p[i+1][j], .uw=data.env.t[i+1][j].x, .vw=data.env.t[i+1][j].y },
+					(e_vertex_t){ .p=data.env.p[i+1][j2], .uw=data.env.t[i+1][j2].x, .vw=data.env.t[i+1][j2].y });
+					RasterizeTriangle(destination,
+					(e_vertex_t){ .p=data.env.p[i][j], .uw=data.env.t[i][j].x, .vw=data.env.t[i][j].y },
+					(e_vertex_t){ .p=data.env.p[i+1][j2], .uw=data.env.t[i+1][j2].x, .vw=data.env.t[i+1][j2].y },
+					(e_vertex_t){ .p=data.env.p[i][j2], .uw=data.env.t[i][j2].x, .vw=data.env.t[i][j2].y });				
 				}
 			}
 		}
-
-		uint32_t line3=VGALine;
-
-/*		if(t&32)
-		DrawRLEBitmap(&screen,&JupiterCyborg2,0,0);
-		else
-		RasterizeTriangle(screen.pixels,
-		(t_vertex_t){ .p=ivec3(Fix(160),Fix(13),0), .uw=Fix(160.5-32), .vw=Fix(13.5-9) },
-		(t_vertex_t){ .p=ivec3(Fix(29),Fix(189),0), .uw=Fix(29.5-32), .vw=Fix(189.5-9) },
-		(t_vertex_t){ .p=ivec3(Fix(291),Fix(189),0), .uw=Fix(291.5-32), .vw=Fix(189.5-9) });*/
-
-		int angle=t*16;
-		angle&=1023;
-
-		if(angle>512)
-		{
-			DrawTriangleAtAngle(&screen,angle);
-			DrawTriangleAtAngle(&screen,angle-1024);
-		}
 		else
 		{
-			DrawTriangleAtAngle(&screen,angle-1024);
-			DrawTriangleAtAngle(&screen,angle);
+			for(int i=NumberOfSegments-2;i>=0;i--)
+			{
+				for(int j=0;j<NumberOfSectors;j++)
+				{
+					int j2=(j+1)%NumberOfSectors;
+					RasterizeTriangle(destination,
+					(e_vertex_t){ .p=data.env.p[i][j], .uw=data.env.t[i][j].x, .vw=data.env.t[i][j].y },
+					(e_vertex_t){ .p=data.env.p[i+1][j], .uw=data.env.t[i+1][j].x, .vw=data.env.t[i+1][j].y },
+					(e_vertex_t){ .p=data.env.p[i+1][j2], .uw=data.env.t[i+1][j2].x, .vw=data.env.t[i+1][j2].y });
+					RasterizeTriangle(destination,
+					(e_vertex_t){ .p=data.env.p[i][j], .uw=data.env.t[i][j].x, .vw=data.env.t[i][j].y },
+					(e_vertex_t){ .p=data.env.p[i+1][j2], .uw=data.env.t[i+1][j2].x, .vw=data.env.t[i+1][j2].y },
+					(e_vertex_t){ .p=data.env.p[i][j2], .uw=data.env.t[i][j2].x, .vw=data.env.t[i][j2].y });				
+				}
+			}
 		}
-
-
-/*int diff1=line2-line1;
-if(diff1<0) diff1+=480;
-int diff2=line3-line2;
-if(diff2<0) diff2+=480;
-
-DrawHorizontalLine(&screen,0,0,diff1,RGB(0,255,0));
-DrawHorizontalLine(&screen,0,199,diff2,RGB(0,255,0));*/
-
-		t++;
 	}
 
 	while(UserButtonState());
 }
 
-static void DrawTriangleAtAngle(Bitmap *screen,int angle)
-{
-	int32_t centerx=Fix(160);
-	int32_t centery=Fix(120);
-
-	int32_t project=200;
-	int32_t distance=Fix(4000);
-	int32_t sx=Fix(291)-centerx;
-	int32_t sy=Fix(189)-centery;
-
-	int32_t x=idiv(imul(distance,sx),Fix(project)+sx);
-	int32_t y=imul(sy,distance-x)/project;
-	int32_t z=x;
-
-	int32_t x1=imul(icos(angle),-x)+imul(isin(angle),z);
-	int32_t z1=-imul(isin(angle),-x)+imul(icos(angle),z);
-	int32_t x2=imul(icos(angle),x)+imul(isin(angle),z);
-	int32_t z2=-imul(isin(angle),x)+imul(icos(angle),z);
-
-	int32_t px1=idiv(project*x1,distance-z1)+centerx;
-	int32_t py1=idiv(project*y,distance-z1)+centery;
-	int32_t px2=idiv(project*x2,distance-z2)+centerx;
-	int32_t py2=idiv(project*y,distance-z2)+centery;
-
-	RasterizeTriangle(screen->pixels,
-	(t_vertex_t){ .p=ivec3(Fix(160),Fix(13),0), .uw=Fix(160.5-32), .vw=Fix(13.5-9) },
-	(t_vertex_t){ .p=ivec3(px1,py1,0), .uw=Fix(29.5-32), .vw=Fix(189.5-9) },
-	(t_vertex_t){ .p=ivec3(px2,py2,0), .uw=Fix(291.5-32), .vw=Fix(189.5-9) });
-}
-
-
 
 #define WIDTH 320
-#define HEIGHT 199
+#define HEIGHT 200
 
-inline static void RasterizeTriangle(uint8_t *image,t_vertex_t v1,t_vertex_t v2,t_vertex_t v3)
+inline static void RasterizeTriangle(uint8_t *image,e_vertex_t v1,e_vertex_t v2,e_vertex_t v3)
 {
+	if(imul(v2.p.x-v1.p.x,v3.p.y-v1.p.y)>imul(v3.p.x-v1.p.x,v2.p.y-v1.p.y)) return;
+
      uint8_t *shadetex=JupiterCyborg2Texture.pixels;
-        
+
 	// Vertex sorting
-	t_vertex_t upperVertex;
-	t_vertex_t centerVertex;
-	t_vertex_t lowerVertex;
+	e_vertex_t upperVertex;
+	e_vertex_t centerVertex;
+	e_vertex_t lowerVertex;
 
 	if(v1.p.y < v2.p.y) {
 		upperVertex = v1;

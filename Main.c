@@ -21,6 +21,7 @@
 #include "Voxelscape.h"
 #include "Greets.h"
 #include "Credits.h"
+#include "Environment.h"
 
 #include <string.h>
 
@@ -56,6 +57,7 @@ int main()
 
 	for(;;)
 	{
+		Environment();
                 Metablobs();
                 Credits();
 		Starfield();
