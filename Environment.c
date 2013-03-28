@@ -12,8 +12,8 @@
 
 #include <string.h>
 
-//extern RLEBitmap JupiterCyborg2;
-extern Bitmap JupiterCyborg2Texture;
+extern Bitmap JupiterSVATG;
+extern Bitmap JupiterSVATGTexture;
 
 typedef struct {
 	ivec2_t p;
@@ -50,11 +50,11 @@ void Environment()
 		}
 		frame^=1;
 
-		int t=VGAFrameCounter();
+		int t=VGAFrameCounter()-180;
 
 		SetFrameBuffer(source);
 
-		memset(destination,0,320*200);
+		memcpy(destination,JupiterSVATG.pixels,320*200);
 
 		Bitmap screen;
 		InitializeBitmap(&screen,320,200,320,destination);
@@ -65,6 +65,11 @@ void Environment()
 		);
 
 		imat3x3_t mn=m;
+
+		int32_t yoffs=0;
+		if(t<0) continue;
+		else if(t>240) yoffs=0;
+		else yoffs=150*imul(icos(t*150),isq(isq(Fix(1)-Fix(t)/240)));
 
 		for(int i=0;i<NumberOfSegments;i++)
 		{
@@ -94,8 +99,8 @@ void Environment()
 				p=imat3x3transform(m,p);
 				n=imat3x3transform(mn,n);
 
-				data.env.p[i][j].x=100*idiv(p.x,p.z+Fix(7))+Fix(159);
-				data.env.p[i][j].y=100*idiv(p.y,p.z+Fix(7))+Fix(99);
+				data.env.p[i][j].x=130*idiv(p.x,p.z+Fix(7))+Fix(159);
+				data.env.p[i][j].y=130*idiv(p.y+yoffs,p.z+Fix(7))+Fix(99);
 				data.env.t[i][j]=ivec2(128*n.x+Fix(128),128*n.y+Fix(128));
 			}
 		}
@@ -149,7 +154,7 @@ inline static void RasterizeTriangle(uint8_t *image,e_vertex_t v1,e_vertex_t v2,
 {
 	if(imul(v2.p.x-v1.p.x,v3.p.y-v1.p.y)>imul(v3.p.x-v1.p.x,v2.p.y-v1.p.y)) return;
 
-     uint8_t *shadetex=JupiterCyborg2Texture.pixels;
+     uint8_t *shadetex=JupiterSVATGTexture.pixels;
 
 	// Vertex sorting
 	e_vertex_t upperVertex;
