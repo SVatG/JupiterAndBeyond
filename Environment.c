@@ -36,7 +36,7 @@ void Environment()
 	int32_t yspeed=0;
 
 	int frame=0;
-	while(!UserButtonState())
+        while(CurrentBitBinRow(songp) < 672)
 	{
 		WaitVBL();
 

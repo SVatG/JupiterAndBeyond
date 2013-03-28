@@ -81,11 +81,10 @@ int main()
         
 	for(;;)
 	{
-		Environment();
                 Metablobs();
                 Pukezoomer();
                 LogoShow();
-                //Reflector();
+                Environment();
                 TorusTunnel();
                 Voxelscape();
                 RasterizeInit();

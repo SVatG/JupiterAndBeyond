@@ -130,7 +130,7 @@ static void DrawField(uint8_t *pixels,int tv)
 			int32_t dy=*rays++;
 			int32_t dz=*rays++;
 
-                        if(cockpitsmall.pixels[x+212*y] != RGBA(0x24,0xb6,0xaa,0x00)) {
+                        if(cockpitsmall.pixels[x+212*y] != RGB(0xff,0xff,0x00)) {
                             *pixels=cockpitsmall.pixels[x+212*y];
                             pixels++;
                             continue;
@@ -278,7 +278,7 @@ static void DrawField2(uint8_t *pixels,int t)
 			int32_t dz=*rays++;
 			int32_t dx=*rays++;
 
-                        if(cockpitsmall.pixels[x+212*y] != RGBA(0x24,0xb6,0xaa,0x00)) {
+                        if(cockpitsmall.pixels[x+212*y] != RGB(0xff,0xff,0x00)) {
                             *pixels=cockpitsmall.pixels[x+212*y];
                             pixels++;
                             continue;
@@ -333,7 +333,7 @@ static void DrawField3(uint8_t *pixels,int t)
 			int32_t dy=*rays++;
 			int32_t dz=*rays++;
 
-                        if(cockpitsmall.pixels[x+212*y] != RGBA(0x24,0xb6,0xaa,0x00)) {
+                        if(cockpitsmall.pixels[x+212*y] != RGB(0xff,0xff,0x00)) {
                             *pixels=cockpitsmall.pixels[x+212*y];
                             pixels++;
                             continue;
@@ -388,7 +388,7 @@ static void DrawField4(uint8_t *pixels,int t)
 			int32_t dy=*rays++;
 			int32_t dz=*rays++;
 
-                        if(cockpitsmall.pixels[x+212*y] != RGBA(0x24,0xb6,0xaa,0x00)) {
+                        if(cockpitsmall.pixels[x+212*y] != RGB(0xff,0xff,0x00)) {
                             *pixels=cockpitsmall.pixels[x+212*y];
                             pixels++;
                             continue;
