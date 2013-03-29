@@ -12,6 +12,38 @@
 
 extern RLEBitmap JupiterHands;
 
+void CodaFadeOut4(uint8_t* pixels, int t, int speedmul, int speeddiv) {
+    float a = (((float)((t*speedmul)/speeddiv))/50.0f)*1.4f;
+    int32_t palsub_r = (int32_t)(((181.0f*a)/255.0f)*7.0f+0.5f);
+    int32_t palsub_g = (int32_t)(((235.0f*a)/255.0f)*7.0f+0.5f);
+    int32_t palsub_b = (int32_t)(((145.0f*a)/255.0f)*3.0f+0.5f);
+    for(int32_t y = 0; y < 200; y++ ) {
+        for(int32_t x = 0; x < 320; x++) {
+            int32_t pos = x+y*320;
+            
+            uint8_t pixel = pixels[pos];
+            int32_t r = (pixel&(7<<5))>>5;
+            int32_t g = (pixel&(7<<2))>>2;
+            int32_t b = (pixel&(3));
+            
+            r = r - palsub_r;
+            r = r > 0 ? r : 0;
+            g = g - palsub_g;
+            g = g > 0 ? g : 0;
+            b = b - palsub_b;
+            b = b > 0 ? b : 0;
+            
+            pixels[pos] = (uint8_t)(r<<5)|(g<<2)|b;
+        }
+    }
+}
+
+void CodaFadeIn4(uint8_t* pixels, int t, int speedmul, int speeddiv) {
+    int t1 = 50-t;
+    t1 = t1 > 0 ? t1 : 0;
+    CodaFadeOut4(pixels, t1, speedmul, speeddiv);
+}
+
 void IDontEvenKnow()
 {
 	uint8_t *framebuffer1=(uint8_t *)0x20000000;
@@ -22,7 +54,7 @@ void IDontEvenKnow()
 	SetVGAScreenMode320x200_60Hz(framebuffer1);
 
 	int t=0;
-        while(CurrentBitBinRow(songp) < 1950)
+        while(CurrentBitBinRow(songp) < 1850)
 	{
 		WaitVBL();
 
@@ -87,13 +119,18 @@ void IDontEvenKnow()
 		DrawRLEBitmapNoClip(&screen,&JupiterHands,0,0);
 
 		t++;
+
+                if(t < 50) {
+                    CodaFadeIn4(destination,t+25,4,1);
+                }
+                else if(t>450 && t<500){
+                    CodaFadeOut4(destination,t-450,2,1);
+                }
+                else if(t>=500) {
+                    CodaFadeOut4(destination,49,2,1);
+                }
 	}
 
 	while(UserButtonState());
-
-        // End of demo. Wait -> loop.
-        for(int i = 0; i < 300; i++) {
-                WaitVBL();
-        }
 }
 

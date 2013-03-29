@@ -150,7 +150,7 @@ void credits_inner(Bitmap* screen)
 
     //char* rawtext = "Code:  WAHa_O6x36  halcy  ryx    Graphics:  Forcer^TRSi    Music:  coda";
     //char* rawtext = "WAHa_O6x36  halcy  ryx  Forcer^TRSi  coda";
-    char* rawtext = "    WAHa_O6x36   halcy   ryx   Forcer   coda";
+    char* rawtext = "      WAHa_O6x36   halcy   ryx   Forcer   coda";
     char textbuf[sizeof(rawtext)+1000]; 
     strcpy(textbuf, rawtext);
     char* text = &textbuf[0];
@@ -161,10 +161,10 @@ void credits_inner(Bitmap* screen)
     render_text_warped_floodfilled(screen, text, pos, 25, font_led_glyph, warp_goggles, 0, RawRGB(4,1,0), RawRGB(6,3,0));//, RawRGB(0,7,0));
 
     if(t < 50) {
-        CodaFadeIn3(screen->pixels, t, 4, 1);
+        CodaFadeIn3(screen->pixels, t+25, 2, 1);
     }
-    else if(t > 400) {
-        CodaFadeOut3(screen->pixels, t-400, 4, 1);
+    else if(t > 200) {
+        CodaFadeOut3(screen->pixels, t-200, 2, 1);
     }
     // profiling_endframe(&(screen->pixels[199*320]));
 #ifdef TESTING

@@ -43,12 +43,12 @@ int main()
 	InitializeUserButton();
 
 	BitBinSong song;
-	InitializeBitBinSong(&song,BitBin22kTable,8,1952,channels);
+// 	InitializeBitBinSong(&song,BitBin22kTable,8,1952,channels);
 	// SetBitBinSongLoops(&song,true);
         songp = &song;
         
-	InitializeAudio(Audio22050HzSettings);
-        SetAudioVolume(0xAA);
+// 	InitializeAudio(Audio22050HzSettings);
+//         SetAudioVolume(0xAA);
 //	InitializeAudio(Audio44100HzSettings);
 	//PlayAudioWithCallback(AudioCallback,&song);
 
@@ -73,10 +73,7 @@ int main()
 //         256             Starfield();                            1568
 //         128             Credits();                              1696
 //         256             IDontEvenKnow();                        1940
-        
-        
-        
-        
+
         
 	for(;;)
 	{
@@ -91,7 +88,11 @@ int main()
                     WaitVBL();
                 }
                 
+                InitializeBitBinSong(&song,BitBin22kTable,8,1920,channels);
+                InitializeAudio(Audio22050HzSettings);
+                SetAudioVolume(0xCC);
                 PlayAudioWithCallback(AudioCallback,&song);
+                
                 Metablobs();
                 Pukezoomer();
                 LogoShow();
