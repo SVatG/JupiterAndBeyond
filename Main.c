@@ -24,6 +24,11 @@
 
 #include <string.h>
 
+#define ATTRACT_MODE 1
+#include "Plasma.h"
+
+#define LOOP_MODE 1
+
 static void AudioCallback(void *context,int buffer);
 int16_t *buffers[2]={ (int16_t *)0x2001fa00,(int16_t *)0x2001fc00 };
 extern BitBinNote *channels[8];
@@ -74,6 +79,32 @@ int main()
 //         128             Credits();                              1696
 //         256             IDontEvenKnow();                        1940
 
+
+        if(ATTRACT_MODE) {
+            while(1) {
+                Metablobs(1);
+                int32_t darkFrame = VGAFrame;
+                uint8_t *framebuffer1=(uint8_t *)0x20000000;
+                uint8_t *framebuffer2=(uint8_t *)0x20010000;
+                memset(framebuffer1,0,320*200);
+                memset(framebuffer2,0,320*200);
+                SetVGAScreenMode320x200_60Hz(framebuffer1);
+
+                int frame = 0;
+                while(!UserButtonState()) {
+                    if(frame&1) { SetFrameBuffer(framebuffer1); }
+                    else { SetFrameBuffer(framebuffer2); }
+                    WaitVBL();
+                    frame++;
+                }
+
+                while(UserButtonState());
+
+                if(frame < 50) {
+                    break;
+                }
+            }
+        }
         
 	for(;;)
 	{
@@ -93,7 +124,7 @@ int main()
                 SetAudioVolume(0xCC);
                 PlayAudioWithCallback(AudioCallback,&song);
                 
-                Metablobs();
+                Metablobs(0);
                 Pukezoomer();
                 LogoShow();
                 Environment();
@@ -106,6 +137,12 @@ int main()
                 Starfield();
                 Credits();
                 IDontEvenKnow();
+
+                if(!LOOP_MODE) {
+                    while(1) {
+
+                    }
+                }
 	}
 }
 

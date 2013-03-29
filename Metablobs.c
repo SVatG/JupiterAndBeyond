@@ -29,9 +29,11 @@
 
 #define Viewport(x,w,s) (imul(idiv((x),(w))+IntToFixed(1),IntToFixed((s)/2)))
 
+#include "SvatgLogo.h"
+
 extern const RLEBitmap EndLogo;
 
-void Metablobs()
+void Metablobs(int attrmode)
 {
 	uint8_t *framebuffer1=(uint8_t *)0x20000000;
 	uint8_t *framebuffer2=(uint8_t *)0x20010000;
@@ -66,6 +68,123 @@ void Metablobs()
         }
         int32_t startframe = VGAFrame;
         int32_t outframe = 0;
+
+        if(attrmode == 1) {            
+            uint8_t ballpal[255];
+            
+            for(int i = 0; i < 256; i++) {
+                if(i < 64) {
+                    ballpal[i] = RawRGB(0,i/16,i/16);
+                }
+                else if(i < 128) {
+                    ballpal[i] = RawRGB(0,(128-i)/16,(128-i)/16);
+                }
+                else if(i < 192) {
+                    ballpal[i] = RawRGB((i-128)/16,0,(i-128)/32);
+                }
+                else {
+                    ballpal[i] = RawRGB((i-128)/16,(i-192)/8,3);
+                }
+            }
+
+            while(!UserButtonState()) {
+                WaitVBL();
+
+                int32_t rotcnt = VGAFrame - startframe;
+                
+                Bitmap *currframe;
+                if(frame&1) { currframe=&frame2; SetFrameBuffer(framebuffer1); }
+                else { currframe=&frame1; SetFrameBuffer(framebuffer2); }
+
+                ClearBitmap(currframe);
+                uint8_t* pixels = currframe->pixels;
+                
+                // Projection matrix
+                imat4x4_t proj = imat4x4diagonalperspective(IntToFixed(45),idiv(IntToFixed(320),IntToFixed(200)),4096,IntToFixed(400));
+                
+                // Modelview matrix
+                ivec3_t eye = ivec3(
+                    imul(isin(rotcnt<<4),IntToFixed(17)),
+                    imul(icos(rotcnt<<2),IntToFixed(17)),
+                    imul(icos(rotcnt<<4),IntToFixed(17))
+                );
+                ivec3_t look = ivec3(IntToFixed(0), IntToFixed(0), IntToFixed(0));
+                imat4x4_t modelview = imat4x4lookat(
+                    eye,
+                    look,
+                    ivec3(IntToFixed(0), IntToFixed(1), IntToFixed(0))
+                );
+
+                // MVP matrix
+                imat4x4_t mvp = imat4x4mul(proj, modelview);
+
+                for(int i = 0; i < 4; i++) {
+                    blobs[i].x = idiv(isin(rotcnt<<(i+1)),F(2.5));
+                    blobs[i].y = idiv(isin(rotcnt<<(i)),F(2.5));
+                    blobs[i].z = idiv(icos(rotcnt<<(3-i)),F(2.5));
+                    blobs[i].x = ((blobs[i].x + F(2)) % F(4)) - F(2);
+                    blobs[i].y = ((blobs[i].y + F(2)) % F(4)) - F(2);
+                    blobs[i].z = ((blobs[i].z + F(2)) % F(4)) - F(2);
+                }
+
+                int blobidx = 0;
+
+                for(int x = -10; x <= 10; x+=2) {
+                    for(int y = -10; y <= 10; y+=2) {
+                        for(int z = -10; z <= 10; z+=2) {
+                            int32_t blobval = 0;
+                            for(int i = 0; i < 4; i++) {
+                                ivec3_t d = ivec3sub(blobs[i], ivec3(F(x)>>4,F(y)>>4,F(z)>>4));
+                                int32_t r = ivec3dot(d,d);
+                                blobval = blobval + (r < F(0.5)) * (isq(r) - r + F(0.25));
+                            }
+                            blobval = F(0.2) - blobval;
+                            if(blobval < 0) {
+                                ivec4_t blobpos = ivec4(F(x), F(y), F(z), F(1));
+                                blobpos = imat4x4transform(mvp, blobpos);
+                                data.metablobs.blobs[blobidx].x = FixedToInt(Viewport(blobpos.x,blobpos.w,320));
+                                data.metablobs.blobs[blobidx].y = FixedToInt(Viewport(blobpos.y,blobpos.w,200));
+                                int32_t blobv = FixedToInt(iabs(idiv(blobpos.z,blobpos.w))<<3);
+                                blobv = imin(blobv,5);
+                                data.metablobs.blobs[blobidx].blob = blobImg[blobv];
+                                blobidx++;
+                            }
+                        }
+                    }
+                }
+
+                for( int i = 0; i < blobidx; i++ ) {
+                        for( int x = 0; x < 19; x++ ) {
+                                for( int y = 0; y < 19; y++ ) {
+                                        int fx = data.metablobs.blobs[i].x+x-9;
+                                        int fy = data.metablobs.blobs[i].y+y-9;
+                                        if(fx < 0 || fx >= 320 || fy < 0 || fy >= 200) continue;
+                                        int idx = fx+fy*320;
+                                        uint32_t things = pixels[idx];
+                                        things += data.metablobs.blobs[i].blob[x+y*19];
+                                        things = things > 0xFF ? 0xFF : things;
+                                        pixels[idx] = things;
+                                }
+                        }
+                }
+
+
+                for( int x = 0; x < 320; x++ ) {
+                        for( int y = 0; y < 200; y++ ) {
+                                pixels[x+y*320] = ballpal[pixels[x+y*320]];
+                        }
+                }
+
+                frame++;
+
+                DrawRLEBitmap(currframe, &SvatgLogo, 0, 66);
+            }
+
+            while(UserButtonState());
+            
+            return;
+        }
+        
         while(CurrentBitBinRow(songp) < 256)
 	{
                 int32_t rotcnt = VGAFrame - startframe;

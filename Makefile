@@ -61,6 +61,7 @@ C_FILES = Audio.c \
 		Blobs.c \
 		Cockpit.c \
 		CockpitSmall.c \
+		SvatgLogo.c \
 		Graphics/Bitmap.c \
 		Graphics/DrawingBitmaps.c \
 		Graphics/DrawingLines.c \
