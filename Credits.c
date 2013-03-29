@@ -15,6 +15,38 @@ extern glyph_t font_led_glyph[];
 static int t;
 static int startframe;
 
+void CodaFadeOut3(uint8_t* pixels, int t, int speedmul, int speeddiv) {
+    float a = (((float)((t*speedmul)/speeddiv))/50.0f)*1.4f;
+    int32_t palsub_r = (int32_t)(((181.0f*a)/255.0f)*7.0f+0.5f);
+    int32_t palsub_g = (int32_t)(((235.0f*a)/255.0f)*7.0f+0.5f);
+    int32_t palsub_b = (int32_t)(((145.0f*a)/255.0f)*3.0f+0.5f);
+    for(int32_t y = 0; y < 200; y++ ) {
+        for(int32_t x = 0; x < 320; x++) {
+            int32_t pos = x+y*320;
+            
+            uint8_t pixel = pixels[pos];
+            int32_t r = (pixel&(7<<5))>>5;
+            int32_t g = (pixel&(7<<2))>>2;
+            int32_t b = (pixel&(3));
+            
+            r = r - palsub_r;
+            r = r > 0 ? r : 0;
+            g = g - palsub_g;
+            g = g > 0 ? g : 0;
+            b = b - palsub_b;
+            b = b > 0 ? b : 0;
+            
+            pixels[pos] = (uint8_t)(r<<5)|(g<<2)|b;
+        }
+    }
+}
+
+void CodaFadeIn3(uint8_t* pixels, int t, int speedmul, int speeddiv) {
+    int t1 = 50-t;
+    t1 = t1 > 0 ? t1 : 0;
+    CodaFadeOut3(pixels, t1, speedmul, speeddiv);
+}
+
 void Credits()
 {
 	uint8_t *framebuffer1=(uint8_t *)0x20000000;
@@ -127,7 +159,13 @@ void credits_inner(Bitmap* screen)
 //    printf("%4i %s\n",pos.x, text);
     
     render_text_warped_floodfilled(screen, text, pos, 25, font_led_glyph, warp_goggles, 0, RawRGB(4,1,0), RawRGB(6,3,0));//, RawRGB(0,7,0));
-    
+
+    if(t < 50) {
+        CodaFadeIn3(screen->pixels, t, 4, 1);
+    }
+    else if(t > 400) {
+        CodaFadeOut3(screen->pixels, t-400, 4, 1);
+    }
     // profiling_endframe(&(screen->pixels[199*320]));
 #ifdef TESTING
     if(*(text+1)==0) {done=true;}

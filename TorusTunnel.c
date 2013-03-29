@@ -109,7 +109,7 @@ void TorusTunnel()
 		map[RandomInteger()&63]^=RandomInteger();
 
 		int a0=t*6;
-        if(CurrentBitBinRow(songp)>714)
+        if(CurrentBitBinRow(songp)>=736)
         {
             rotate += 6;
         }

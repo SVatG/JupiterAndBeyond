@@ -330,16 +330,16 @@ void Starfield_inner(uint8_t* source, uint8_t* destination)
     else if(t < 1200) {
         DrawRLEBitmap(&screen,&JupiterCyborg, 0,0);
     }
-    else if(t<1320) {
-        DrawRLEBitmap(&screen,&JupiterCyborg,120-(1320-t),0);
+    else if(t<1310) {
+        DrawRLEBitmap(&screen,&JupiterCyborg,120-(1310-t),0);
     }
     else {
         DrawRLEBitmap(&screen,&JupiterCyborg,120,0);
     }
     t++;
 
-    if(t > 1320-50) {
-        CodaFadeOut2(destination, 1320-50, 2, 1);
+    if(t > 1310-50) {
+        CodaFadeOut2(destination, t-(1310-50), 2, 1);
     }
 }
 //		uint32_t line3=VGALine;
