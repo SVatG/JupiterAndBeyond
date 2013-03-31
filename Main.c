@@ -24,10 +24,10 @@
 
 #include <string.h>
 
-#define ATTRACT_MODE 1
+#define ATTRACT_MODE 0
 #include "Plasma.h"
 
-#define LOOP_MODE 1
+#define LOOP_MODE 0
 
 static void AudioCallback(void *context,int buffer);
 int16_t *buffers[2]={ (int16_t *)0x2001fa00,(int16_t *)0x2001fc00 };
