@@ -25,8 +25,6 @@
 #include <string.h>
 
 #define ATTRACT_MODE 0
-#include "Plasma.h"
-
 #define LOOP_MODE 0
 
 static void AudioCallback(void *context,int buffer);
