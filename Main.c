@@ -1,4 +1,4 @@
-#include "System.h"
+f#include "System.h"
 #include "LED.h"
 #include "Button.h"
 #include "VGA.h"
@@ -25,7 +25,6 @@
 #include <string.h>
 
 #define ATTRACT_MODE 1
-#include "Plasma.h"
 
 #define LOOP_MODE 1
 
