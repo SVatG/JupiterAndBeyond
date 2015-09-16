@@ -1,6 +1,6 @@
 # Jupiter & Beyond #
 
-This is [SVatG](http://demogroup.vc/)'s entry in the wild compo at Revision 2013, another demo for the STM32F4DISCOVERY board, using a few resistors on GPIO pins to generate a VGA signal. It was programmed by [WAHa.06x36](https://bitbucket.org/WAHa_06x36/), [halcy](https://github.com/halcy), ryx and coda. It placed 5th.
+This is [SVatG](http://demogroup.vc/)'s entry in the wild compo at Revision 2013, another demo for the STM32F4DISCOVERY board, using a few resistors on GPIO pins to generate a VGA signal. It was programmed by [WAHa.06x36](https://bitbucket.org/WAHa_06x36/), [halcy](https://github.com/halcy), ryx and coda. It placed 3rd.
 
 **Be aware that this is demoscener code. View only at your own risk. Bleeding from the eyes may occur.**
 
