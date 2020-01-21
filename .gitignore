@@ -4,6 +4,4 @@
 VGA.bin
 VGA.elf
 .hg*
-/Graphics
-/VectorLibrary
 tags
